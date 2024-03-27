@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "../../../../Arduino/PCM1808"
+		},
+		{
+			"name": "231215-062004-pico",
+			"path": "."
+		}
+	],
+	"settings": {}
+	"files.exclude": {
+		"**/test/*": true
+	},
+}
