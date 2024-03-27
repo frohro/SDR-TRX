@@ -69,5 +69,7 @@ The control of the SDR comes from the operator via the PC interface software (Qu
 
 ### PCB
 The PCB has test points and uses components I found still available on JLCPCB.  That accounts for why a mix or 0603 and 0805 components, and why there are a lot of 120pF and 4.7nF caps in parallel.
+
 ![image.png](28dc7114-37c9-4093-8b8a-e3087f4c6eea.png)
+
 The cutout is for the WIFI antenna if a Pico W is used.
