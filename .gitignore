@@ -5,7 +5,6 @@
 .vscode/ipch
 SDR-TRX-backups
 Gerbers*
-SDR-TRX.pdf
 *.bak
 *-cache.lib
 *.kicad_prl
@@ -24,3 +23,4 @@ jlcpcb
 *.plt
 *.wave
 SDR 2023 Docs
+*lck

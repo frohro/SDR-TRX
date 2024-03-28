@@ -1,0 +1,3 @@
+[submodule "wsjtx_transceiver_interface"]
+	path = wsjtx_transceiver_interface
+	url = https://github.com/agustinmartino/wsjtx_transceiver_interface.git
