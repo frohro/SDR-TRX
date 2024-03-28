@@ -2,5 +2,6 @@
     "cmake.configureOnOpen": true,
     "files.associations": {
         "compare": "cpp"
-    }
+    },
+    "gitdoc.enabled": true
 }
