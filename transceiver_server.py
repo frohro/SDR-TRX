@@ -2,7 +2,6 @@
 
 import socket
 import time
-import lib.WSJTXClass as WSJTXClass
 import serial
 import yaml
 import struct
@@ -14,12 +13,16 @@ import sys
 import sys
 import os
 
-sys.path.append(os.path.expandvars('$WEAKMON'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.expandvars('$WEAKMON'))  # You need to set this environment 
+# variable to point to the weakmon directory that has the ft8.py and ft4.py files modified for Python 3.
+# In the repository, it is not needed.
+# sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'wsjtx_transceiver_interface'))
+import lib.WSJTXClass as WSJTXClass  # This is the WSJTXClass.py file in the wsjtx_transceiver_interface/lib directory
 from ft8 import FT8Send
 from ft4 import FT4Send
 
-
+# If there is a timeout error, nothing transmits thereafter.  This is a bug to find.
 
 #Read configuration file
 configs_file = open('transceiver_config.yml', 'r')
@@ -93,7 +96,7 @@ def load_symbols(symbols):
 def change_freq(new_freq):
     global tx_freq
     print ("Change TX frequency to:", new_freq)
-    puerto.write(bqq'o')
+    puerto.write(b'o')
     for kk in range(2):
         puerto.write(struct.pack('>B', (new_freq >> 8*kk) & 0xFF))
     resp = puerto.read(1)        

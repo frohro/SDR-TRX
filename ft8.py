@@ -182,6 +182,7 @@ def crc_python(msg, div, code=None):
     divlen = len(div)
 
     # Loop over every message bit (minus the appended code)
+
     for i in range(len(msg)-len(code)):
         # If that messsage bit is 1, perform modulo 2 multiplication
         if msg[i] == 1:

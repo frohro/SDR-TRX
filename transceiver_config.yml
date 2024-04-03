@@ -1,5 +1,6 @@
 #Transceiver configuration file
 callsign: 'KL7NA'
 grid: DN06
+power_dbm: 30
 serial_port: '/home/frohro/ttydummy'
 baudrate: 57600
