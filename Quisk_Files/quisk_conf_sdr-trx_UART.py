@@ -322,10 +322,9 @@ class Hardware(BaseHardware):
                 self.tx_ready_wsjtx = True
         try:
             fileContent, addr = self.sock.recvfrom(1024)
+            print("Read sock.")
             NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
             NewPacket.Decode()
-
-            print("Read NewPacket.")
 
             if NewPacket.PacketType == 1:
                 StatusPacket = WSJTXClass.WSJTX_Status(fileContent, NewPacket.index)
