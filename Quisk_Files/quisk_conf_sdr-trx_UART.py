@@ -330,9 +330,9 @@ class Hardware(BaseHardware):
                     # Maybe use select to stop the errors printing after we quit.
                     return BaseHardware.HeartBeat(self)
                 else:
-                    # print("Error in HeartBeat")
-                    # print(f"Exception type: {type(e).__name__}")
-                    # print(f"Exception message: {str(e)}")
+                    print("Error in HeartBeat")
+                    print(f"Exception type: {type(e).__name__}")
+                    print(f"Exception message: {str(e)}")
                     pass
             try:
                 NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
@@ -363,7 +363,7 @@ class Hardware(BaseHardware):
                     if StatusPacket.Transmitting == 1:
                         print('Transmitting')
                         # Check time, avoid transmitting out of the time slot
-                        # utc_time = datetime.datetime.utcnow()
+                        # utc_time = datetime.datetime.utcnow()  # Depreciated
                         current_time = datetime.datetime.now()
                         utc_time = current_time.astimezone(datetime.timezone.utc)
                         tx_now = self.check_time_window(utc_time)
