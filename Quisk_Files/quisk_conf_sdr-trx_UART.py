@@ -24,16 +24,13 @@ from quisk_hardware_model import Hardware as BaseHardware
 # This is for usinng the SDR-TRX with a 3.5 mm audio card to the soundcard of the computer,
 # and the WSJT-X software using the USB UART.
 # It requires the libldl/ directory from weakmon to be in the direectory you run this from.
-# It also requires the WSJTXClass.py file to be in the same directory a
-
+# It also requires the WSJTXClass.py file from wsjtx_transceiver_interface to be in the lib directory.
 
 import lib.WSJTXClass as WSJTXClass
 
 # Import weakmon to use encoders
 
 sys.path.append(os.path.expandvars('$WEAKMON'))
-
-
 
 # SOUND CARD SETTINGS
 #
@@ -131,7 +128,7 @@ class Hardware(BaseHardware):
     def close(self):
         # Called once to close the Hardware
         self.get_parameter("RX")
-        time.sleep(1)
+        time.sleep(1)  # Wait for RX to be set.
         self.or_serial.close()
         self.sock.close()
 
@@ -249,7 +246,7 @@ class Hardware(BaseHardware):
         for symbol in symbols:
             self.or_serial.write(struct.pack('>B', symbol))
             count += 1
-            # Wait to avoid Arduino serial buffer overflow
+            # Wait to avoid Arduino serial buffer overflow.  This may not be needed with the Pico.
             if count % 50 == 0:
                 time.sleep(0.05)
         self.or_serial.write(b'\0')
