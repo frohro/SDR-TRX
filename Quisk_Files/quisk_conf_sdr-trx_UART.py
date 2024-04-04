@@ -278,7 +278,7 @@ class Hardware(BaseHardware):
         #global self.mode
         if msg != self.current_msg:
             print("Message: {0}".format(msg))
-            if 'FT8' in mode:
+            if 'FT8' in self.callsignmode:
                 symbols = self.encode_ft8(msg)
             else:
                 symbols = self.encode_ft4(msg)
@@ -351,13 +351,13 @@ class Hardware(BaseHardware):
                         time.sleep(0.03)
                         print('Changing frequency from {0} to {1}'.format(self.tx_freq, new_freq))
                         try:
-                            self.change_freq(self, new_freq)
+                            self.change_freq(new_freq)
                         except Exception as e:
                             print(f"Exception occurred: {e}")
                         print ('It is now ', self.tx_freq)
 
                     if new_mode != self.mode:
-                        self.change_mode(self, new_mode)
+                        self.change_mode(new_mode)
 
                     # Check if TX is enabled
                     if StatusPacket.Transmitting == 1:
@@ -372,9 +372,9 @@ class Hardware(BaseHardware):
                         message = StatusPacket.TxMessage
                         message = message.replace('<', '')
                         message = message.replace('>', '')
-                        self.new_msg(self, message.strip())
+                        self.new_msg(message.strip())
                         if tx_now:
-                            self.transmit(self)
+                            self.transmit()
                         print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
                         return BaseHardware.HeartBeat(self)
         
