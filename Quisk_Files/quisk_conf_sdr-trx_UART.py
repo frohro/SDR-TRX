@@ -60,7 +60,10 @@ class Hardware(BaseHardware):
     # These are "static variable substitutes" since python doesn't have them.
     tx_ready_wsjtx = False
     tx_ready_wsjtx_sent = False
-    
+    # FT8 encoder
+    ft8_encoder = FT8Send()
+    ft4_encoder = FT4Send()
+
     def open(self):
         # SERIAL PORT SETTINGS
 
@@ -99,22 +102,18 @@ class Hardware(BaseHardware):
         configs = yaml.load(configs_file, Loader=yaml.BaseLoader)
 
         # Global variables
-        callsign = configs['callsign']
-        grid = configs['grid']
-        current_msg = ''
-        rx_callsign = ''
-        mode = 'FT8'
-        tx_freq = 1200
+        self.callsign = configs['callsign']
+        self.grid = configs['grid']
+        self.current_msg = ''
+        self.rx_callsign = ''
+        self.mode = 'FT8'
+        self.tx_freq = 1200
 
         # Connection for WSJT-X
         UDP_IP = "127.0.0.1"
         UDP_PORT = 2237
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((UDP_IP, UDP_PORT))
-
-        # FT8 encoder
-        self.ft8_encoder = FT8Send()
-        self.ft4_encoder = FT4Send()
 
         time.sleep(2)
         # Poll for version. Should probably confirm the response on this.
@@ -218,8 +217,8 @@ class Hardware(BaseHardware):
 
     def encode_ft8(msg):
         try:
-            a77 = ft8_encoder.pack(msg, 1)
-            symbols = ft8_encoder.make_symbols(a77)
+            a77 = self.ft8_encoder.pack(msg, 1)
+            symbols = self.ft8_encoder.make_symbols(a77)
         except:
             print("FT8 encoder error, check message!")
             symbols = None
@@ -279,12 +278,12 @@ class Hardware(BaseHardware):
         if msg != current_msg:
             print("Message: {0}".format(msg))
             if 'FT8' in mode:
-                symbols = encode_ft8(msg)
+                symbols = self.encode_ft8(msg)
             else:
-                symbols = encode_ft4(msg)
+                symbols = self.encode_ft4(msg)
             if symbols.any():
                 # symbols = [kk for kk in range(79)]
-                load_symbols(symbols)
+                self.load_symbols(symbols)
                 current_msg = msg
             else:
                 return
