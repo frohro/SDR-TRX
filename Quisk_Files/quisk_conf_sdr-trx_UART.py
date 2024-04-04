@@ -23,15 +23,16 @@ from quisk_hardware_model import Hardware as BaseHardware
 # and lowercase letters are for commands coming from WSJT-X (through this Quisk interface).
 # This is for usinng the SDR-TRX with a 3.5 mm audio card to the soundcard of the computer,
 # and the WSJT-X software using the USB UART.
+# It requires the libldl/ directory from weakmon to be in the direectory you run this from.
+# It also requires the WSJTXClass.py file to be in the same directory a
 
 
-import lib.WSJTXClass as WSJTXClass
+import WSJTXClass as WSJTXClass
 
 # Import weakmon to use encoders
 
 sys.path.append(os.path.expandvars('$WEAKMON'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '/home/frohro/Documents/PlatformIO/Projects/wsjtx_transceiver_interface'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 
 
 # SOUND CARD SETTINGS
@@ -278,39 +279,25 @@ class Hardware(BaseHardware):
             print("Switched to: {0}".format(new_mode))
             self.current_msg = ''
 
-    # def new_msg(self, msg):
-    #     #global self.current_msg
-    #     #global self.mode
-    #     if msg != self.current_msg:
-    #         print("Message: {0}".format(msg))
-    #         if 'FT8' in self.mode:
-    #             symbols = self.encode_ft8(msg)
-    #         else:
-    #             symbols = self.encode_ft4(msg)
-    #         if symbols.any():
-    #             # symbols = [kk for kk in range(79)]
-    #             self.load_symbols(symbols)
-    #             self.current_msg = msg
-    #         else:
-    #             return
-    #     else:
-    #         time.sleep(0.005)  #  Do we need this?
-
     def new_msg(self, msg):
+        #global self.current_msg
+        #global self.mode
         if msg != self.current_msg:
             print("Message: {0}".format(msg))
             if 'FT8' in self.mode:
                 symbols = self.encode_ft8(msg)
             else:
                 symbols = self.encode_ft4(msg)
-            if symbols is not None and symbols.any():
+            if symbols.any():
+                # symbols = [kk for kk in range(79)]
                 self.load_symbols(symbols)
                 self.current_msg = msg
             else:
-                print("Error: symbols is None")
                 return
         else:
-            time.sleep(0.005)  # This delay might be necessary to prevent the CPU from being overloaded
+            time.sleep(0.005)  #  Do we need this?
+
+
 
     def transmit():
         if False:  # not current_msg:
@@ -360,7 +347,7 @@ class Hardware(BaseHardware):
                 NewPacket.Decode()
 
                 if NewPacket.PacketType == 1:
-                    print('New Packet is type 1')
+                    # print('New Packet is type 1')
                     StatusPacket = WSJTXClass.WSJTX_Status(fileContent, NewPacket.index)
                     StatusPacket.Decode()
     
