@@ -4672,6 +4672,7 @@ class FT8Send:
         symbols[36:43] = costas
         symbols[43:72] = dsymbols[29:]
         symbols[72:] = costas
+        print(type(symbols))
 
         return symbols
 
