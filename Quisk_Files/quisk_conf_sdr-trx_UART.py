@@ -277,10 +277,10 @@ class Hardware(BaseHardware):
         global mode
         if msg != current_msg:
             print("Message: {0}".format(msg))
-            #if 'FT8' in mode:
-                #symbols = self.encode_ft8(msg)
-           # else:
-                #symbols = self.encode_ft4(msg)
+            if 'FT8' in mode:
+                symbols = self.encode_ft8(msg)
+            else:
+                symbols = self.encode_ft4(msg)
             if symbols.any():
                 # symbols = [kk for kk in range(79)]
                 self.load_symbols(symbols)
@@ -324,6 +324,8 @@ class Hardware(BaseHardware):
             fileContent, addr = self.sock.recvfrom(1024)
             NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
             NewPacket.Decode()
+
+            print("Read NewPacket.")
 
             if NewPacket.PacketType == 1:
                 StatusPacket = WSJTXClass.WSJTX_Status(fileContent, NewPacket.index)
