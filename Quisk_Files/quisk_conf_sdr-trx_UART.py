@@ -312,14 +312,14 @@ class Hardware(BaseHardware):
         # Check transmitter is initialized
         #raise Exception("In HeartBeat")
     
-        print("\n\nWait for transmitter ready...")
+        # print("\n\nWait for transmitter ready...")
         if self.tx_ready_wsjtx == False:
             if self.tx_ready_wsjtx_sent == False:
                 self.or_serial.write(b'r')
                 self.tx_ready_wsjtx_sent = True
             x = self.or_serial.read()
             if x == b'r':
-                print("Transmitter ready!", self.tx_ready_wsjtx)
+                print("Transmitter ready!")
                 self.tx_ready_wsjtx = True
         if self.tx_ready_wsjtx == True:
             try:
