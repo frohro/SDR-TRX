@@ -167,6 +167,7 @@ static void set_rx_freq(uint_fast32_t freq)
 
 void tx_enable()
 { // This can be used for CW keying.
+  // TX is enabled by calling tx().
   si5351.output_enable(SI5351_CLK2, 1);
   tx_state = 1;
 }
@@ -229,8 +230,6 @@ void transmit()
   for (i = 0; i < symbol_count; i++)
   {
     si5351.set_freq((digital_tx_freq) + (tx_buffer[i] * tone_spacing), SI5351_CLK2);
-    // si5351.set_freq((14100000*100ULL), SI5351_CLK2);
-    // Serial.printf("digital_tx_freq: %d \r\n", digital_tx_freq);
     delay(tone_delay);
   }
   // Back to receive
@@ -632,8 +631,6 @@ void processCommandUART()
     // Transmit
     else if (recibido == 't')
     {
-      // digitalWrite(LED_BUILTIN, HIGH);
-      // delay(1000);
       if (message_available)
         transmit();
     }
