@@ -13,7 +13,7 @@ import sys
 import sys
 import os
 
-sys.path.append(os.path.expandvars('$WEAKMON'))  # You need to set this environment 
+# sys.path.append(os.path.expandvars('$WEAKMON'))  # You need to set this environment 
 # variable to point to the weakmon directory that has the ft8.py and ft4.py files modified for Python 3.
 # In the repository, it is not needed.
 # sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
