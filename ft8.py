@@ -4676,7 +4676,7 @@ class FT8Send:
             symbols[43:72] = dsymbols[29:]
             symbols[72:] = costas
         except Exception as e:
-            print(type(symbols))
+            print("tpye (symbols)", type(symbols))
             time.sleep(1)
         return symbols
 
