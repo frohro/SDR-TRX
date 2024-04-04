@@ -4646,7 +4646,6 @@ class FT8Send:
     # bits77 is the result of pack().
     # returns an array of 79 symbols 0..8, ready for FSK.
     def make_symbols(self, bits77):
-        print("In make_symbols")
         assert len(bits77) == 77
         cksum = crc(numpy.append(bits77, numpy.zeros(5, dtype=numpy.int32)),
                     crc14poly)
@@ -4669,12 +4668,10 @@ class FT8Send:
         costas = numpy.array(costas_symbols, dtype=numpy.int32)
         symbols = numpy.zeros(79, dtype=numpy.int32)
         symbols[0:7] = costas
-        print("tpye (symbols)", type(symbols))
         symbols[7:36] = dsymbols[0:29]
         symbols[36:43] = costas
         symbols[43:72] = dsymbols[29:]
         symbols[72:] = costas
-        print( "Exiting make_symbols")
         time.sleep(2)
 
         return symbols
