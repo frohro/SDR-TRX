@@ -278,7 +278,7 @@ class Hardware(BaseHardware):
         #global self.mode
         if msg != self.current_msg:
             print("Message: {0}".format(msg))
-            if 'FT8' in self.callsignmode:
+            if 'FT8' in self.mode:
                 symbols = self.encode_ft8(msg)
             else:
                 symbols = self.encode_ft4(msg)
