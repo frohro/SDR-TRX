@@ -277,10 +277,10 @@ class Hardware(BaseHardware):
         global mode
         if msg != current_msg:
             print("Message: {0}".format(msg))
-            if 'FT8' in mode:
-                symbols = self.encode_ft8(msg)
-            else:
-                symbols = self.encode_ft4(msg)
+            #if 'FT8' in mode:
+                #symbols = self.encode_ft8(msg)
+           # else:
+                #symbols = self.encode_ft4(msg)
             if symbols.any():
                 # symbols = [kk for kk in range(79)]
                 self.load_symbols(symbols)
