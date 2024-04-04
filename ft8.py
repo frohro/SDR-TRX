@@ -4647,22 +4647,16 @@ class FT8Send:
     # returns an array of 79 symbols 0..8, ready for FSK.
     def make_symbols(self, bits77):
         print("In make_symbols")
-        time.sleep(1)
-        try:
-            assert len(bits77) == 77
-            cksum = crc(numpy.append(bits77, numpy.zeros(5, dtype=numpy.int32)),
-                        crc14poly)
-            a91 = numpy.zeros(91, dtype=numpy.int32)
-            a91[0:77] = bits77
-            a91[77:91] = cksum
+        assert len(bits77) == 77
+        cksum = crc(numpy.append(bits77, numpy.zeros(5, dtype=numpy.int32)),
+                    crc14poly)
+        a91 = numpy.zeros(91, dtype=numpy.int32)
+        a91[0:77] = bits77
+        a91[77:91] = cksum
 
-            a174 = ldpc_encode(a91)
+        a174 = ldpc_encode(a91)
 
-            a174 = gray_code(a174)
-
-        except Exception as e:
-            print("tpye (symbols) after costas", type(symbols))
-            time.sleep(1)
+        a174 = gray_code(a174)
 
         # turn array of 174 bits into 58 3-bit symbols,
         # most significant bit first.
@@ -4680,6 +4674,8 @@ class FT8Send:
         symbols[36:43] = costas
         symbols[43:72] = dsymbols[29:]
         symbols[72:] = costas
+        print( "Exiting make_symbols")
+        time.sleep(2)
 
         return symbols
 
