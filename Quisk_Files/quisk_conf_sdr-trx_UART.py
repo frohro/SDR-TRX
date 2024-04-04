@@ -50,6 +50,11 @@ radio_upper = 30000000
 
 # Set the number of Hz the signal is tuned to above the center frequency.
 vfo_Center_Offset = 10000
+
+# These are "static variable substitutes" since python doesn't have them.
+tx_ready_wsjtx = False
+tx_ready_wsjtx_sent = False
+
 # SDR-TRX Hardware Control Class
 #
 
@@ -304,15 +309,16 @@ class Hardware(BaseHardware):
     def HeartBeat(self):  # Should be called at 10 Hz from the main.
         # Check transmitter is initialized
         #raise Exception("In HeartBeat")
+    
         print("\n\nWait for transmitter ready...")
-        if not hasattr(self, "initialized"):
-            initialized = False
-            self.or_serial.write(b'r')
-        if not initialized:
+        if self.tx_ready_wsjtx == False:
+            if self.tx_ready_wsjtx_sent == False:
+                self.or_serial.write(b'r')
+                self.tx_ready_wsjtx_sent = True
             x = self.or_serial.read()
             if x == b'r':
                 print("Transmitter ready!")
-                initialized = True
+                self.tx_ready_wsjtx = True
         try:
             fileContent, addr = self.sock.recvfrom(1024)
             NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
