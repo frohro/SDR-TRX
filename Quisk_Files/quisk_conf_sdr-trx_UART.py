@@ -322,7 +322,6 @@ class Hardware(BaseHardware):
                 self.tx_ready_wsjtx = True
         try:
             fileContent, addr = self.sock.recvfrom(1024)
-            print("Read sock.")
             NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
             NewPacket.Decode()
 
@@ -357,6 +356,10 @@ class Hardware(BaseHardware):
                         self.transmit()
                     print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
                     return BaseHardware.HeartBeat(self)
-        except:
+       
+        except Exception as e:
             print("Error in HeartBeat")
-            return BaseHardware.HeartBeat(self)
+            print(f"Exception type: {type(e).__name__}")
+            print(f"Exception message: {str(e)}")
+            traceback.print_exc()
+        return BaseHardware.HeartBeat(self)
