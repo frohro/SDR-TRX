@@ -325,8 +325,14 @@ class Hardware(BaseHardware):
             try:
                 fileContent, addr = self.sock.recvfrom(1024)
                 print(addr)
-            except BlockingIOError:  # This is our way of pollig the socket.
-                return BaseHardware.HeartBeat(self)
+            except Exception as e:
+                if e == BlockingIOError:  # This is our way of pollig the socket.
+                    # Maybe use select to stop the errors printing after we quit.
+                    return BaseHardware.HeartBeat(self)
+                else:
+                    print("Error in HeartBeat")
+                    print(f"Exception type: {type(e).__name__}")
+                    print(f"Exception message: {str(e)}")
             try:
                 NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
                 NewPacket.Decode()
