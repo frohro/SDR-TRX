@@ -216,7 +216,7 @@ class Hardware(BaseHardware):
 
     #  The code below is to interface WSJT-X with SDR-TRX.
 
-    def encode_ft8(msg):
+    def encode_ft8(self, msg):
         try:
             a77 = self.ft8_encoder.pack(msg, 1)
             symbols = self.ft8_encoder.make_symbols(a77)
@@ -226,7 +226,7 @@ class Hardware(BaseHardware):
             time.sleep(3)
         return symbols
 
-    def encode_ft4(msg):
+    def encode_ft4(self, msg):
         try:
             a77 = self.ft4_encoder.pack(msg, 1)
             symbols = self.ft4_encoder.make_symbols(a77)
@@ -236,7 +236,7 @@ class Hardware(BaseHardware):
             time.sleep(3)
         return symbols
 
-    def load_symbols(symbols):
+    def load_symbols(self, symbols):
         print("Load symbols into transmitter..")
         self.or_serial.write(b'm')
         count = 0
@@ -253,7 +253,7 @@ class Hardware(BaseHardware):
         else:
             print(resp)
 
-    def change_freq(new_freq):
+    def change_freq(self, new_freq):
         #global self.tx_freq
         print("Change TX frequency to:", new_freq)
         self.or_serial.write(b'o')
@@ -264,7 +264,7 @@ class Hardware(BaseHardware):
             print("New freq OK")
             self.tx_freq = new_freq
 
-    def change_mode(new_mode):
+    def change_mode(self, new_mode):
         #global self.mode
         self.or_serial.write(b's')
         resp = self.or_serial.read(1)
@@ -273,7 +273,7 @@ class Hardware(BaseHardware):
             print("Switched to: {0}".format(new_mode))
             self.current_msg = ''
 
-    def new_msg(msg):
+    def new_msg(self, msg):
         #global self.current_msg
         #global self.mode
         if msg != self.current_msg:
@@ -299,7 +299,7 @@ class Hardware(BaseHardware):
             print("TX!")
             self.or_serial.write(b't')
 
-    def check_time_window(utc_time):
+    def check_time_window(self, utc_time):
         time_window = 15 if 'FT8' in self.mode else 7
         rm = utc_time.second % time_window
         if rm > 1 and rm < time_window - 1:
@@ -351,13 +351,13 @@ class Hardware(BaseHardware):
                         time.sleep(0.03)
                         print('Changing frequency from {0} to {1}'.format(self.tx_freq, new_freq))
                         try:
-                            self.change_freq(new_freq)
+                            self.change_freq(self, new_freq)
                         except Exception as e:
                             print(f"Exception occurred: {e}")
                         print ('It is now ', self.tx_freq)
 
                     if new_mode != self.mode:
-                        self.change_mode(new_mode)
+                        self.change_mode(self, new_mode)
 
                     # Check if TX is enabled
                     if StatusPacket.Transmitting == 1:
@@ -372,9 +372,9 @@ class Hardware(BaseHardware):
                         message = StatusPacket.TxMessage
                         message = message.replace('<', '')
                         message = message.replace('>', '')
-                        self.new_msg(message.strip())
+                        self.new_msg(self, message.strip())
                         if tx_now:
-                            self.transmit()
+                            self.transmit(self)
                         print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
                         return BaseHardware.HeartBeat(self)
         
