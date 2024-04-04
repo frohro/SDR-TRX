@@ -2,5 +2,5 @@
 callsign: 'KL7NA'
 grid: DN06
 power_dbm: 30
-serial_port: '/home/frohro/ttydummy'
+serial_port: '/home/frohro/ttyDummy'
 baudrate: 57600
