@@ -348,8 +348,12 @@ class Hardware(BaseHardware):
                     new_mode = StatusPacket.TxMode.strip()
 
                     if new_freq != self.tx_freq:
+                        time.sleep(0.03)
                         print('Changing frequency from {0} to {1}'.format(self.tx_freq, new_freq))
-                        # self.change_freq(new_freq)
+                        try:
+                            self.change_freq(new_freq)
+                        except Exception as e:
+                            print(f"Exception occurred: {e}")
                         print ('It is now ', self.tx_freq)
 
                     if new_mode != self.mode:
