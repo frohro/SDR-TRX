@@ -4647,7 +4647,7 @@ class FT8Send:
     # returns an array of 79 symbols 0..8, ready for FSK.
     def make_symbols(self, bits77):
         print("In make_symbols")
-        time.sleep(10)
+        time.sleep(1)
         try:
             assert len(bits77) == 77
             cksum = crc(numpy.append(bits77, numpy.zeros(5, dtype=numpy.int32)),
@@ -4660,25 +4660,27 @@ class FT8Send:
 
             a174 = gray_code(a174)
 
-            # turn array of 174 bits into 58 3-bit symbols,
-            # most significant bit first.
-            dsymbols = numpy.zeros(58, dtype=numpy.int32)
-            for i in range(0, 58):
-                ii = i * 3
-                dsymbols[i] = (a174[ii+0] << 2) | (a174[ii+1]<<1) | (a174[ii+2]<<0)
-
-            # insert three 7-symbol Costas arrays.
-            costas = numpy.array(costas_symbols, dtype=numpy.int32)
-            symbols = numpy.zeros(79, dtype=numpy.int32)
-            symbols[0:7] = costas
-            print("tpye (symbols)", type(symbols))
-            symbols[7:36] = dsymbols[0:29]
-            symbols[36:43] = costas
-            symbols[43:72] = dsymbols[29:]
-            symbols[72:] = costas
         except Exception as e:
             print("tpye (symbols) after costas", type(symbols))
             time.sleep(1)
+
+        # turn array of 174 bits into 58 3-bit symbols,
+        # most significant bit first.
+        dsymbols = numpy.zeros(58, dtype=numpy.int32)
+        for i in range(0, 58):
+            ii = i * 3
+            dsymbols[i] = (a174[ii+0] << 2) | (a174[ii+1]<<1) | (a174[ii+2]<<0)
+
+        # insert three 7-symbol Costas arrays.
+        costas = numpy.array(costas_symbols, dtype=numpy.int32)
+        symbols = numpy.zeros(79, dtype=numpy.int32)
+        symbols[0:7] = costas
+        print("tpye (symbols)", type(symbols))
+        symbols[7:36] = dsymbols[0:29]
+        symbols[36:43] = costas
+        symbols[43:72] = dsymbols[29:]
+        symbols[72:] = costas
+
         return symbols
 
     # a77 is 77 bits, the result of pack().
