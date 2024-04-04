@@ -254,7 +254,7 @@ class Hardware(BaseHardware):
             print(resp)
 
     def change_freq(new_freq):
-        global self.tx_freq
+        #global self.tx_freq
         print("Change TX frequency to:", new_freq)
         self.or_serial.write(b'o')
         for kk in range(2):
@@ -265,18 +265,18 @@ class Hardware(BaseHardware):
             self.tx_freq = new_freq
 
     def change_mode(new_mode):
-        global mode
+        #global self.mode
         self.or_serial.write(b's')
         resp = self.or_serial.read(1)
         if resp == b's':
-            mode = new_mode
+            self.mode = new_mode
             print("Switched to: {0}".format(new_mode))
-            current_msg = ''
+            self.current_msg = ''
 
     def new_msg(msg):
-        global current_msg
-        global mode
-        if msg != current_msg:
+        #global self.current_msg
+        #global self.mode
+        if msg != self.current_msg:
             print("Message: {0}".format(msg))
             if 'FT8' in mode:
                 symbols = self.encode_ft8(msg)
@@ -285,11 +285,11 @@ class Hardware(BaseHardware):
             if symbols.any():
                 # symbols = [kk for kk in range(79)]
                 self.load_symbols(symbols)
-                current_msg = msg
+                self.current_msg = msg
             else:
                 return
         else:
-            time.sleep(0.005)
+            time.sleep(0.005)  #  Do we need this?
 
     def transmit():
         if False:  # not current_msg:
@@ -300,7 +300,7 @@ class Hardware(BaseHardware):
             self.or_serial.write(b't')
 
     def check_time_window(utc_time):
-        time_window = 15 if 'FT8' in mode else 7
+        time_window = 15 if 'FT8' in self.mode else 7
         rm = utc_time.second % time_window
         if rm > 1 and rm < time_window - 1:
             return False
