@@ -371,15 +371,15 @@ class Hardware(BaseHardware):
                         utc_time = datetime.datetime.utcnow()  # Depreciated
                        # current_time = datetime.datetime.now()
                        # utc_time = current_time.astimezone(datetime.timezone.utc)
-                        tx_now = self.check_time_window(utc_time)
-                        if tx_now:
+                        self.tx_now = self.check_time_window(utc_time)
+                        if self.tx_now:
                             self.or_serial.write(b'p')
                         message = StatusPacket.TxMessage
                         message = message.replace('<', '')
                         message = message.replace('>', '')
                         print('Message is: ', message)
                         self.new_msg(message.strip())
-                        if tx_now:
+                        if self.tx_now:
                             self.transmit()
                         print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
                         return BaseHardware.HeartBeat(self)
