@@ -51,14 +51,16 @@ radio_upper = 30000000
 # Set the number of Hz the signal is tuned to above the center frequency.
 vfo_Center_Offset = 10000
 
-# These are "static variable substitutes" since python doesn't have them.
-tx_ready_wsjtx = False
-tx_ready_wsjtx_sent = False
+
 
 # SDR-TRX Hardware Control Class
 #
 
 class Hardware(BaseHardware):
+    # These are "static variable substitutes" since python doesn't have them.
+    tx_ready_wsjtx = False
+    tx_ready_wsjtx_sent = False
+    
     def open(self):
         # SERIAL PORT SETTINGS
 
