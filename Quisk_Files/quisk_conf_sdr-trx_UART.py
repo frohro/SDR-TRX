@@ -27,7 +27,7 @@ from quisk_hardware_model import Hardware as BaseHardware
 # It also requires the WSJTXClass.py file to be in the same directory a
 
 
-import WSJTXClass as WSJTXClass
+import lib.WSJTXClass as WSJTXClass
 
 # Import weakmon to use encoders
 
