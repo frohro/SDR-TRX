@@ -58,6 +58,7 @@ class Hardware(BaseHardware):
     # These are "static variable substitutes" since python doesn't have them.
     tx_ready_wsjtx = False
     tx_ready_wsjtx_sent = False
+    tx_now = False
 
     # This is the open code for the WSJT server.
     ft8_encoder = FT8Send()
