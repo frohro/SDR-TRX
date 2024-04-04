@@ -339,6 +339,7 @@ class Hardware(BaseHardware):
                 NewPacket.Decode()
 
                 if NewPacket.PacketType == 1:
+                    print('New Packet is type 1')
                     StatusPacket = WSJTXClass.WSJTX_Status(fileContent, NewPacket.index)
                     StatusPacket.Decode()
     
