@@ -165,18 +165,17 @@ static void set_rx_freq(uint_fast32_t freq)
   si5351.pll_reset(SI5351_PLLA);
 }
 
-void tx_enable()
-{ // This can be used for CW keying.
-  // TX is enabled by calling tx().
-  si5351.output_enable(SI5351_CLK2, 1);
-  tx_state = 1;
-}
+// void tx_enable()
+// { // This can be used for CW keying.
+//   // TX is enabled by calling tx().
 
-void tx_disable()
-{
-  si5351.output_enable(SI5351_CLK2, 0);
-  tx_state = 0;
-}
+// }
+
+// void tx_disable()
+// {
+//   si5351.output_enable(SI5351_CLK2, 0);
+//   tx_state = 0;
+// }
 
 void tx()
 {
@@ -188,7 +187,8 @@ void tx()
   digitalWrite(LED_BUILTIN, HIGH); // Turn on the LED
   delay(1000);
   rx_relay_state = 0;
-  tx_enable();
+  si5351.output_enable(SI5351_CLK2, 1);
+  tx_state = 1;
 }
 
 void rx()
@@ -197,7 +197,8 @@ void rx()
   {
     data_sending = true;
   }
-  tx_disable();
+  si5351.output_enable(SI5351_CLK2, 0);
+  tx_state = 0;
   digitalWrite(RX_SWITCH, HIGH);
   digitalWrite(LED_BUILTIN, LOW); // Turn off the LED
   rx_relay_state = 1;
@@ -409,22 +410,22 @@ void processCommandUDP()
         udpCommand.endPacket();
       }
     }
-    else if (command.startsWith("TX_DISABLE"))
-    {
-      Serial.println("TX_DISABLE received!");
-      tx_disable();
-      udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-      udpCommand.printf("TX_DISABLE\r\n");
-      udpCommand.endPacket();
-    }
-    else if (command.startsWith("TX_ENABLE"))
-    {
-      Serial.println("TX_ENABLE received!");
-      tx_enable();
-      udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-      udpCommand.printf("TX_ENABLE\r\n");
-      udpCommand.endPacket();
-    }
+    // else if (command.startsWith("TX_DISABLE"))
+    // {
+    //   Serial.println("TX_DISABLE received!");
+    //   tx_disable();
+    //   udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+    //   udpCommand.printf("TX_DISABLE\r\n");
+    //   udpCommand.endPacket();
+    // }
+    // else if (command.startsWith("TX_ENABLE"))
+    // {
+    //   Serial.println("TX_ENABLE received!");
+    //   tx_enable();
+    //   udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+    //   udpCommand.printf("TX_ENABLE\r\n");
+    //   udpCommand.endPacket();
+    // }
     else if (command.startsWith("TX_FREQ"))
     {
       Serial.println("TX_FREQ received!");
@@ -638,7 +639,7 @@ void processCommandUART()
     // Pre transmit
     else if (recibido == 'p')
     {
-      tx_enable();
+      // tx_enable();
     }
     else if (recibido == 'r')
     {
@@ -686,16 +687,16 @@ void processCommandUART()
         Serial.printf("FREQ,%d\r\n", rx_freq);
       }
     }
-    else if (command.startsWith("TX_DISABLE"))
-    {
-      tx_disable();
-      Serial.printf("TX_DISABLE\r\n");
-    }
-    else if (command.startsWith("TX_ENABLE"))
-    {
-      tx_enable();
-      Serial.printf("TX_ENABLE\r\n");
-    }
+    // else if (command.startsWith("TX_DISABLE"))
+    // {
+    //   tx_disable();
+    //   Serial.printf("TX_DISABLE\r\n");
+    // }
+    // else if (command.startsWith("TX_ENABLE"))
+    // {
+    //   tx_enable();
+    //   Serial.printf("TX_ENABLE\r\n");
+    // }
     else if (command.startsWith("TX_FREQ"))
     {
       int commaIndex = command.indexOf(',');
@@ -735,13 +736,13 @@ void processCommandUART()
     else if (command.startsWith("TX"))
     {
       tx();
-      tx_enable();
+      // tx_enable();
       Serial.printf("TX\r\n");
     }
     else if (command.startsWith("RX"))
     {
       rx();
-      tx_disable();
+      // tx_disable();
       Serial.printf("RX\r\n");
     }
     else
