@@ -796,7 +796,6 @@ void setup()
   }
   si5351_init();
   pinMode(RX_SWITCH, OUTPUT);
-  digitalWrite(RX_SWITCH, HIGH); // Set RX mode
   pinMode(LED_BUILTIN, OUTPUT);  // Set the LED pin as output.  It is used for TX mode.
   i2s.begin();
   cur_mode = MODE_FT8;
@@ -804,7 +803,7 @@ void setup()
   set_tx_freq(FT8_DEFAULT_FREQ);
   delay(1000);
   set_rx_freq(FT8_DEFAULT_FREQ);
-  rx();
+  rx(); // Set RX mode
   useUDP = false; // Only for testing out FT8
 }
 
