@@ -348,6 +348,7 @@ class Hardware(BaseHardware):
                     new_mode = StatusPacket.TxMode.strip()
 
                     if new_freq != self.tx_freq:
+                        print('Changing frequency')
                         self.change_freq(new_freq)
 
                     if new_mode != self.mode:
@@ -355,6 +356,7 @@ class Hardware(BaseHardware):
 
                     # Check if TX is enabled
                     if StatusPacket.Transmitting == 1:
+                        print('Transmitting')
                         # Check time, avoid transmitting out of the time slot
                         # utc_time = datetime.datetime.utcnow()
                         current_time = datetime.datetime.now()
