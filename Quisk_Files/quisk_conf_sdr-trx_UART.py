@@ -368,9 +368,9 @@ class Hardware(BaseHardware):
                     if StatusPacket.Transmitting == 1:
                         print('Transmitting')
                         # Check time, avoid transmitting out of the time slot
-                        # utc_time = datetime.datetime.utcnow()  # Depreciated
-                        current_time = datetime.datetime.now()
-                        utc_time = current_time.astimezone(datetime.timezone.utc)
+                        utc_time = datetime.datetime.utcnow()  # Depreciated
+                       # current_time = datetime.datetime.now()
+                       # utc_time = current_time.astimezone(datetime.timezone.utc)
                         tx_now = self.check_time_window(utc_time)
                         if tx_now:
                             self.or_serial.write(b'p')
