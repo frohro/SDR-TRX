@@ -12,23 +12,15 @@ import os
 import sys
 import sys
 import os
-from ft8 import FT8Send
-from ft4 import FT4Send
 
 # sys.path.append(os.path.expandvars('$WEAKMON'))  # You need to set this environment 
 # variable to point to the weakmon directory that has the ft8.py and ft4.py files modified for Python 3.
 # In the repository, it is not needed.
 # sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-# sys.path.append(os.path.join(os.path.dirname(__file__), 'wsjtx_transceiver_interface'))
-import lib.WSJTXClass as WSJTXClass
-
-# Set the current working directory to the directory of the script
-script_dir = os.path.dirname(os.path.abspath(__file__))
-os.chdir(script_dir)
-
-# Initialize FT8Send class
-ft8_encoder = FT8Send()
-ft4_encoder = FT4Send()
+sys.path.append(os.path.join(os.path.dirname(__file__), 'wsjtx_transceiver_interface'))
+import lib.WSJTXClass as WSJTXClass  # This is the WSJTXClass.py file in the wsjtx_transceiver_interface/lib directory
+from ft8 import FT8Send
+from ft4 import FT4Send
 
 # If there is a timeout error, nothing transmits thereafter.  This is a bug to find.
 
