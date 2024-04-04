@@ -114,6 +114,7 @@ class Hardware(BaseHardware):
         UDP_PORT = 2237
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((UDP_IP, UDP_PORT))
+        self.sock.setblocking(False)
 
         time.sleep(2)
         # Poll for version. Should probably confirm the response on this.
@@ -318,18 +319,22 @@ class Hardware(BaseHardware):
                 self.tx_ready_wsjtx_sent = True
             x = self.or_serial.read()
             if x == b'r':
-                print("Transmitter ready!")
+                print("Transmitter ready!", self.tx_ready_wsjtx)
                 self.tx_ready_wsjtx = True
         if self.tx_ready_wsjtx == True:
             try:
                 fileContent, addr = self.sock.recvfrom(1024)
+                print(addr)
+            except BlockingIOError:  # This is our way of pollig the socket.
+                return BaseHardware.HeartBeat(self)
+            try:
                 NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
                 NewPacket.Decode()
 
                 if NewPacket.PacketType == 1:
                     StatusPacket = WSJTXClass.WSJTX_Status(fileContent, NewPacket.index)
                     StatusPacket.Decode()
-
+    
                     # Check TX frequency and update transceiver
                     new_freq = StatusPacket.TxDF
                     new_mode = StatusPacket.TxMode.strip()
