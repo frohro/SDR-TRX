@@ -218,7 +218,7 @@ class Hardware(BaseHardware):
 
     def encode_ft8(self, msg):
         try:
-            a77 = ft8_encoder.pack(msg, 1)
+            a77 = self.ft8_encoder.pack(msg, 1)
             symbols = self.ft8_encoder.make_symbols(a77)
         except Exception as e:
             print("FT8 encoder error, check message!")
@@ -374,6 +374,7 @@ class Hardware(BaseHardware):
                         message = StatusPacket.TxMessage
                         message = message.replace('<', '')
                         message = message.replace('>', '')
+                        print('Message is: ', message)
                         self.new_msg(message.strip())
                         if tx_now:
                             self.transmit()
