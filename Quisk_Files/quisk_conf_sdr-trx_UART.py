@@ -330,9 +330,9 @@ class Hardware(BaseHardware):
                     # Maybe use select to stop the errors printing after we quit.
                     return BaseHardware.HeartBeat(self)
                 else:
-                    print("Error in HeartBeat")
-                    print(f"Exception type: {type(e).__name__}")
-                    print(f"Exception message: {str(e)}")
+                    # print("Error in HeartBeat")
+                    # print(f"Exception type: {type(e).__name__}")
+                    # print(f"Exception message: {str(e)}")
                     pass
             try:
                 NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
