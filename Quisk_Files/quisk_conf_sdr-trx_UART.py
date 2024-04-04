@@ -56,6 +56,8 @@ vfo_Center_Offset = 10000
 
 class Hardware(BaseHardware):
     # These are "static variable substitutes" since python doesn't have them.
+    # They are shared by all instances of the class and don't get redefinede each time a method is called.
+    # If you didn't have them here that would happen.
     tx_ready_wsjtx = False
     tx_ready_wsjtx_sent = False
     tx_now = False
