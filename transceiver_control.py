@@ -24,7 +24,7 @@ baudrate = configs['baudrate']
 try:
     puerto = serial.Serial(serial_port, baudrate, timeout=0.5)
 except serial.serialutil.SerialException as e:
-    print("\nNo se puede abrir puerto: " + serial_port + "\n")
+    print("\nCannot connect to the serial port: " + serial_port + "\n")
     exit(1)
 
 # Global variables
