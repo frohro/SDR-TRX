@@ -320,46 +320,47 @@ class Hardware(BaseHardware):
             if x == b'r':
                 print("Transmitter ready!")
                 self.tx_ready_wsjtx = True
-        try:
-            fileContent, addr = self.sock.recvfrom(1024)
-            NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
-            NewPacket.Decode()
+        if self.tx_ready_wsjtx == True:
+            try:
+                fileContent, addr = self.sock.recvfrom(1024)
+                NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
+                NewPacket.Decode()
 
-            if NewPacket.PacketType == 1:
-                StatusPacket = WSJTXClass.WSJTX_Status(fileContent, NewPacket.index)
-                StatusPacket.Decode()
+                if NewPacket.PacketType == 1:
+                    StatusPacket = WSJTXClass.WSJTX_Status(fileContent, NewPacket.index)
+                    StatusPacket.Decode()
 
-                # Check TX frequency and update transceiver
-                new_freq = StatusPacket.TxDF
-                new_mode = StatusPacket.TxMode.strip()
+                    # Check TX frequency and update transceiver
+                    new_freq = StatusPacket.TxDF
+                    new_mode = StatusPacket.TxMode.strip()
 
-                if new_freq != self.tx_freq:
-                    self.change_freq(new_freq)
+                    if new_freq != self.tx_freq:
+                        self.change_freq(new_freq)
 
-                if new_mode != self.mode:
-                    self.change_mode(new_mode)
+                    if new_mode != self.mode:
+                        self.change_mode(new_mode)
 
-                # Check if TX is enabled
-                if StatusPacket.Transmitting == 1:
-                    # Check time, avoid transmitting out of the time slot
-                    # utc_time = datetime.datetime.utcnow()
-                    current_time = datetime.datetime.now()
-                    utc_time = current_time.astimezone(datetime.timezone.utc)
-                    tx_now = self.check_time_window(utc_time)
-                    if tx_now:
-                        self.or_serial.write(b'p')
-                    message = StatusPacket.TxMessage
-                    message = message.replace('<', '')
-                    message = message.replace('>', '')
-                    self.new_msg(message.strip())
-                    if tx_now:
-                        self.transmit()
-                    print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
-                    return BaseHardware.HeartBeat(self)
-       
-        except Exception as e:
-            print("Error in HeartBeat")
-            print(f"Exception type: {type(e).__name__}")
-            print(f"Exception message: {str(e)}")
-            traceback.print_exc()
-        return BaseHardware.HeartBeat(self)
+                    # Check if TX is enabled
+                    if StatusPacket.Transmitting == 1:
+                        # Check time, avoid transmitting out of the time slot
+                        # utc_time = datetime.datetime.utcnow()
+                        current_time = datetime.datetime.now()
+                        utc_time = current_time.astimezone(datetime.timezone.utc)
+                        tx_now = self.check_time_window(utc_time)
+                        if tx_now:
+                            self.or_serial.write(b'p')
+                        message = StatusPacket.TxMessage
+                        message = message.replace('<', '')
+                        message = message.replace('>', '')
+                        self.new_msg(message.strip())
+                        if tx_now:
+                            self.transmit()
+                        print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
+                        return BaseHardware.HeartBeat(self)
+        
+            except Exception as e:
+                # print("Error in HeartBeat")
+                # print(f"Exception type: {type(e).__name__}")
+                # print(f"Exception message: {str(e)}")
+                # traceback.print_exc()
+                return BaseHardware.HeartBeat(self)
