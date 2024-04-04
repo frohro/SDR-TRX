@@ -4670,8 +4670,8 @@ class FT8Send:
             # insert three 7-symbol Costas arrays.
             costas = numpy.array(costas_symbols, dtype=numpy.int32)
             symbols = numpy.zeros(79, dtype=numpy.int32)
-            print("tpye (symbols)", type(symbols))
             symbols[0:7] = costas
+            print("tpye (symbols)", type(symbols))
             symbols[7:36] = dsymbols[0:29]
             symbols[36:43] = costas
             symbols[43:72] = dsymbols[29:]
