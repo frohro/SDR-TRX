@@ -61,15 +61,16 @@ class Hardware(BaseHardware):
     tx_ready_wsjtx = False
     tx_ready_wsjtx_sent = False
 
+    # This is the open code for the WSJT server.
+    ft8_encoder = FT8Send()
+    ft4_encoder = FT4Send()
 
     def open(self):
 
             # FT8 encoder
-        self.ft8_encoder = FT8Send()
-        self.ft4_encoder = FT4Send()
+
         # SERIAL PORT SETTINGS
 
-        # This is the open code for the WSJT server.
         # serial_port = configs['serial_port']
         # baudrate    = configs['baudrate']
         # try:
@@ -277,23 +278,39 @@ class Hardware(BaseHardware):
             print("Switched to: {0}".format(new_mode))
             self.current_msg = ''
 
+    # def new_msg(self, msg):
+    #     #global self.current_msg
+    #     #global self.mode
+    #     if msg != self.current_msg:
+    #         print("Message: {0}".format(msg))
+    #         if 'FT8' in self.mode:
+    #             symbols = self.encode_ft8(msg)
+    #         else:
+    #             symbols = self.encode_ft4(msg)
+    #         if symbols.any():
+    #             # symbols = [kk for kk in range(79)]
+    #             self.load_symbols(symbols)
+    #             self.current_msg = msg
+    #         else:
+    #             return
+    #     else:
+    #         time.sleep(0.005)  #  Do we need this?
+
     def new_msg(self, msg):
-        #global self.current_msg
-        #global self.mode
         if msg != self.current_msg:
             print("Message: {0}".format(msg))
             if 'FT8' in self.mode:
                 symbols = self.encode_ft8(msg)
             else:
                 symbols = self.encode_ft4(msg)
-            if symbols.any():
-                # symbols = [kk for kk in range(79)]
+            if symbols is not None and symbols.any():
                 self.load_symbols(symbols)
                 self.current_msg = msg
             else:
+                print("Error: symbols is None")
                 return
         else:
-            time.sleep(0.005)  #  Do we need this?
+            time.sleep(0.005)  # This delay might be necessary to prevent the CPU from being overloaded
 
     def transmit():
         if False:  # not current_msg:
