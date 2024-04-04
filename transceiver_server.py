@@ -17,7 +17,7 @@ sys.path.append(os.path.expandvars('$WEAKMON'))  # You need to set this environm
 # variable to point to the weakmon directory that has the ft8.py and ft4.py files modified for Python 3.
 # In the repository, it is not needed.
 # sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(os.path.join(os.path.dirname(__file__), 'wsjtx_transceiver_interface'))
+# sys.path.append(os.path.join(os.path.dirname(__file__), 'wsjtx_transceiver_interface'))
 import lib.WSJTXClass as WSJTXClass  # This is the WSJTXClass.py file in the wsjtx_transceiver_interface/lib directory
 from ft8 import FT8Send
 from ft4 import FT4Send
