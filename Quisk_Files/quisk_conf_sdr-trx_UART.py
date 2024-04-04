@@ -60,11 +60,13 @@ class Hardware(BaseHardware):
     # These are "static variable substitutes" since python doesn't have them.
     tx_ready_wsjtx = False
     tx_ready_wsjtx_sent = False
-    # FT8 encoder
-    ft8_encoder = FT8Send()
-    ft4_encoder = FT4Send()
+
 
     def open(self):
+
+            # FT8 encoder
+        self.ft8_encoder = FT8Send()
+        self.ft4_encoder = FT4Send()
         # SERIAL PORT SETTINGS
 
         # This is the open code for the WSJT server.
