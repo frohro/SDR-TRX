@@ -333,10 +333,10 @@ class Hardware(BaseHardware):
                 new_freq = StatusPacket.TxDF
                 new_mode = StatusPacket.TxMode.strip()
 
-                if new_freq != tx_freq:
+                if new_freq != self.tx_freq:
                     self.change_freq(new_freq)
 
-                if new_mode != mode:
+                if new_mode != self.mode:
                     self.change_mode(new_mode)
 
                 # Check if TX is enabled
