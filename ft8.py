@@ -4672,8 +4672,6 @@ class FT8Send:
         symbols[36:43] = costas
         symbols[43:72] = dsymbols[29:]
         symbols[72:] = costas
-        time.sleep(2)
-
         return symbols
 
     # a77 is 77 bits, the result of pack().
