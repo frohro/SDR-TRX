@@ -220,8 +220,10 @@ class Hardware(BaseHardware):
         try:
             a77 = self.ft8_encoder.pack(msg, 1)
             symbols = self.ft8_encoder.make_symbols(a77)
-        except:
+        except Exception as e:
             print("FT8 encoder error, check message!")
+            print(f"Exception type: {type(e).__name__}")
+            print(f"Exception message: {str(e)}")
             symbols = None
             time.sleep(3)
         return symbols
@@ -324,7 +326,7 @@ class Hardware(BaseHardware):
         if self.tx_ready_wsjtx == True:
             try:
                 fileContent, addr = self.sock.recvfrom(1024)
-                print(addr)
+                # print(addr)
             except Exception as e:
                 if e == BlockingIOError:  # This is our way of pollig the socket.
                     # Maybe use select to stop the errors printing after we quit.
