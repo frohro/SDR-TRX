@@ -254,7 +254,7 @@ class Hardware(BaseHardware):
             print(resp)
 
     def change_freq(new_freq):
-        global tx_freq
+        global self.tx_freq
         print("Change TX frequency to:", new_freq)
         self.or_serial.write(b'o')
         for kk in range(2):
@@ -262,7 +262,7 @@ class Hardware(BaseHardware):
         resp = self.or_serial.read(1)
         if resp == b'o':
             print("New freq OK")
-            tx_freq = new_freq
+            self.tx_freq = new_freq
 
     def change_mode(new_mode):
         global mode
