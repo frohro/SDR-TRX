@@ -4646,6 +4646,8 @@ class FT8Send:
     # bits77 is the result of pack().
     # returns an array of 79 symbols 0..8, ready for FSK.
     def make_symbols(self, bits77):
+        print("In make_symbols")
+        time.sleep(10)
         try:
             assert len(bits77) == 77
             cksum = crc(numpy.append(bits77, numpy.zeros(5, dtype=numpy.int32)),
