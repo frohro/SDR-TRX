@@ -565,7 +565,7 @@ void processCommandUART()
           tx_buffer[msg_index] = recibido;
           msg_index++;
         }
-        delay(1); // Wait for the next character (1ms). This was to get rid of the timeout in FT4.
+        //delay(1); // Wait for the next character (1ms). This was to get rid of the timeout in FT4.
         timeout += 1;
       }
       if (timeout >= SERIAL_TIMEOUT)
