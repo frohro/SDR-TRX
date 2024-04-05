@@ -381,6 +381,7 @@ class Hardware(BaseHardware):
                     # Check TX frequency and update transceiver
                     new_freq = StatusPacket.TxDF
                     new_mode = StatusPacket.TxMode.strip()
+                    # print('new_mode', new_mode)
 
                     if new_freq != self.tx_freq:
                         # time.sleep(0.03)
