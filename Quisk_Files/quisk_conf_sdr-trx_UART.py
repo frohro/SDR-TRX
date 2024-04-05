@@ -394,9 +394,9 @@ class Hardware(BaseHardware):
 
                     print('new_mode', new_mode, ' self.mode is: ', self.mode)
                     if new_mode != self.mode:  
-                        print("Mode before: {0}".format(mode))
+                        print("Mode before: {0}".format(self.mode))
                         self.set_mode(new_mode)
-                        print("New mode after: {0}".format(mode))
+                        print("New mode after: {0}".format(self.mode))
 
                     # Check if TX is enabled
                     if StatusPacket.Transmitting == 1:
