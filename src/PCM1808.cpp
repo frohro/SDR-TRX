@@ -85,7 +85,7 @@ const int FSQ_6_DELAY = 167;   // Delay value for 6 baud FSQ
 const int FT8_DELAY = 157;     // Delay value for FT8
 const int FT4_DELAY = 45;      // Need to substract 3ms due to PLL delay
 
-const int FT4_SYMBOL_COUNT = 103;
+const int FT4_SYMBOL_COUNT = 103;  // 105?   https://wsjt.sourceforge.io/FT4_FT8_QEX.pdf
 
 const uint_fast32_t JT9_DEFAULT_FREQ = 14078700UL;
 const uint_fast32_t JT65_DEFAULT_FREQ = 14078300UL;
@@ -556,11 +556,12 @@ void processCommandUART()
     // Serial.print(recibido);
   if ((recibido == 'm') || // This whole if statement is a way of combining my code with 
     (recibido == 'o') || // wsjt-transceiver.ino.  I'm not sure if it is the best way.
-    (recibido == 's') || 
+    (recibido == 'e') || 
     (recibido == 'w') || 
     (recibido == 't') || 
     (recibido == 'p') || 
     (recibido == 'r') || 
+    (recibido == 'f') ||
     (recibido < 32)) // Check for a message which is a control character in ASCII.
   {
     // New message
@@ -609,18 +610,24 @@ void processCommandUART()
       Serial.print("o");
     }
 
-    // Switch mode
-    else if (recibido == 's')
+    // Switch mode = FT8
+    else if (recibido == 'e')
     {
-      if (cur_mode == MODE_FT8)
-        cur_mode = MODE_FT4;
-      else
-        cur_mode = MODE_FT8;
+      cur_mode = MODE_FT8;
       setup_mode(cur_mode);
       message_available = false;
-      Serial.print("s");
+      Serial.print("e");
     }
 
+    // Switch mode = FT4
+    else if (recibido == 'f')
+    {
+      cur_mode = MODE_FT4;
+      setup_mode(cur_mode);
+      message_available = false;
+      Serial.print("f");
+    }
+  
     // WSPR Mode
     else if (recibido == 'w')
     {

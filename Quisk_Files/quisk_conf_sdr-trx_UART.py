@@ -57,7 +57,7 @@ vfo_Center_Offset = 10000
 class Hardware(BaseHardware):
     # These are "static variable substitutes" since python doesn't have them.
     # They are shared by all instances of the class and don't get redefinede each time a method is called.
-    # If you didn't have them here that would happen.
+\
     tx_ready_wsjtx = False
     tx_ready_wsjtx_sent = False
     tx_now = False
@@ -265,19 +265,45 @@ class Hardware(BaseHardware):
         self.or_serial.write(b'o')
         for kk in range(2):
             self.or_serial.write(struct.pack('>B', (new_freq >> 8 * kk) & 0xFF))
+        time.sleep(0.05)    
         resp = self.or_serial.read(1)
         if resp == b'o':
             print("New freq OK")
             self.tx_freq = new_freq
 
-    def change_mode(self, new_mode):
-        #global self.mode
-        self.or_serial.write(b's')
-        resp = self.or_serial.read(1)
-        if resp == b's':
-            self.mode = new_mode
-            print("Switched to: {0}".format(new_mode))
-            self.current_msg = ''
+    # def set_mode(self, new_mode):  # This was the old protocol from wsjt_transceiver.ino
+    #     #global self.mode
+    #     self.or_serial.write(b'e')
+    #     time.sleep(0.05)
+    #     resp = self.or_serial.read(1)
+    #     print("Response: {0}".format(resp))
+    #     if resp == b's':
+    #         self.mode = new_mode
+    #         print("Switched to: {0}".format(new_mode))
+
+    def set_mode(self, new_mode):  # New more robust protocol.
+        #global mode
+        if new_mode == 'FT8':
+            self.or_serial.write(b'e')
+            time.sleep(.05)
+            resp = self.or_serial.read(1) 
+            print("resp = ", resp)       
+            if resp == b'e':
+                self.mode = new_mode
+                print("Switched to: {0}".format(new_mode))  
+                return True
+        elif new_mode == 'FT4':
+            self.or_serial.write(b'f')
+            time.sleep(0.05)
+            resp = self.or_serial.read(1) 
+            print("resp = ", resp)       
+            if resp == b'f':
+                self.mode = new_mode
+                print("Switched to: {0}".format(new_mode))
+                return True
+        else:
+            return False
+
 
     def new_msg(self, msg):
         #global self.current_msg
@@ -297,15 +323,14 @@ class Hardware(BaseHardware):
         else:
             time.sleep(0.005)  #  Do we need this?
 
-
-
-    def transmit():
+    def transmit(self):
         if False:  # not current_msg:
             print("No previous message!")
             time.sleep(1)
         else:
             print("TX!")
             self.or_serial.write(b't')
+            # self.tx_now = False
 
     def check_time_window(self, utc_time):
         time_window = 15 if 'FT8' in self.mode else 7
@@ -324,6 +349,7 @@ class Hardware(BaseHardware):
         if self.tx_ready_wsjtx == False:
             if self.tx_ready_wsjtx_sent == False:
                 self.or_serial.write(b'r')
+                time.sleep(0.05)
                 self.tx_ready_wsjtx_sent = True
             x = self.or_serial.read()
             if x == b'r':
@@ -356,7 +382,7 @@ class Hardware(BaseHardware):
                     new_mode = StatusPacket.TxMode.strip()
 
                     if new_freq != self.tx_freq:
-                        time.sleep(0.03)
+                        # time.sleep(0.03)
                         print('Changing frequency from {0} to {1}'.format(self.tx_freq, new_freq))
                         try:
                             self.change_freq(new_freq)
@@ -364,8 +390,10 @@ class Hardware(BaseHardware):
                             print(f"Exception occurred: {e}")
                         print ('It is now ', self.tx_freq)
 
-                    if new_mode != self.mode:
-                        self.change_mode(new_mode)
+                    if new_mode != self.mode:  
+                        print("Mode before: {0}".format(mode))
+                        set_mode(new_mode)
+                        print("New mode after: {0}".format(mode))
 
                     # Check if TX is enabled
                     if StatusPacket.Transmitting == 1:
@@ -382,10 +410,13 @@ class Hardware(BaseHardware):
                         message = message.replace('>', '')
                         print('Message is: ', message)
                         self.new_msg(message.strip())
+                        # print("tx_now is: ", self.tx_now)
                         if self.tx_now:
                             self.transmit()
                         print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
-                        return BaseHardware.HeartBeat(self)
+                    else:
+                        print('Not Transmitting')
+                    return BaseHardware.HeartBeat(self)
         
             except Exception as e:
                 # print("Error in HeartBeat")

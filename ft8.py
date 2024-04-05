@@ -113,6 +113,7 @@ decimate_order = 8
 #     at symbol #s 0, 36, 72 of final signal
 #   thus: 79 FSK-8 symbols
 # total transmission time is 12.64 seconds
+# Agrees with https://wsjt.sourceforge.io/FT4_FT8_QEX.pdf
 
 costas_symbols = [ 3, 1, 4, 0, 6, 5, 2 ] # new FT8
 
