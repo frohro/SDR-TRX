@@ -121,7 +121,7 @@ class Hardware(BaseHardware):
         self.sock.setblocking(False)
 
         time.sleep(2)
-        self.get_parameter("TX_FREQ, 14074000")
+        # self.get_parameter("TX_FREQ, 14074000")
         # Poll for version. Should probably confirm the response on this.
         version = str(self.get_parameter("VER"))  # The way the firmware is now, this sets it up to use the UART.
         print(version)
