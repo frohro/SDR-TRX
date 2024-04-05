@@ -165,18 +165,6 @@ static void set_rx_freq(uint_fast32_t freq)
   si5351.pll_reset(SI5351_PLLA);
 }
 
-// void tx_enable()
-// { // This can be used for CW keying.
-//   // TX is enabled by calling tx().
-
-// }
-
-// void tx_disable()
-// {
-//   si5351.output_enable(SI5351_CLK2, 0);
-//   tx_state = 0;
-// }
-
 void tx()
 {
   if (useUDP)
@@ -577,6 +565,7 @@ void processCommandUART()
           tx_buffer[msg_index] = recibido;
           msg_index++;
         }
+        delay(1); // Wait for the next character (1ms). This was to get rid of the timeout in FT4.
         timeout += 1;
       }
       if (timeout >= SERIAL_TIMEOUT)
