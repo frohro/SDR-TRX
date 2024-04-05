@@ -615,7 +615,6 @@ void processCommandUART()
     {
       cur_mode = MODE_FT8;
       setup_mode(cur_mode);
-      message_available = false;
       Serial.print("e");
     }
 
@@ -624,7 +623,6 @@ void processCommandUART()
     {
       cur_mode = MODE_FT4;
       setup_mode(cur_mode);
-      message_available = false;
       Serial.print("f");
     }
   
@@ -633,7 +631,6 @@ void processCommandUART()
     {
       cur_mode = MODE_WSPR;
       setup_mode(cur_mode);
-      message_available = false;
     }
 
     // Transmit
