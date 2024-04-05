@@ -393,7 +393,7 @@ class Hardware(BaseHardware):
 
                     if new_mode != self.mode:  
                         print("Mode before: {0}".format(mode))
-                        set_mode(new_mode)
+                        self.set_mode(new_mode)
                         print("New mode after: {0}".format(mode))
 
                     # Check if TX is enabled
