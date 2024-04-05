@@ -57,7 +57,7 @@ vfo_Center_Offset = 10000
 class Hardware(BaseHardware):
     # These are "static variable substitutes" since python doesn't have them.
     # They are shared by all instances of the class and don't get redefinede each time a method is called.
-\
+
     tx_ready_wsjtx = False
     tx_ready_wsjtx_sent = False
     tx_now = False
@@ -121,6 +121,7 @@ class Hardware(BaseHardware):
         self.sock.setblocking(False)
 
         time.sleep(2)
+        self.get_parameter("TX_FREQ, 14074000")
         # Poll for version. Should probably confirm the response on this.
         version = str(self.get_parameter("VER"))  # The way the firmware is now, this sets it up to use the UART.
         print(version)
