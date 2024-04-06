@@ -661,7 +661,7 @@ void processCommandUART()
         String freqStr = command.substring(commaIndex + 1);
         uint32_t freq = freqStr.toInt();
         set_rx_freq(freq);
-        // set_tx_freq(freq);
+        set_tx_freq(freq);
         Serial.printf("FREQ,%d\r\n", freq);
       }
       else
