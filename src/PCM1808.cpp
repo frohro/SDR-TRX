@@ -153,8 +153,8 @@ static void set_rx_freq(uint_fast32_t freq)
     mult = 126;
   }
   pll_freq = (uint64_t)mult * freq;
-  Serial.printf("Setting RX frequency to %d Hz\n", freq);
-  Serial.printf("PLL frequency is %llu Hz\n", pll_freq);
+  // Serial.printf("Setting RX frequency to %d Hz\n", freq);
+  // Serial.printf("PLL frequency is %llu Hz\n", pll_freq);
   si5351.set_freq_manual(freq * 100ULL * CAL_FACTOR, pll_freq, SI5351_CLK0);
   si5351.set_freq_manual(freq * 100ULL * CAL_FACTOR, pll_freq, SI5351_CLK1);
   // Now we can set CLK1 to have a 90 deg phase shift by entering
@@ -661,7 +661,7 @@ void processCommandUART()
         String freqStr = command.substring(commaIndex + 1);
         uint32_t freq = freqStr.toInt();
         set_rx_freq(freq);
-        set_tx_freq(freq);
+        // set_tx_freq(freq);
         Serial.printf("FREQ,%d\r\n", freq);
       }
       else
@@ -669,16 +669,6 @@ void processCommandUART()
         Serial.printf("FREQ,%d\r\n", rx_freq);
       }
     }
-    // else if (command.startsWith("TX_DISABLE"))
-    // {
-    //   tx_disable();
-    //   Serial.printf("TX_DISABLE\r\n");
-    // }
-    // else if (command.startsWith("TX_ENABLE"))
-    // {
-    //   tx_enable();
-    //   Serial.printf("TX_ENABLE\r\n");
-    // }
     else if (command.startsWith("TX_FREQ"))
     {
       int commaIndex = command.indexOf(',');
