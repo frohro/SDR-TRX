@@ -292,7 +292,7 @@ void setup_mode(enum mode sel_mode)
     break;
   }
   set_tx_freq(tx_freq);
-  delay(100); // Wait for the PLL to lock (probably not needed)
+  delay(1000); // Wait for the PLL to lock (probably not needed)
   set_rx_freq(tx_freq);
 }
 
