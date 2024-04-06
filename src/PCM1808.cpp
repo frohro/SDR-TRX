@@ -53,6 +53,7 @@ const int FREQ_LIMIT_LOWER = 3500000;
 const int FREQ_LIMIT_UPPER = 30000000;
 const int RX_SWITCH = 10;          // GPIO pin for RX/TX switch (High is RX)
 const int CAL_FACTOR = 1.00007587; // Calibration factor for the Si5351
+uint_fast32_t if_freq_offset = 10000; // Baseband offset in Hz
 uint_fast32_t rx_freq = 14074000;  // 20 meter FT8 frequency
 uint_fast32_t tx_freq = 14074000;  // 20 meter FT8 frequency
 int rx_relay_state = 0;            // 0 is RX, 1 is TX
@@ -661,7 +662,7 @@ void processCommandUART()
         String freqStr = command.substring(commaIndex + 1);
         uint32_t freq = freqStr.toInt();
         set_rx_freq(freq);
-        // set_tx_freq(freq);
+        set_tx_freq(freq + if_freq_offset);
         Serial.printf("FREQ,%d\r\n", freq);
       }
       else
