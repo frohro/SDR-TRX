@@ -155,8 +155,8 @@ static void set_rx_freq(uint_fast32_t freq)
   pll_freq = (uint64_t)mult * freq;
   // Serial.printf("Setting RX frequency to %d Hz\n", freq);
   // Serial.printf("PLL frequency is %llu Hz\n", pll_freq);
-  si5351.set_freq_manual(freq * 100ULL * CAL_FACTOR, pll_freq, SI5351_CLK0);
-  si5351.set_freq_manual(freq * 100ULL * CAL_FACTOR, pll_freq, SI5351_CLK1);
+  si5351.set_freq_manual(freq * 100ULL * CAL_FACTOR, pll_freq * 100ULL, SI5351_CLK0);
+  si5351.set_freq_manual(freq * 100ULL * CAL_FACTOR, pll_freq * 100ULL, SI5351_CLK1);
   // Now we can set CLK1 to have a 90 deg phase shift by entering
   // mult in the CLK1 phase register, since the ratio of the PLL to
   // the clock frequency is mult.
