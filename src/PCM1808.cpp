@@ -398,22 +398,6 @@ void processCommandUDP()
         udpCommand.endPacket();
       }
     }
-    // else if (command.startsWith("TX_DISABLE"))
-    // {
-    //   Serial.println("TX_DISABLE received!");
-    //   tx_disable();
-    //   udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-    //   udpCommand.printf("TX_DISABLE\r\n");
-    //   udpCommand.endPacket();
-    // }
-    // else if (command.startsWith("TX_ENABLE"))
-    // {
-    //   Serial.println("TX_ENABLE received!");
-    //   tx_enable();
-    //   udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-    //   udpCommand.printf("TX_ENABLE\r\n");
-    //   udpCommand.endPacket();
-    // }
     else if (command.startsWith("TX_FREQ"))
     {
       Serial.println("TX_FREQ received!");
