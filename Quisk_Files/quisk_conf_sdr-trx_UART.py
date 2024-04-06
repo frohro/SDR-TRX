@@ -339,7 +339,7 @@ class Hardware(BaseHardware):
         time_window = 15 if 'FT8' in self.mode else 7
         print("Time window: ", time_window)
         rm = utc_time.second % time_window
-        if rm > 1 and rm < time_window - 1:
+        if rm > 1 and rm < time_window - 1:  # Within one second of exact time for FT8.
             return False
         else:
             return True
@@ -405,9 +405,9 @@ class Hardware(BaseHardware):
                     if StatusPacket.Transmitting == 1:
                         print('Transmitting')
                         # Check time, avoid transmitting out of the time slot
-                        utc_time = datetime.datetime.utcnow()  # Depreciated
-                       # current_time = datetime.datetime.now()
-                       # utc_time = current_time.astimezone(datetime.timezone.utc)
+                        # utc_time = datetime.datetime.utcnow()  # Depreciated
+                        current_time = datetime.datetime.now()
+                        utc_time = current_time.astimezone(datetime.timezone.utc)
                         self.tx_now = self.check_time_window(utc_time)
                         if self.tx_now:
                             self.or_serial.write(b'p')
