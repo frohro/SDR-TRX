@@ -557,7 +557,7 @@ void processCommandUART()
     {
       msg_index = 0;
       timeout = 0;
-      while (msg_index < symbol_count && timeout < SERIAL_TIMEOUT)
+      while (msg_index < symbol_count) // && timeout < SERIAL_TIMEOUT)
       {
         if (Serial.available() > 0)
         {
@@ -605,6 +605,7 @@ void processCommandUART()
       cur_mode = MODE_FT8;
       setup_mode(cur_mode);
       Serial.print("e");
+      message_available = false;
     }
 
     // Switch mode = FT4
@@ -613,6 +614,7 @@ void processCommandUART()
       cur_mode = MODE_FT4;
       setup_mode(cur_mode);
       Serial.print("f");
+      message_available = false;
     }
   
     // WSPR Mode
