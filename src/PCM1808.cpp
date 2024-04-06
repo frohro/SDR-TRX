@@ -576,10 +576,10 @@ void processCommandUART()
       //   Serial.println(msg_index, DEC);
       // }
       // else
-      {
-        message_available = true;
-        Serial.print("m");
-      }
+      //{
+      message_available = true;
+      Serial.print("m");
+     // }
     }
 
     // Change offset
@@ -622,6 +622,7 @@ void processCommandUART()
     {
       cur_mode = MODE_WSPR;
       setup_mode(cur_mode);
+      message_available = false;
     }
 
     // Transmit
@@ -634,7 +635,7 @@ void processCommandUART()
     // Pre transmit
     else if (recibido == 'p')
     {
-      // tx_enable();
+      // tx_enable();  Don't need this.
     }
     else if (recibido == 'r')
     {
