@@ -337,6 +337,7 @@ class Hardware(BaseHardware):
 
     def check_time_window(self, utc_time):
         time_window = 15 if 'FT8' in self.mode else 7
+        print("Time window: ", time_window)
         rm = utc_time.second % time_window
         if rm > 1 and rm < time_window - 1:
             return False
