@@ -290,7 +290,7 @@ void setup_mode(enum mode sel_mode)
     break;
   }
   set_tx_freq(tx_freq);
-  delay(1000); // Wait for the PLL to lock (probably not needed
+  delay(100); // Wait for the PLL to lock (probably not needed)
   set_rx_freq(tx_freq);
 }
 
@@ -675,7 +675,7 @@ void processCommandUART()
         String freqStr = command.substring(commaIndex + 1);
         uint32_t freq = freqStr.toInt();
         set_rx_freq(freq);
-        // set_tx_freq(freq);
+        set_tx_freq(freq);
         Serial.printf("FREQ,%d\r\n", freq);
       }
       else
