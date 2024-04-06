@@ -599,7 +599,7 @@ void processCommandUART()
       Serial.print("o");
     }
 
-    // Switch mode = FT8
+    // Switch mode = FT8  Note: We start in FT8 mode and don't sync until a change mode is sent.
     else if (recibido == 'e')
     {
       cur_mode = MODE_FT8;
