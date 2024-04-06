@@ -291,7 +291,8 @@ class Hardware(BaseHardware):
             print("resp = ", resp)       
             if resp == b'e':
                 self.mode = new_mode
-                print("Switched to: {0}".format(new_mode))  
+                print("Switched to: {0}".format(new_mode)) 
+                self.current_msg = '' 
                 return True
         elif new_mode == 'FT4':
             self.or_serial.write(b'f')
@@ -300,6 +301,7 @@ class Hardware(BaseHardware):
             print("resp = ", resp)       
             if resp == b'f':
                 self.mode = new_mode
+                self.current_msg = ''
                 print("Switched to: {0}".format(new_mode))
                 return True
         else:
@@ -413,6 +415,7 @@ class Hardware(BaseHardware):
                         message = message.replace('>', '')
                         print('Message is: ', message)
                         self.new_msg(message.strip())
+                        print("Encoded message is: ", self.current_msg)
                         # print("tx_now is: ", self.tx_now)
                         if self.tx_now:
                             self.transmit()
