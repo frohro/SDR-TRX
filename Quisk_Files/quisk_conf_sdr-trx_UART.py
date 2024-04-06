@@ -337,7 +337,7 @@ class Hardware(BaseHardware):
 
     def check_time_window(self, utc_time):
         time_window = 15 if 'FT8' in self.mode else 7
-        print("Time window: ", time_window)
+        print("Time window: ", time_window)  # Is correct for FT8 and FT4.
         rm = utc_time.second % time_window
         if rm > 1 and rm < time_window - 1:  # Within one second of exact time for FT8.
             return False
@@ -403,9 +403,7 @@ class Hardware(BaseHardware):
 
                     # Check if TX is enabled
                     if StatusPacket.Transmitting == 1:
-                        print('Transmitting')
                         # Check time, avoid transmitting out of the time slot
-                        # utc_time = datetime.datetime.utcnow()  # Depreciated
                         current_time = datetime.datetime.now()
                         utc_time = current_time.astimezone(datetime.timezone.utc)
                         self.tx_now = self.check_time_window(utc_time)
@@ -419,6 +417,7 @@ class Hardware(BaseHardware):
                         print("Encoded message is: ", self.current_msg)
                         # print("tx_now is: ", self.tx_now)
                         if self.tx_now:
+                            print('Transmitting')
                             self.transmit()
                         print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
                     else:
