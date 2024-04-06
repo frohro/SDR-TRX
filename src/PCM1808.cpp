@@ -195,7 +195,7 @@ void set_tx_freq(uint32_t freq)
 {
   // Let driver choose PLL settings. May glitch when changing frequencies.
   tx_freq = freq;
-  si5351.set_freq(freq * 100ULL * CAL_FACTOR, SI5351_CLK2);
+  si5351.set_freq(tx_freq * 100ULL * CAL_FACTOR, SI5351_CLK2);
 }
 
 // Loop through the string, transmitting one character at a time.
