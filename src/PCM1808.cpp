@@ -152,9 +152,8 @@ static void set_rx_freq(uint_fast32_t freq)
   {
     mult = 126;
   }
-  freq = (uint64_t)(freq * 100ULL * CAL_FACTOR);
   pll_freq = (uint64_t)mult * freq;
-  si5351.set_freq_manual(freq * CAL_FACTOR, pll_freq, SI5351_CLK0);
+  si5351.set_freq_manual(freq * 100ULL * CAL_FACTOR, pll_freq, SI5351_CLK0);
   si5351.set_freq_manual(freq * CAL_FACTOR, pll_freq, SI5351_CLK1);
   // Now we can set CLK1 to have a 90 deg phase shift by entering
   // mult in the CLK1 phase register, since the ratio of the PLL to
@@ -195,9 +194,8 @@ void rx()
 void set_tx_freq(uint32_t freq)
 {
   // Let driver choose PLL settings. May glitch when changing frequencies.
-  freq = (uint64_t)(freq * 100ULL * CAL_FACTOR);
-  si5351.set_freq(freq, SI5351_CLK2);
   tx_freq = freq;
+  si5351.set_freq(freq * 100ULL * CAL_FACTOR, SI5351_CLK2);
 }
 
 // Loop through the string, transmitting one character at a time.
@@ -218,7 +216,7 @@ void transmit()
   }
   for (i = 0; i < symbol_count; i++)
   {
-    si5351.set_freq((digital_tx_freq) + (tx_buffer[i] * tone_spacing), SI5351_CLK2);
+    si5351.set_freq((digital_tx_freq)*100ULL + (tx_buffer[i] * tone_spacing), SI5351_CLK2);
     delay(tone_delay);
   }
   // Back to receive
