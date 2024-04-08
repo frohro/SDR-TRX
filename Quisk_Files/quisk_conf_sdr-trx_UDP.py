@@ -18,8 +18,8 @@ from quisk_hardware_model import Hardware as BaseHardware
 
 # SDR-TRX Quisk Configuration File
 # This file is to integrate the function of control of the SDR-TRX wint Quisk and with WSJT-X.
-# This is for control of the SDR-TRX with using the UART interface.  WSJT-X interfaces with this
-# locally using UDP.  Capital letters begin commands to the SDR-TRX from Quisk, 
+# This is for control of the SDR-TRX with using the UDP port port 12346.  WSJT-X interfaces with this
+# locally using UDP on port 2237.  Capital letters begin commands to the SDR-TRX from Quisk, 
 # and lowercase letters are for commands coming from WSJT-X (through this Quisk interface).
 # This is for usinng the SDR-TRX with a 3.5 mm audio card to the soundcard of the computer,
 # and the WSJT-X software using the USB UART.
