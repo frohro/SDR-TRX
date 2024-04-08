@@ -175,19 +175,19 @@ class Hardware(BaseHardware):
         self.command_sock.setblocking(True)
         try:
             data1 = self.command_sock.recv(1024)
-            print('Received: ', data1)
+            print('Received on line 178: ', data1)
         except Exception as e:
             print("Exception occurred: {0}".format(e))
             return -1
         self.command_sock.setblocking(False)
         if not data1.startswith(b'OK'):
-            print('Received: ', data1)
+            print('Received on line 185: ', data1)
         # Maybe we didn't catch an OK line?
         else:
             while True:
                 try:
                     data1 = self.command_sock.recv(1024)
-                    print('Received: ', data1)
+                    print('Received on line 190: ', data1)
                     break
                 except BlockingIOError:
                     pass
