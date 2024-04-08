@@ -840,7 +840,7 @@ void setup()
   cur_mode = MODE_FT8;
   setup_mode(cur_mode);
   rx();           // Set RX mode
-  useUDP = false; // Only for testing out FT8
+  useUDP = true; // False only for testing out FT8
 }
 
 void loop()
