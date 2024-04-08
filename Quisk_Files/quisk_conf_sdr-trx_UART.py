@@ -141,6 +141,7 @@ class Hardware(BaseHardware):
         # This sends the FREQ command  dto set the centre frequency of the radio,
         # and will also move the 'tune' frequency (the section within the RX passband
         # which is to be demodulated) if it falls outside the passband (+/- sample_rate/2).
+        print("Setting VFO to %d, with tune to %d." % (vfo, tune))
         print("Setting VFO to %d." % vfo)
         if vfo < radio_lower:
             vfo = radio_lower
@@ -152,6 +153,7 @@ class Hardware(BaseHardware):
 
         # success = self.set_parameter("FREQ",str(vfo))
         self.set_parameter("FREQ", str(vfo))
+        self.set_parameter("TX_FREQ", str(tune))
 
         print("sample_rate =", sample_rate)
         # If the tune frequency is outside the RX bandwidth, set it to somewhere within that bandwidth.

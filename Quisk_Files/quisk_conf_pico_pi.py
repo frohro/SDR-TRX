@@ -84,7 +84,7 @@ class Hardware(BaseHardware):
     # This sends the FREQ command to set the centre frequency of the OpenRadio,
     # and will also move the 'tune' frequency (the section within the RX passband
     # which is to be demodulated) if it falls outside the passband (+/- sample_rate/2).
-    print("Setting VFO to %d." % vfo)
+    time.sleep(0.1)
     if(vfo<openradio_lower):
       vfo = openradio_lower
       print("Outside range! Setting to %d" % openradio_lower)
@@ -95,6 +95,7 @@ class Hardware(BaseHardware):
 
     # success = self.set_parameter("FREQ",str(vfo))
     self.set_parameter("FREQ",str(vfo))
+    self.set_parameter("TX_FREQ",str(tune))
 
     print("sample_rate =")
     print(sample_rate)
@@ -155,3 +156,215 @@ class Hardware(BaseHardware):
     data2 = self.or_serial.readline()
     if data2.startswith(b'OK'):
       return data1
+
+ #  The code below is to interface WSJT-X with SDR-TRX.
+
+    def encode_ft8(self, msg):
+        try:
+            a77 = self.ft8_encoder.pack(msg, 1)
+            symbols = self.ft8_encoder.make_symbols(a77)
+        except Exception as e:
+            print("FT8 encoder error, check message!")
+            print(f"Exception type: {type(e).__name__}")
+            print(f"Exception message: {str(e)}")
+            symbols = None
+            time.sleep(3)
+        return symbols
+
+    def encode_ft4(self, msg):
+        try:
+            a77 = self.ft4_encoder.pack(msg, 1)
+            symbols = self.ft4_encoder.make_symbols(a77)
+        except:
+            print("FT4 encoder error, check message!")
+            symbols = None
+            time.sleep(3)
+        return symbols
+
+    def load_symbols(self, symbols):
+        print("Load symbols into transmitter..")
+        self.or_serial.write(b'm')
+        count = 0
+        for symbol in symbols:
+            self.or_serial.write(struct.pack('>B', symbol))
+            count += 1
+            # Wait to avoid Arduino serial buffer overflow.  This may not be needed with the Pico.
+            if count % 50 == 0:
+                time.sleep(0.05)
+        self.or_serial.write(b'\0')
+        resp = self.or_serial.read(512)
+        if resp == b'm':
+            print("Load OK")
+        else:
+            print(resp)
+
+    def change_freq(self, new_freq):
+        #global self.tx_freq
+        print("Change TX frequency to:", new_freq)
+        self.or_serial.write(b'o')
+        for kk in range(2):
+            self.or_serial.write(struct.pack('>B', (new_freq >> 8 * kk) & 0xFF))
+        time.sleep(0.05)    
+        resp = self.or_serial.read(1)
+        if resp == b'o':
+            print("New freq OK")
+            self.tx_freq = new_freq
+
+    # def set_mode(self, new_mode):  # This was the old protocol from wsjt_transceiver.ino
+    #     #global self.mode
+    #     self.or_serial.write(b'e')
+    #     time.sleep(0.05)
+    #     resp = self.or_serial.read(1)
+    #     print("Response: {0}".format(resp))
+    #     if resp == b's':
+    #         self.mode = new_mode
+    #         print("Switched to: {0}".format(new_mode))
+
+    def set_mode(self, new_mode):  # New more robust protocol.
+        #global mode
+        if new_mode == 'FT8':
+            self.or_serial.write(b'e')
+            time.sleep(.05)
+            resp = self.or_serial.read(1) 
+            print("resp = ", resp)       
+            if resp == b'e':
+                self.mode = new_mode
+                print("Switched to: {0}".format(new_mode)) 
+                self.current_msg = '' 
+                return True
+        elif new_mode == 'FT4':
+            self.or_serial.write(b'f')
+            time.sleep(0.05)
+            resp = self.or_serial.read(1) 
+            print("resp = ", resp)       
+            if resp == b'f':
+                self.mode = new_mode
+                self.current_msg = ''
+                print("Switched to: {0}".format(new_mode))
+                return True
+        else:
+            return False
+
+
+    def new_msg(self, msg):
+        #global self.current_msg
+        #global self.mode
+        if msg != self.current_msg:
+            print("Message: {0}".format(msg))
+            if 'FT8' in self.mode:
+                symbols = self.encode_ft8(msg)
+            else:
+                symbols = self.encode_ft4(msg)
+            if symbols.any():
+                # symbols = [kk for kk in range(79)]
+                self.load_symbols(symbols)
+                self.current_msg = msg
+            else:
+                return
+        else:
+            time.sleep(0.005)  #  Do we need this?
+
+    def transmit(self):
+        if False:  # not current_msg:
+            print("No previous message!")
+            time.sleep(1)
+        else:
+            print("TX!")
+            self.or_serial.write(b't')
+            # self.tx_now = False
+
+    def check_time_window(self, utc_time):
+        time_window = 15 if 'FT8' in self.mode else 7
+        print("Time window: ", time_window)  # Is correct for FT8 and FT4.
+        rm = utc_time.second % time_window
+        if rm > 1 and rm < time_window - 1:  # Within one second of exact time for FT8.
+            return False
+        else:
+            return True
+
+    # See if HeartBeat will work for this:
+    def HeartBeat(self):  # Should be called at 10 Hz from the main.
+        # Check transmitter is initialized
+        #raise Exception("In HeartBeat")
+    
+        # print("\n\nWait for transmitter ready...")
+        if self.tx_ready_wsjtx == False:
+            if self.tx_ready_wsjtx_sent == False:
+                self.or_serial.write(b'r')
+                time.sleep(0.05)
+                self.tx_ready_wsjtx_sent = True
+            x = self.or_serial.read()
+            if x == b'r':
+                print("Transmitter ready!")
+                self.tx_ready_wsjtx = True
+        if self.tx_ready_wsjtx == True:
+            try:
+                fileContent, addr = self.sock.recvfrom(1024)
+                # print(addr)
+            except Exception as e:
+                if e == BlockingIOError:  # This is our way of pollig the socket.
+                    # Maybe use select to stop the errors printing after we quit.
+                    return BaseHardware.HeartBeat(self)
+                else:
+                    # print("Error in HeartBeat")
+                    # print(f"Exception type: {type(e).__name__}")
+                    # print(f"Exception message: {str(e)}")
+                    pass
+            try:
+                NewPacket = WSJTXClass.WSJTX_Packet(fileContent, 0)
+                NewPacket.Decode()
+
+                if NewPacket.PacketType == 1:
+                    # print('New Packet is type 1')
+                    StatusPacket = WSJTXClass.WSJTX_Status(fileContent, NewPacket.index)
+                    StatusPacket.Decode()
+    
+                    # Check TX frequency and update transceiver
+                    new_freq = StatusPacket.TxDF
+                    new_mode = StatusPacket.TxMode.strip()
+                    
+
+                    if new_freq != self.tx_freq:
+                        # time.sleep(0.03)
+                        print('Changing frequency from {0} to {1}'.format(self.tx_freq, new_freq))
+                        try:
+                            self.change_freq(new_freq)
+                        except Exception as e:
+                            print(f"Exception occurred: {e}")
+                        print ('It is now ', self.tx_freq)
+
+                    print('new_mode', new_mode, ' self.mode is: ', self.mode)
+                    if new_mode != self.mode:  
+                        print("Mode before: {0}".format(self.mode))
+                        self.set_mode(new_mode)
+                        print("New mode after: {0}".format(self.mode))
+
+                    # Check if TX is enabled
+                    if StatusPacket.Transmitting == 1:
+                        # Check time, avoid transmitting out of the time slot
+                        current_time = datetime.datetime.now()
+                        utc_time = current_time.astimezone(datetime.timezone.utc)
+                        self.tx_now = self.check_time_window(utc_time)
+                        if self.tx_now:
+                            self.or_serial.write(b'p')
+                        message = StatusPacket.TxMessage
+                        message = message.replace('<', '')
+                        message = message.replace('>', '')
+                        print('Message is: ', message)
+                        self.new_msg(message.strip())
+                        print("Encoded message is: ", self.current_msg)
+                        # print("tx_now is: ", self.tx_now)
+                        if self.tx_now:
+                            print('Transmitting')
+                            self.transmit()
+                        print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
+                    else:
+                        print('Not Transmitting')
+                    return BaseHardware.HeartBeat(self)
+        
+            except Exception as e:
+                # print("Error in HeartBeat")
+                # print(f"Exception type: {type(e).__name__}")
+                # print(f"Exception message: {str(e)}")
+                # traceback.print_exc()
+                return BaseHardware.HeartBeat(self)

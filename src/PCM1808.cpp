@@ -53,7 +53,6 @@ const int FREQ_LIMIT_LOWER = 3500000;
 const int FREQ_LIMIT_UPPER = 30000000;
 const int RX_SWITCH = 10;          // GPIO pin for RX/TX switch (High is RX)
 const int CAL_FACTOR = 1.00007587; // Calibration factor for the Si5351
-uint_fast32_t if_freq_offset = 15000; // Baseband offset in Hz  This needs to come from Quisk.
 uint_fast32_t rx_freq = 14074000;  // 20 meter FT8 frequency
 uint_fast32_t tx_freq = 14074000;  // 20 meter FT8 frequency
 int rx_relay_state = 0;            // 0 is RX, 1 is TX
@@ -175,7 +174,7 @@ void tx()
   }
   digitalWrite(RX_SWITCH, LOW);    // Set TX mode on T/R switch
   digitalWrite(LED_BUILTIN, HIGH); // Turn on the LED
-  delay(1000);
+  delay(100);
   rx_relay_state = 0;
   si5351.output_enable(SI5351_CLK2, 1);
   tx_state = 1;
@@ -225,7 +224,7 @@ void transmit()
     delay(tone_delay);
   }
   // Back to receive
-  delay(200);
+  delay(100);
   rx();
 }
 
@@ -260,7 +259,7 @@ void setup_mode(enum mode sel_mode)
     tone_delay = WSPR_DELAY;
     break;
   case MODE_FT8:
-    tx_freq = FT8_DEFAULT_FREQ;
+    tx_freq = FT8_DEFAULT_FREQ;  // At this point, we are letting Quisk & WJST-X set the frequency. Maybe delete these.
     symbol_count = FT8_SYMBOL_COUNT; // From the library defines
     tone_spacing = FT8_TONE_SPACING;
     tone_delay = FT8_DELAY;
@@ -292,9 +291,6 @@ void setup_mode(enum mode sel_mode)
     tone_delay = FSQ_6_DELAY;
     break;
   }
-  set_tx_freq(tx_freq);
-  delay(1000); // Wait for the PLL to lock (probably not needed)
-  set_rx_freq(tx_freq);
 }
 
 uint8_t si5351_init()
@@ -363,7 +359,7 @@ void processCommandUDP()
       Serial.printf("VER,%s\r\n", VERSION_NUMBER);
       udpCommand.printf("VER,%s\r\n", VERSION_NUMBER);
       udpCommand.endPacket();
-      // useUDP = true; // Set useUDP to true
+      useUDP = true; // Set useUDP to true
       // Determine whether to use UDP or UART.
     }
     else if (command.startsWith("START_I2S_UDP"))
@@ -373,7 +369,7 @@ void processCommandUDP()
       udpData.begin(DATA_UDPPORT); // Initialize UDP for data port
       i2s.begin();
     }
-    else if (command.startsWith("STOP"))
+    else if (command.startsWith("STOP"))  // Stop UDP I2S data stream.
     {
       Serial.println("STOP received!");
       data_sending = false;
@@ -389,7 +385,6 @@ void processCommandUDP()
         String freqStr = command.substring(commaIndex + 1);
         uint32_t freq = freqStr.toInt();
         set_rx_freq(freq);
-        set_tx_freq(freq);
         udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
         udpCommand.printf("FREQ,%d\r\n", freq);
         udpCommand.endPacket();
@@ -418,26 +413,6 @@ void processCommandUDP()
       {
         udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
         udpCommand.printf("TX_FREQ,%d\r\n", tx_freq);
-        udpCommand.endPacket();
-      }
-    }
-    else if (command.startsWith("RX_FREQ"))
-    {
-      Serial.println("RX_FREQ received!");
-      int commaIndex = command.indexOf(',');
-      if (commaIndex != -1)
-      {
-        String freqStr = command.substring(commaIndex + 1);
-        uint32_t freq = freqStr.toInt();
-        set_rx_freq(freq);
-        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-        udpCommand.printf("RX_FREQ,%d\r\n", freq);
-        udpCommand.endPacket();
-      }
-      else
-      {
-        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-        udpCommand.printf("RX_FREQ,%d\r\n", rx_freq);
         udpCommand.endPacket();
       }
     }
@@ -522,38 +497,38 @@ void processCommandUART()
 {
   bool no_error;
   String command;
-  char recibido;
+  char received;
   unsigned char rec_byte[2];
   unsigned char msg_index;
   // Check if there's any serial data available
   if (Serial.available() > 0)
-    recibido = Serial.read();
-    // Serial.print(recibido);
-  if ((recibido == 'm') || // This whole if statement is a way of combining my code with 
-    (recibido == 'o') || // wsjt-transceiver.ino.  I'm not sure if it is the best way.
-    (recibido == 'e') || 
-    (recibido == 'w') || 
-    (recibido == 't') || 
-    (recibido == 'p') || 
-    (recibido == 'r') || 
-    (recibido == 'f') ||
-    (recibido < 32)) // Check for a message which is a control character in ASCII.
+    received = Serial.read();
+    // Serial.print(received);
+  if ((received == 'm') || // This whole if statement is a way of combining my code with 
+    (received == 'o') || // wsjt-transceiver.ino.  I'm not sure if it is the best way.
+    (received == 'e') || 
+    (received == 'w') || 
+    (received == 't') || 
+    (received == 'p') || 
+    (received == 'r') || 
+    (received == 'f') ||
+    (received < 32)) // Check for a message which is a control character in ASCII.
   {
     // New message
-    if (recibido == 'm')
+    if (received == 'm')
     {
       msg_index = 0;
-      timeout = 0;
+      // timeout = 0;
       while (msg_index < symbol_count) // && timeout < SERIAL_TIMEOUT)
       {
         if (Serial.available() > 0)
         {
-          recibido = Serial.read();
-          tx_buffer[msg_index] = recibido;
+          received = Serial.read();
+          tx_buffer[msg_index] = received;
           msg_index++;
         }
         //delay(1); // Wait for the next character (1ms). This was to get rid of the timeout in FT4.
-        timeout += 1;
+        // timeout += 1;
       }
       // if (timeout >= SERIAL_TIMEOUT)
       // {
@@ -570,7 +545,7 @@ void processCommandUART()
     }
 
     // Change offset
-    else if (recibido == 'o')
+    else if (received == 'o')
     {
       msg_index = 0;
       // Offset encoded in two bytes
@@ -587,7 +562,7 @@ void processCommandUART()
     }
 
     // Switch mode = FT8  Note: We start in FT8 mode and don't sync until a change mode is sent.
-    else if (recibido == 'e')
+    else if (received == 'e')
     {
       cur_mode = MODE_FT8;
       setup_mode(cur_mode);
@@ -596,7 +571,7 @@ void processCommandUART()
     }
 
     // Switch mode = FT4
-    else if (recibido == 'f')
+    else if (received == 'f')
     {
       cur_mode = MODE_FT4;
       setup_mode(cur_mode);
@@ -605,7 +580,7 @@ void processCommandUART()
     }
   
     // WSPR Mode
-    else if (recibido == 'w')
+    else if (received == 'w')
     {
       cur_mode = MODE_WSPR;
       setup_mode(cur_mode);
@@ -613,18 +588,18 @@ void processCommandUART()
     }
 
     // Transmit
-    else if (recibido == 't')
+    else if (received == 't')
     {
       if (message_available)
         transmit();
     }
 
     // Pre transmit
-    else if (recibido == 'p')
+    else if (received == 'p')
     {
       // tx_enable();  Don't need this.
     }
-    else if (recibido == 'r')
+    else if (received == 'r')
     {
       // Send indication for ready!
       Serial.print("r");
@@ -632,13 +607,13 @@ void processCommandUART()
   }
   else
   {
-    command = recibido + Serial.readStringUntil('\n');
+    command = received + Serial.readStringUntil('\n');
     no_error = true;
     // Process the received command
     if (command.startsWith("VER"))
     {
       Serial.printf("VER,%s\r\n", VERSION_NUMBER);
-      // useUDP = false; // Set useUDP to false
+      useUDP = false; // Set useUDP to false
       //  The first thing Quisk does is to check VER.
       //  So if it uses UART, we will use UART.
     }
@@ -662,7 +637,6 @@ void processCommandUART()
         String freqStr = command.substring(commaIndex + 1);
         uint32_t freq = freqStr.toInt();
         set_rx_freq(freq);
-        set_tx_freq(freq + if_freq_offset);
         Serial.printf("FREQ,%d\r\n", freq);
       }
       else
@@ -685,22 +659,6 @@ void processCommandUART()
         Serial.printf("TX_FREQ,%d\r\n", tx_freq);
       }
     }
-    else if (command.startsWith("RX_FREQ"))
-    {
-      int commaIndex = command.indexOf(',');
-      if (commaIndex != -1)
-      {
-        String freqStr = command.substring(commaIndex + 1);
-        uint32_t freq = freqStr.toInt();
-        set_rx_freq(freq);
-        Serial.printf("RX_FREQ,%d\r\n", freq);
-      }
-      else
-      {
-        Serial.printf("RX_FREQ,%d\r\n", rx_freq);
-      }
-    }
-
     else if (command.startsWith("USE_UDP"))
     {
       useUDP = true; // Set useUDP to true
@@ -709,13 +667,11 @@ void processCommandUART()
     else if (command.startsWith("TX"))
     {
       tx();
-      // tx_enable();
       Serial.printf("TX\r\n");
     }
     else if (command.startsWith("RX"))
     {
       rx();
-      // tx_disable();
       Serial.printf("RX\r\n");
     }
     else
@@ -757,10 +713,10 @@ void setup()
   }
   else
   {
-    // Serial.println("Connected to WiFi");
-    // Serial.println("WiFi connected");
-    // Serial.print("Pico IP address: ");
-    // Serial.println(WiFi.localIP());
+    Serial.println("Connected to WiFi");
+    Serial.println("WiFi connected");
+    Serial.print("Pico IP address: ");
+    Serial.println(WiFi.localIP());
     udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
     udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
     useUDP = true;
@@ -771,9 +727,6 @@ void setup()
   i2s.begin();
   cur_mode = MODE_FT8;
   setup_mode(cur_mode);
-  set_tx_freq(FT8_DEFAULT_FREQ);
-  delay(1000);
-  set_rx_freq(FT8_DEFAULT_FREQ);
   rx(); // Set RX mode
   useUDP = false; // Only for testing out FT8
 }
@@ -789,7 +742,7 @@ void loop()
     processCommandUART();
   }
   // if (data_sending)
-  //  if (udpData.remoteIP() != IPAddress(0, 0, 0, 0))
+  //  if (udpData.remoteIP() != IPAddress(0, 0, 0, 0))  Things were not working with this line.
   {
     sendDataUDP();
   }
