@@ -176,8 +176,8 @@ class Hardware(BaseHardware):
         try:
             data1 = self.command_sock.recv(1024)
             print('Received: ', data1)
-        except BlockingIOError:
-            print("exited get_arguement with BlockingIOError")
+        except Exception as e:
+            print("Exception occurred: {0}".format(e))
             return -1
         self.command_sock.setblocking(False)
         if not data1.startswith(b'OK'):

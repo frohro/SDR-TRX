@@ -340,6 +340,7 @@ void processCommandUDP()
     if (len > 0)
     {
       command_packetBuffer[len] = 0; // Null terminate the string.
+      received = command_packetBuffer[0];
     }
     command = String(command_packetBuffer);
     no_error = true;
@@ -354,12 +355,13 @@ void processCommandUDP()
     Serial.println(command);
     // Process the received command
     remoteIp = udpCommand.remoteIP();
-    if (udpCommand.available() > 0)
-      received = udpCommand.read();
-    // Serial.print(received);
+    // if (udpCommand.available() > 0)
+    //   received = udpCommand.read();
+    Serial.print("received is ");
+    Serial.println(received);
     if ((received == 'm') || // This whole if statement is a way of combining my code with
-        (received == 'o') || // wsjt-transceiver.ino.  I'm not sure if it is the best way.
-        (received == 'e') ||
+        (received == 'o') || // wsjt-transceiver.ino.  I'm not sure if it is the best way,
+        (received == 'e') || // but it seperates the wsjt-x commands from the original commands..
         (received == 'w') ||
         (received == 't') ||
         (received == 'p') ||
@@ -460,19 +462,110 @@ void processCommandUDP()
     }
     else
     {
-
-      Serial.println("Unknown command received!");
-      udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-      udpCommand.write("ERROR\r\n");
-      udpCommand.endPacket();
-      no_error = false;
-
-      if (no_error)
+      if (command.startsWith("VER"))
       {
         udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-        udpCommand.write("OK\r\n"); // Do we need an Ok after an error?
+        Serial.println("VER received!");
+        Serial.println("Began Packet.");
+        Serial.printf("VER,%s\r\n", VERSION_NUMBER);
+        udpCommand.printf("VER,%s\r\n", VERSION_NUMBER);
+        udpCommand.endPacket();
+        // useUDP = true; // Set useUDP to true
+        // Determine whether to use UDP or UART.
+      }
+      else if (command.startsWith("START_I2S_UDP"))
+      {
+        Serial.println("START_I2S_UDP received!");
+        data_sending = true;
+        udpData.begin(DATA_UDPPORT); // Initialize UDP for data port
+        i2s.begin();
+      }
+      else if (command.startsWith("STOP"))
+      {
+        Serial.println("STOP received!");
+        data_sending = false;
+        udpData.stop();
+        i2s.end();
+      }
+      else if (command.startsWith("FREQ"))
+      {
+        Serial.println("FREQ received!");
+        int commaIndex = command.indexOf(',');
+        if (commaIndex != -1)
+        {
+          String freqStr = command.substring(commaIndex + 1);
+          uint32_t freq = freqStr.toInt();
+          set_rx_freq(freq);
+          set_tx_freq(freq);
+          udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+          udpCommand.printf("FREQ,%d\r\n", freq);
+          udpCommand.endPacket();
+        }
+        else
+        {
+          udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+          udpCommand.printf("FREQ,%d\r\n", rx_freq);
+          udpCommand.endPacket();
+        }
+      }
+      else if (command.startsWith("TX_FREQ"))
+      {
+        Serial.println("TX_FREQ received!");
+        int commaIndex = command.indexOf(',');
+        if (commaIndex != -1)
+        {
+          String freqStr = command.substring(commaIndex + 1);
+          uint32_t freq = freqStr.toInt();
+          set_tx_freq(freq);
+          udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+          udpCommand.printf("TX_FREQ,%d\r\n", freq);
+          udpCommand.endPacket();
+        }
+        else
+        {
+          udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+          udpCommand.printf("TX_FREQ,%d\r\n", tx_freq);
+          udpCommand.endPacket();
+        }
+      }
+      else if (command.startsWith("USE_UART"))
+      {
+        useUDP = false; // Set useUDP to false
+        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+        udpCommand.printf("USE_UART\r\n");
         udpCommand.endPacket();
       }
+      else if (command.startsWith("TX"))
+      {
+        Serial.println("TX received!");
+        tx();
+        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+        udpCommand.printf("TX\r\n");
+        udpCommand.endPacket();
+      }
+      else if (command.startsWith("RX"))
+      {
+        Serial.println("RX received!");
+        rx();
+        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+        udpCommand.printf("RX\r\n");
+        udpCommand.endPacket();
+      }
+      else
+      {
+
+        Serial.println("Unknown command received!");
+        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+        udpCommand.write("ERROR\r\n");
+        udpCommand.endPacket();
+        no_error = false;
+      }
+    }
+    if (no_error)
+    {
+      udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+      udpCommand.write("OK\r\n"); // Do we need an Ok after an error?
+      udpCommand.endPacket();
     }
   }
 }
