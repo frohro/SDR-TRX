@@ -75,7 +75,7 @@ class Hardware(BaseHardware):
         PICO_UDP_IP = "192.168.1.107"  # Put the Pico IP here.
         COMMAND_UDP_PORT = 12346
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.command_sock.bind((UDP_IP, UDP_PORT))
+        self.command_sock.bind((PICO_UDP_IP, COMMAND_UDP_PORT))
         self.command_sock.setblocking(False)
         time.sleep(2)
         # Poll for version. Should probably confirm the response on this.
@@ -95,10 +95,10 @@ class Hardware(BaseHardware):
         self.tx_freq = 1200
 
         # Connection for WSJT-X
-        WSJTXUDP_IP = "127.0.0.1"
+        WSJTX_UDP_IP = "127.0.0.1"
         WSJTX_UDP_PORT = 2237
         self.wsjtx_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.wsjtx_sock.bind((UDP_IP, UDP_PORT))
+        self.wsjtx_sock.bind((WSJTX_UDP_IP, WSJTX_UDP_PORT))
         self.wsjtx_sock.setblocking(False)
 
         time.sleep(2)
