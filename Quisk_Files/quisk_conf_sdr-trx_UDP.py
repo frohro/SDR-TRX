@@ -75,7 +75,6 @@ class Hardware(BaseHardware):
         PICO_UDP_IP = "192.168.1.107"  # Put the Pico IP here.
         COMMAND_UDP_PORT = 12346
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.command_sock.bind((PICO_UDP_IP, COMMAND_UDP_PORT))
         self.command_sock.setblocking(False)
         time.sleep(2)
         # Poll for version. Should probably confirm the response on this.
@@ -165,12 +164,12 @@ class Hardware(BaseHardware):
 
     def get_parameter(self, string):
         string = string + "\n"
-        self.command_sock.send(string.encode())
+        self.command_sock.sendto(string.encode(), (PICO_UDP_IP, COMMAND_UDP_PORT))
         return self.get_argument()
 
     def set_parameter(self, string, arg):
         string = string + "," + arg + "\r" + "\n"
-        self.command_sock.send(string.encode())
+        self.command_sock.sendto(string.encode(), (PICO_UDP_IP, COMMAND_UDP_PORT))
         print('arg is: ', arg)
         temp_arg = self.get_argument()
         print('temp_arg is: ', temp_arg)
@@ -231,12 +230,12 @@ class Hardware(BaseHardware):
         self.or_serial.write(b'm')
         count = 0
         for symbol in symbols:
-            self.command_sock.send(struct.pack('>B', symbol))
+            self.command_sock.sendto(struct.pack('>B', symbol), (PICO_UDP_IP, COMMAND_UDP_PORT))
             count += 1
             # Wait to avoid Arduino serial buffer overflow.  This may not be needed with the Pico.
             if count % 50 == 0:
                 time.sleep(0.05)
-        self.command_sock.send(b'\0')
+        self.command_sock.sendto(b'\0', (PICO_UDP_IP, COMMAND_UDP_PORT))
         resp = self.or_serial.read(512)
         if resp == b'm':
             print("Load OK")
@@ -246,9 +245,9 @@ class Hardware(BaseHardware):
     def change_freq(self, new_freq):
         #global self.tx_freq
         print("Change TX frequency to:", new_freq)
-        self.command_sock.send(b'o')
+        self.command_sock.sendto(b'o', (PICO_UDP_IP, COMMAND_UDP_PORT))
         for kk in range(2):
-            self.command_sock.send(struct.pack('>B', (new_freq >> 8 * kk) & 0xFF))
+            self.command_sock.sendto(struct.pack('>B', (new_freq >> 8 * kk) & 0xFF), (PICO_UDP_IP, COMMAND_UDP_PORT))
         time.sleep(0.05)    
         resp = self.command_sock.recv(1)
         if resp == b'o':
@@ -268,9 +267,9 @@ class Hardware(BaseHardware):
     def set_mode(self, new_mode):  # New more robust protocol.
         #global mode
         if new_mode == 'FT8':
-            self.command_sock.send(b'e')
+            self.command_sock.sendto(b'e', (PICO_UDP_IP, COMMAND_UDP_PORT))
             time.sleep(.05)
-            resp = self.or_serial.read(1) 
+            resp = self.command_sock.read(1) 
             print("resp = ", resp)       
             if resp == b'e':
                 self.mode = new_mode
@@ -278,7 +277,7 @@ class Hardware(BaseHardware):
                 self.current_msg = '' 
                 return True
         elif new_mode == 'FT4':
-            self.command_sock.send(b'f')
+            self.command_sock.sendto(b'f', (PICO_UDP_IP, COMMAND_UDP_PORT))
             time.sleep(0.05)
             resp = self.command_sock.recv(1)
             print("resp = ", resp)       
@@ -335,7 +334,7 @@ class Hardware(BaseHardware):
         # print("\n\nWait for transmitter ready...")
         if self.tx_ready_wsjtx == False:
             if self.tx_ready_wsjtx_sent == False:
-                self.command_sock.send(b'r')
+                self.command_sock.sendto(b'r', (PICO_UDP_IP, COMMAND_UDP_PORT))
                 time.sleep(0.05)
                 self.tx_ready_wsjtx_sent = True
             x = self.command_sock.recv(1)
@@ -391,7 +390,7 @@ class Hardware(BaseHardware):
                         utc_time = current_time.astimezone(datetime.timezone.utc)
                         self.tx_now = self.check_time_window(utc_time)
                         if self.tx_now:
-                            self.command_sock.send(b'p')
+                            self.command_sock.sendto(b'p', (PICO_UDP_IP, COMMAND_UDP_PORT))
                         message = StatusPacket.TxMessage
                         message = message.replace('<', '')
                         message = message.replace('>', '')
