@@ -3,17 +3,13 @@ from __future__ import absolute_import
 from __future__ import division
 import socket
 import time
-# import serial
 import yaml
 import struct
 import datetime
-import os
-import sys
 import sys
 import os
 from ft8 import FT8Send
 from ft4 import FT4Send
-import serial,time
 from quisk_hardware_model import Hardware as BaseHardware
 
 # SDR-TRX Quisk Configuration File
