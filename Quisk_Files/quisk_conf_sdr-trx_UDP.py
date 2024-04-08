@@ -72,7 +72,7 @@ class Hardware(BaseHardware):
         # UDP SETTINGS
 
         # Connection for WSJT-X
-        UDP_IP = "192.168.1.114"  # Put the Pico IP here.
+        UDP_IP = "192.168.1.107"  # Put the Pico IP here.
         UDP_PORT = 12346
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.command_sock.bind((UDP_IP, UDP_PORT))
