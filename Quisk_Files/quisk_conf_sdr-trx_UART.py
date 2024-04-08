@@ -329,7 +329,7 @@ class Hardware(BaseHardware):
             time.sleep(0.005)  #  Do we need this?
 
     def transmit(self):
-        if False:  # not current_msg:
+        if False:  # not current_msg: # For some reason it only transmits at 7 and 22 after the minute on FT4.
             print("No previous message!")
             time.sleep(1)
         else:
