@@ -182,9 +182,13 @@ class Hardware(BaseHardware):
             print('Received: ', data1)
         # Maybe we didn't catch an OK line?
         else:
-            data1 = self.command_sock.recv(1024)
-            print('Received: ', data1)
-
+            while True:
+                try:
+                    data1 = self.command_sock.recv(1024)
+                    print('Received: ', data1)
+                    break
+                except BlockingIOError:
+                    pass
         # Check to see if we have a comma in the string. If not, there is no argument.
         if data1.find(b',') == -1:
             return -1
@@ -193,10 +197,13 @@ class Hardware(BaseHardware):
         print("data1 =")
         print(data1)
 
-        # Check for the OK string
-        data2 = self.command_sock.recv(1024)
-        if data2.startswith(b'OK'):
-            return data1
+        # Check for the OK string.  Should we wait for the OK string?
+        try:
+            data2 = self.command_sock.recv(1024)
+            if data2.startswith(b'OK'):  
+                return data2
+        except BlockingIOError:
+            return -1
 
     # We need to integrate the UART reads below into the stuff above.
 
