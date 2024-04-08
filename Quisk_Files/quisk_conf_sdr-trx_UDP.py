@@ -343,13 +343,18 @@ class Hardware(BaseHardware):
                 self.command_sock.sendto(b'r', (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
                 time.sleep(0.05)
                 self.tx_ready_wsjtx_sent = True
-            x = self.command_sock.recv(1)
-            if x == b'r':
-                print("Transmitter ready!")
-                self.tx_ready_wsjtx = True
+            while True:
+                try:
+                    x = self.command_sock.recv(1)
+                    if x == b'r':
+                        print("Transmitter ready!")
+                        self.tx_ready_wsjtx = True
+                    break
+                except BlockingIOError:
+                    pass          
         if self.tx_ready_wsjtx == True:
             try:
-                fileContent, addr = self.sock.recvfrom(1024)
+                fileContent, addr = self.wsjtx_sock.recvfrom(1024)
                 # print(addr)
             except Exception as e:
                 if e == BlockingIOError:  # This is our way of pollig the socket.
