@@ -75,6 +75,7 @@ class Hardware(BaseHardware):
         time.sleep(2)
         # Poll for version. Should probably confirm the response on this.
         version = str(self.get_parameter("VER"))  # The way the firmware is now, this sets it up to use the UART.
+        print("called version from line 78")
         print(version)
         # Return an informative message for the config screen
         t = str(version) + ". Capture from sound card %s." % self.conf.name_of_sound_capt
