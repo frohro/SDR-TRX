@@ -172,14 +172,17 @@ class Hardware(BaseHardware):
         return True
 
     def get_argument(self):
-        data1 = self.command_sock.recv(1024)
-        if len(data1) == 0:
-            return -1
+        while True:
+            try:
+                data1 = self.command_sock.recv(1024)
+                break
+            except BlockingIOError:
+                return -1
         if not data1.startswith(b'OK'):
             print('Received: ', data1)
         # Maybe we didn't catch an OK line?
         else:
-            data1 = self.or_serial.readline()
+            data1 = self.command_sock.recv(1024)
             print('Received: ', data1)
 
         # Check to see if we have a comma in the string. If not, there is no argument.
