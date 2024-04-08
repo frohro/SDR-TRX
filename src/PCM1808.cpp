@@ -197,8 +197,8 @@ void set_tx_freq(uint32_t freq)
 {
   // Let driver choose PLL settings. May glitch when changing frequencies.
   tx_freq = freq;
-  Serial.print("Setting TX frequency to ");
-  Serial.println(tx_freq);
+  // Serial.print("Setting TX frequency to ");
+  // Serial.println(tx_freq);
   si5351.set_freq(tx_freq * 100ULL * CAL_FACTOR, SI5351_CLK2);
 }
 
