@@ -172,14 +172,14 @@ class Hardware(BaseHardware):
         return True
 
     def get_argument(self):
-        self.wsjtx_sock.setblocking(True)
+        self.command_sock.setblocking(True)
         try:
             data1 = self.command_sock.recv(1024)
             print('Received: ', data1)
         except BlockingIOError:
             print("exited get_arguement with BlockingIOError")
             return -1
-        self.wsjtx_sock.setblocking(False)
+        self.command_sock.setblocking(False)
         if not data1.startswith(b'OK'):
             print('Received: ', data1)
         # Maybe we didn't catch an OK line?
