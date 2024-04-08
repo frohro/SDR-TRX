@@ -198,6 +198,7 @@ class Hardware(BaseHardware):
     def get_argument(self):
         data1 = self.or_serial.readline()
         if len(data1) == 0:
+            print("No data received in get_argument!")
             return -1
         if not data1.startswith(b'OK'):
             print('Received: ', data1)

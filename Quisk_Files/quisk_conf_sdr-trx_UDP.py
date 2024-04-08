@@ -175,8 +175,10 @@ class Hardware(BaseHardware):
         while True:
             try:
                 data1 = self.command_sock.recv(1024)
+                print('Received: ', data1)
                 break
             except BlockingIOError:
+                print("exited get_arguement with BlockingIOError")
                 return -1
         if not data1.startswith(b'OK'):
             print('Received: ', data1)
@@ -354,8 +356,7 @@ class Hardware(BaseHardware):
                     pass          
         if self.tx_ready_wsjtx == True:
             try:
-                fileContent, addr = self.wsjtx_sock.recvfrom(1024)
-                # print(addr)
+                fileContent = self.wsjtx_sock.recv(1024)
             except Exception as e:
                 if e == BlockingIOError:  # This is our way of pollig the socket.
                     # Maybe use select to stop the errors printing after we quit.
