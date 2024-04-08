@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from __future__ import division
 import socket
 import time
-# import serial
+import serial
 import yaml
 import struct
 import datetime
@@ -18,8 +18,8 @@ from quisk_hardware_model import Hardware as BaseHardware
 
 # SDR-TRX Quisk Configuration File
 # This file is to integrate the function of control of the SDR-TRX wint Quisk and with WSJT-X.
-# This is for control of the SDR-TRX with using the UDP port port 12346.  WSJT-X interfaces with this
-# locally using UDP on port 2237.  Capital letters begin commands to the SDR-TRX from Quisk, 
+# This is for control of the SDR-TRX with using the UART interface.  WSJT-X interfaces with this
+# locally using UDP.  Capital letters begin commands to the SDR-TRX from Quisk, 
 # and lowercase letters are for commands coming from WSJT-X (through this Quisk interface).
 # This is for usinng the SDR-TRX with a 3.5 mm audio card to the soundcard of the computer,
 # and the WSJT-X software using the USB UART.
@@ -69,20 +69,39 @@ class Hardware(BaseHardware):
     def open(self):
 
             # FT8 encoder
-        # UDP SETTINGS
 
-        # Connection for WSJT-X
-        UDP_IP = "192.168.1.114"  # Put the Pico IP here.
-        UDP_PORT = 12346
-        self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.command_sock.bind((UDP_IP, UDP_PORT))
-        self.command_sock.setblocking(False)
-        time.sleep(2)
-        # Poll for version. Should probably confirm the response on this.
-        version = str(self.get_parameter("VER"))  # The way the firmware is now, this sets it up to use the UART.
-        print(version)
-        # Return an informative message for the config screen
-        t = str(version) + ". Capture from sound card %s." % self.conf.name_of_sound_capt
+        # SERIAL PORT SETTINGS
+
+        # serial_port = configs['serial_port']
+        # baudrate    = configs['baudrate']
+        # try:
+        #     self.or_serial = serial.Serial(serial_port, baudrate, timeout=0.5)
+        # except serial.serialutil.SerialException:
+        #     print("\nNo se puede abrir self.or_serial: " + serial_port + "\n")
+        #     exit(1)
+        # Set this as appropriate for your OS.
+        radio_serial_port = "/home/frohro/ttyDummy"  # First port to try.
+        radio_serial_rate = 57600  # Not nneeded for ACM serial port.  Could try commenting it out.
+        # Called once to open the Hardware
+        # Open the serial port.
+        try:
+            self.or_serial = serial.Serial(radio_serial_port, radio_serial_rate, timeout=.05)
+        except serial.serialutil.SerialException:
+            radio_serial_port = "/dev/ttyACM0"  # Set to the port for interceptty.
+            # To run interceptty: $ interceptty /dev/ttyACM0 /dev/ttyDummy
+        try:
+            self.or_serial = serial.Serial(radio_serial_port, radio_serial_rate, timeout=0.5)
+        except serial.serialutil.SerialException:
+            radio_serial_port = "/dev/ttyACM1"  # Set to the third serial port for your OS.
+        try:
+            self.or_serial = serial.Serial(radio_serial_port, radio_serial_rate, timeout=0.5)
+        except serial.serialutil.SerialException:
+            print("Radio not connected to serial port.  Exiting.")
+            exit(1)
+            # Maybe use exit(1) instead.
+        print("Opened Serial Port ", radio_serial_port)
+        # Wait for the Pico to restart and boot.
+        # Read configuration file
         configs_file = open('transceiver_config.yml', 'r')
         configs = yaml.load(configs_file, Loader=yaml.BaseLoader)
 
@@ -97,9 +116,9 @@ class Hardware(BaseHardware):
         # Connection for WSJT-X
         UDP_IP = "127.0.0.1"
         UDP_PORT = 2237
-        self.wsjtx_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.wsjtx_sock.bind((UDP_IP, UDP_PORT))
-        self.wsjtx_sock.setblocking(False)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind((UDP_IP, UDP_PORT))
+        self.sock.setblocking(False)
 
         time.sleep(2)
         # self.get_parameter("TX_FREQ, 14074000")
@@ -114,8 +133,8 @@ class Hardware(BaseHardware):
         # Called once to close the Hardware
         self.get_parameter("RX")
         time.sleep(1)  # Wait for RX to be set.
-        self.command_sock.close()
-        self.wsjtx_sock.close()
+        self.or_serial.close()
+        self.sock.close()
 
     def ChangeFrequency(self, tune, vfo, source='', band='', event=None):
         # Called whenever quisk requests a frequency change.
@@ -165,19 +184,19 @@ class Hardware(BaseHardware):
 
     def get_parameter(self, string):
         string = string + "\n"
-        self.command_sock.send(string.encode())
+        self.or_serial.write(string.encode())
         return self.get_argument()
 
     def set_parameter(self, string, arg):
         string = string + "," + arg + "\r" + "\n"
-        self.command_sock.send(string.encode())
+        self.or_serial.write(string.encode())
         print('arg is: ', arg)
         temp_arg = self.get_argument()
         print('temp_arg is: ', temp_arg)
         return True
 
     def get_argument(self):
-        data1 = self.command_sock.recv(1024)
+        data1 = self.or_serial.readline()
         if len(data1) == 0:
             return -1
         if not data1.startswith(b'OK'):
@@ -196,7 +215,7 @@ class Hardware(BaseHardware):
         print(data1)
 
         # Check for the OK string
-        data2 = self.command_sock.recv(1024)
+        data2 = self.or_serial.readline()
         if data2.startswith(b'OK'):
             return data1
 
@@ -231,12 +250,12 @@ class Hardware(BaseHardware):
         self.or_serial.write(b'm')
         count = 0
         for symbol in symbols:
-            self.command_sock.send(struct.pack('>B', symbol))
+            self.or_serial.write(struct.pack('>B', symbol))
             count += 1
             # Wait to avoid Arduino serial buffer overflow.  This may not be needed with the Pico.
             if count % 50 == 0:
                 time.sleep(0.05)
-        self.command_sock.send(b'\0')
+        self.or_serial.write(b'\0')
         resp = self.or_serial.read(512)
         if resp == b'm':
             print("Load OK")
@@ -246,11 +265,11 @@ class Hardware(BaseHardware):
     def change_freq(self, new_freq):
         #global self.tx_freq
         print("Change TX frequency to:", new_freq)
-        self.command_sock.send(b'o')
+        self.or_serial.write(b'o')
         for kk in range(2):
-            self.command_sock.send(struct.pack('>B', (new_freq >> 8 * kk) & 0xFF))
+            self.or_serial.write(struct.pack('>B', (new_freq >> 8 * kk) & 0xFF))
         time.sleep(0.05)    
-        resp = self.command_sock.recv(1)
+        resp = self.or_serial.read(1)
         if resp == b'o':
             print("New freq OK")
             self.tx_freq = new_freq
@@ -268,7 +287,7 @@ class Hardware(BaseHardware):
     def set_mode(self, new_mode):  # New more robust protocol.
         #global mode
         if new_mode == 'FT8':
-            self.command_sock.send(b'e')
+            self.or_serial.write(b'e')
             time.sleep(.05)
             resp = self.or_serial.read(1) 
             print("resp = ", resp)       
@@ -278,9 +297,9 @@ class Hardware(BaseHardware):
                 self.current_msg = '' 
                 return True
         elif new_mode == 'FT4':
-            self.command_sock.send(b'f')
+            self.or_serial.write(b'f')
             time.sleep(0.05)
-            resp = self.command_sock.recv(1)
+            resp = self.or_serial.read(1) 
             print("resp = ", resp)       
             if resp == b'f':
                 self.mode = new_mode
@@ -335,10 +354,10 @@ class Hardware(BaseHardware):
         # print("\n\nWait for transmitter ready...")
         if self.tx_ready_wsjtx == False:
             if self.tx_ready_wsjtx_sent == False:
-                self.command_sock.send(b'r')
+                self.or_serial.write(b'r')
                 time.sleep(0.05)
                 self.tx_ready_wsjtx_sent = True
-            x = self.command_sock.recv(1)
+            x = self.or_serial.read()
             if x == b'r':
                 print("Transmitter ready!")
                 self.tx_ready_wsjtx = True
@@ -391,7 +410,7 @@ class Hardware(BaseHardware):
                         utc_time = current_time.astimezone(datetime.timezone.utc)
                         self.tx_now = self.check_time_window(utc_time)
                         if self.tx_now:
-                            self.command_sock.send(b'p')
+                            self.or_serial.write(b'p')
                         message = StatusPacket.TxMessage
                         message = message.replace('<', '')
                         message = message.replace('>', '')
