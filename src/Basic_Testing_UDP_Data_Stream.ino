@@ -1,4 +1,5 @@
-/*
+/* Basic_Testing_UDP_Data_Stream for speed.  I get 990 kB/s with this code.
+ * I am using the Ubuntu System Monitor to measure this.
  * Author: Rob Frohne, KL7NA, with help from Perplexity and Github Copilot.
  * 4/9/2024
  */
