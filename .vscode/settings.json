@@ -3,7 +3,8 @@
     "files.associations": {
         "compare": "cpp",
         "istream": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "*.tcc": "cpp"
     },
     "gitdoc.enabled": true
 }
