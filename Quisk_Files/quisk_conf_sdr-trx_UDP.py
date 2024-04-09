@@ -253,6 +253,7 @@ class Hardware(BaseHardware):
         self.command_sock.sendto(struct.pack('>H', new_freq), (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
         time.sleep(0.05)    
         resp = self.command_sock.recv(1)
+        print("resp after changing offset is: ", resp)
         self.command_sock.setblocking(False)
         if resp == b'o':
             print("New freq OK")
