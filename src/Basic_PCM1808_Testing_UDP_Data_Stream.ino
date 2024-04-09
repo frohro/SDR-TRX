@@ -72,7 +72,7 @@ void loop() {
 
   // Fill the buffer with 108 lines of "%d\r\n"
   while (bufferIndex < BUFFER_SIZE - 26) { // 13 is the max size of "%d\r\n" with 10 digits
-    i2s.read32(&l, &r); // Read the next l and r values
+    // i2s.read32(&l, &r); // Read the next l and r values
     l = l<<9;
     r = r<<9;
     // This next line is for transferring data over the UART in case you don't have a Pico W,    
