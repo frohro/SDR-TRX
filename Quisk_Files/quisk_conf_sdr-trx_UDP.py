@@ -239,7 +239,7 @@ class Hardware(BaseHardware):
             if count % 50 == 0:
                 time.sleep(0.05)
         self.command_sock.sendto(b'\0', (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
-        resp = self.or_serial.read(512)
+        resp = self.command_sock.recv(1)
         if resp == b'm':
             print("Load OK")
         else:
