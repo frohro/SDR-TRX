@@ -26,7 +26,7 @@
 #define STASSID Frohne-2.4GHz
 #endif
 
-#define RATE 16000
+#define RATE 96000
 #define MCLK_MULT 256  // 384 for 48 BCK per frame,  256 for 64 BCK per frame
 
 I2S i2s(INPUT);
