@@ -247,14 +247,14 @@ class Hardware(BaseHardware):
 
     def change_freq(self, new_freq):
         #global self.tx_freq
-        self.command_sock.blocking(True)
+        self.command_sock.setblocking(True)
         print("Change TX frequency to:", new_freq)
         self.command_sock.sendto(b'o', (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
         for kk in range(2):
             self.command_sock.sendto(struct.pack('>B', (new_freq >> 8 * kk) & 0xFF), (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
         time.sleep(0.05)    
         resp = self.command_sock.recv(1)
-        self.command_sock.blocking(False)
+        self.command_sock.setblocking(False)
         if resp == b'o':
             print("New freq OK")
             self.tx_freq = new_freq
