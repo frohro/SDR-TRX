@@ -372,14 +372,13 @@ void processCommandUDP()
       // New message
       if (received == 'm')
       {
-        char incomingPacket[255];
         Serial.println("Received an m.");
         int packetSize = udpCommand.parsePacket();
         if (packetSize) {
           // If there's a packet available, read it into a buffer
           int len = udpCommand.read(tx_buffer, 255);
           if (len == symbol_count) {
-            incomingPacket[len] = 0;
+            tx_buffer[len] = 0;
           }
           else {
             Serial.println("Packet was not symbol_count bytes long.");
