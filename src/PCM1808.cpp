@@ -379,6 +379,7 @@ void processCommandUDP()
           int len = udpCommand.read(tx_buffer, 255);
           if (len == symbol_count) {
             tx_buffer[len] = 0;
+            Serial.println((char*)tx_buffer);
           }
           else {
             Serial.println("Packet was not symbol_count bytes long.");
