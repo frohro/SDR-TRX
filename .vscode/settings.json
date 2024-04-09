@@ -1,7 +1,9 @@
 {
     "cmake.configureOnOpen": true,
     "files.associations": {
-        "compare": "cpp"
+        "compare": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp"
     },
     "gitdoc.enabled": true
 }
