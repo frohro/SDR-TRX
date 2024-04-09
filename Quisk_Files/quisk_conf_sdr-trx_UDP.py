@@ -259,16 +259,6 @@ class Hardware(BaseHardware):
             print("New freq OK")
             self.tx_freq = new_freq
 
-    # def set_mode(self, new_mode):  # This was the old protocol from wsjt_transceiver.ino
-    #     #global self.mode
-    #     self.or_serial.write(b'e')
-    #     time.sleep(0.05)
-    #     resp = self.or_serial.read(1)
-    #     print("Response: {0}".format(resp))
-    #     if resp == b's':
-    #         self.mode = new_mode
-    #         print("Switched to: {0}".format(new_mode))
-
     def set_mode(self, new_mode):  # New more robust protocol.
         #global mode
         if new_mode == 'FT8':
@@ -319,7 +309,7 @@ class Hardware(BaseHardware):
             time.sleep(1)
         else:
             print("TX!")
-            self.or_serial.write(b't')
+            self.command_sock.sendto(b't', (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
             # self.tx_now = False
 
     def check_time_window(self, utc_time):
