@@ -402,23 +402,34 @@ void processCommandUDP()
       // Change offset
       else if (received == 'o')
       {
+        char incomingPacket[255];
         Serial.println("Received an o.");
-        msg_index = 0;
         // Offset encoded in two bytes
-        udpCommand.parsePacket(); // Add this line to parse the UDP packet
-        while (msg_index < 2)
-        {
-          int avail = udpCommand.available();
-          Serial.println(avail);
-          if (avail > 0)  // We are not getting this.
-          {
-            Serial.println("udpCommand.available was true.");
-            rec_byte[msg_index] = udpCommand.read();
-            msg_index++;
+        int packetSize = udpCommand.parsePacket();
+        if (packetSize) {
+          // If there's a packet available, read it into a buffer
+          int len = udpCommand.read(incomingPacket, 255);
+          if (len == 2) {
+            incomingPacket[len] = 0;
+          }
+          else {
+            Serial.println("Offset packet was not 2 bytes long.");
           }
         }
-        offset = rec_byte[0] + (rec_byte[1] << 8);
-        Serial.println(offset);
+        // while (msg_index < 2)
+        // {
+        //   int avail = udpCommand.available();
+        //   Serial.println(avail);
+        //   if (avail > 0)  // We are not getting this.
+        //   {
+        //     Serial.println("udpCommand.available was true.");
+        //     rec_byte[msg_index] = udpCommand.read();
+        //     msg_index++;
+        //   }
+        // }
+        // offset = rec_byte[0] + (rec_byte[1] << 8);
+        // Serial.println(offset);
+        offset = (incomingPacket[0]) + (incomingPacket[1] << 8);
         udpCommand.write("o");
       }
 
