@@ -24,7 +24,7 @@ void setup()
     udp.begin(12345);
 }
 
-const size_t BUFFER_SIZE = 1404; // Assuming the MTU is 1500 bytes...
+const size_t BUFFER_SIZE = 1470*10; // Assuming the MTU is 1500 bytes...
 char buffer[BUFFER_SIZE];
 const char *udpAddress = "192.168.1.101"; // Put your laptop IP here.
 const unsigned int udpPort = 12345;
