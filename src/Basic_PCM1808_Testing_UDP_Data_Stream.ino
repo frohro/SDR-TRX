@@ -72,25 +72,25 @@ void loop() {
   size_t bufferIndex = 0;
 
   // Fill the buffer with 108 lines of "%d\r\n"
-  while (bufferIndex < BUFFER_SIZE - 26) { // 13 is the max size of "%d\r\n" with 10 digits
-    // i2s.read32(&l, &r); // Read the next l and r values
-    l = l<<9;
-    r = r<<9;
-    // This next line is for transferring data over the UART in case you don't have a Pico W,    
+  // while (bufferIndex < BUFFER_SIZE - 26) { // 13 is the max size of "%d\r\n" with 10 digits
+  //   // i2s.read32(&l, &r); // Read the next l and r values
+  //   l = l<<9;
+  //   r = r<<9;
+  //   // This next line is for transferring data over the UART in case you don't have a Pico W,    
 //    Serial.printf("%d,%d\r\n", l, r);  // This only works up 16 kHz.
     // With the extra four spaces it should wark at 96 kHz with 16 bit samples
     // and leaving about 90 frames for control packets if we can figure out how
     // to do that.
 
     // These next lines create the buffer of slightly less that the MTU (1500 bytes)
-    int n = snprintf(buffer + bufferIndex, BUFFER_SIZE - bufferIndex, "%d,%d\r\n", l, r);
-    if (n > 0) {
-      bufferIndex += n;
-    } else {
-      Serial.println("Problem with buffer!");
-      break;
-    }
-  }
+    // int n = snprintf(buffer + bufferIndex, BUFFER_SIZE - bufferIndex, "%d,%d\r\n", l, r);
+    // if (n > 0) {
+    //   bufferIndex += n;
+    // } else {
+    //   Serial.println("Problem with buffer!");
+    //   break;
+    // }
+  // }
 
   // Send the buffer via UDP
   udp.beginPacket(udpAddress, udpPort);
@@ -98,5 +98,5 @@ void loop() {
   udp.endPacket();
 
   // Clear the buffer for the next round
-  memset(buffer, 0, BUFFER_SIZE);
+  // memset(buffer, 0, BUFFER_SIZE);
 }
