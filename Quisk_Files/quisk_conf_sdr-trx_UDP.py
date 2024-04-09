@@ -250,7 +250,7 @@ class Hardware(BaseHardware):
         self.command_sock.setblocking(True)
         print("Change TX frequency to:", new_freq)
         self.command_sock.sendto(b'o', (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
-        self.command_sock.sendto(struct.pack('>H', new_freq), (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
+        self.command_sock.sendto(struct.pack('<H', new_freq), (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
         time.sleep(0.05)    
         resp = self.command_sock.recv(1)
         print("resp after changing offset is: ", resp)
