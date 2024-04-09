@@ -405,6 +405,7 @@ void processCommandUDP()
         Serial.println("Received an o.");
         msg_index = 0;
         // Offset encoded in two bytes
+        udpCommand.parsePacket(); // Add this line to parse the UDP packet
         while (msg_index < 2)
         {
           int avail = udpCommand.available();
