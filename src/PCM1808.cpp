@@ -402,6 +402,7 @@ void processCommandUDP()
       // Change offset
       else if (received == 'o')
       {
+        Serial.println("Received an o.");
         msg_index = 0;
         // Offset encoded in two bytes
         while (msg_index < 2)
@@ -413,6 +414,7 @@ void processCommandUDP()
           }
         }
         offset = rec_byte[0] + (rec_byte[1] << 8);
+        Serial.println(offset);
         udpCommand.write("o");
       }
 
@@ -839,7 +841,7 @@ void setup()
   i2s.begin();
   cur_mode = MODE_FT8;
   setup_mode(cur_mode);
-  rx();           // Set RX mode
+  rx();          // Set RX mode
   useUDP = true; // False only for testing out FT8
 }
 
