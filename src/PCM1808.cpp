@@ -224,6 +224,7 @@ void transmit()
     delay(tone_delay);
   }
   // Back to receive
+  Serial.println("Transmitting complete.");
   delay(100);
   rx();
 }
@@ -355,8 +356,6 @@ void processCommandUDP()
     Serial.println(command);
     // Process the received command
     remoteIp = udpCommand.remoteIP();
-    // if (udpCommand.available() > 0)
-    //   received = udpCommand.read();
     Serial.print("received is ");
     Serial.println(received);
     if ((received == 'm') || // This whole if statement is a way of combining my code with
@@ -388,12 +387,11 @@ void processCommandUDP()
         message_available = true;
         udpCommand.write("m");
       }
-
       // Change offset
       else if (received == 'o')
       {
         char incomingPacket[255];
-        Serial.println("Received an o.");
+        // Serial.println("Received an o.");
         // Offset encoded in two bytes
         int packetSize = udpCommand.parsePacket();
         if (packetSize) {
@@ -406,10 +404,9 @@ void processCommandUDP()
             Serial.println("Offset packet was not 2 bytes long.");
           }
         }
-
         offset = (incomingPacket[0]) + (incomingPacket[1] << 8);
         udpCommand.write("o");
-        Serial.println("Wrote o.");
+        // Serial.println("Wrote o.");
       }
 
       // Switch mode = FT8  Note: We start in FT8 mode and don't sync until a change mode is sent.
@@ -420,7 +417,6 @@ void processCommandUDP()
         udpCommand.write("e");
         message_available = false;
       }
-
       // Switch mode = FT4
       else if (received == 'f')
       {
@@ -429,7 +425,6 @@ void processCommandUDP()
         udpCommand.write("f");
         message_available = false;
       }
-
       // WSPR Mode
       else if (received == 'w')
       {
@@ -437,14 +432,12 @@ void processCommandUDP()
         setup_mode(cur_mode);
         message_available = false;
       }
-
       // Transmit
       else if (received == 't')
       {
         if (message_available)
           transmit();
       }
-
       // Pre transmit
       else if (received == 'p')
       {
