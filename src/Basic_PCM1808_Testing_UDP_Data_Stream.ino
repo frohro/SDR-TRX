@@ -20,6 +20,7 @@
 #include <I2S.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <si5351.h>
 
 #ifndef STASSID
 #define STASSID Frohne-2.4GHz
