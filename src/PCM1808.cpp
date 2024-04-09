@@ -431,6 +431,7 @@ void processCommandUDP()
         // Serial.println(offset);
         offset = (incomingPacket[0]) + (incomingPacket[1] << 8);
         udpCommand.write("o");
+        Serial.println("Wrote o.");
       }
 
       // Switch mode = FT8  Note: We start in FT8 mode and don't sync until a change mode is sent.
