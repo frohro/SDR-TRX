@@ -94,7 +94,7 @@ void loop() {
 
   // Send the buffer via UDP
   udp.beginPacket(udpAddress, udpPort);
-  udp.write((const uint8_t*)buffer, bufferIndex);
+  udp.write((const uint8_t*)buffer, BUFFER_SIZE);
   udp.endPacket();
 
   // Clear the buffer for the next round
