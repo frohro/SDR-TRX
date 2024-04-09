@@ -230,7 +230,7 @@ class Hardware(BaseHardware):
 
     def load_symbols(self, symbols):
         print("Load symbols into transmitter..")
-        self.or_serial.write(b'm')
+        self.command_sock.sendto(b'm', (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
         count = 0
         for symbol in symbols:
             self.command_sock.sendto(struct.pack('>B', symbol), (self.PICO_UDP_IP, self.COMMAND_UDP_PORT))
