@@ -407,8 +407,9 @@ void processCommandUDP()
         // Offset encoded in two bytes
         while (msg_index < 2)
         {
-          if (udpCommand.available() > 0)
+          if (udpCommand.available() > 0)  // We are not getting this.
           {
+            Serial.println("udpCommand.available was true.");
             rec_byte[msg_index] = udpCommand.read();
             msg_index++;
           }
