@@ -96,14 +96,6 @@ class Hardware(BaseHardware):
         self.wsjtx_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.wsjtx_sock.bind((WSJTX_UDP_IP, WSJTX_UDP_PORT))
         self.wsjtx_sock.setblocking(False)
-
-        time.sleep(2)
-        # self.get_parameter("TX_FREQ, 14074000")
-        # Poll for version. Should probably confirm the response on this.
-        # version = str(self.get_parameter("VER"))  # The way the firmware is now, this sets it up to use the UART.
-        # print(version)
-        # Return an informative message for the config screen
-        # t = str(version) + ". Capture from sound card %s." % self.conf.name_of_sound_capt
         return t
 
     def close(self):
@@ -128,15 +120,17 @@ class Hardware(BaseHardware):
             vfo = radio_upper
             print("Outside range! Setting to %d" % radio_upper)
 
-        # success = self.set_parameter("FREQ",str(vfo))
-        self.set_parameter("FREQ", str(vfo))
-        self.set_parameter("TX_FREQ", str(tune))
+
 
         print("sample_rate =", sample_rate)
         # If the tune frequency is outside the RX bandwidth, set it to somewhere within that bandwidth.
         if tune > (vfo + sample_rate / 2) or tune < (vfo - sample_rate / 2):
             tune = vfo + vfo_Center_Offset
             print("Bringing tune frequency back into the RX bandwidth.")
+
+        # success = self.set_parameter("FREQ",str(vfo))
+        self.set_parameter("FREQ", str(vfo))
+        self.set_parameter("TX_FREQ", str(tune))
 
         # if success:
         #   print("Frequency change succeeded!")
