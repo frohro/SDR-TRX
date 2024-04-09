@@ -372,31 +372,21 @@ void processCommandUDP()
       // New message
       if (received == 'm')
       {
-        msg_index = 0;
-        // timeout = 0;
-        while (msg_index < symbol_count) // && timeout < SERIAL_TIMEOUT)
-        {
-          if (udpCommand.available() > 0)
-          {
-            received = udpCommand.read();
-            tx_buffer[msg_index] = received;
-            msg_index++;
+        char incomingPacket[255];
+        Serial.println("Received an m.");
+        int packetSize = udpCommand.parsePacket();
+        if (packetSize) {
+          // If there's a packet available, read it into a buffer
+          int len = udpCommand.read(tx_buffer, 255);
+          if (len == symbol_count) {
+            incomingPacket[len] = 0;
           }
-          // delay(1); // Wait for the next character (1ms). This was to get rid of the timeout in FT4.
-          //  timeout += 1;
+          else {
+            Serial.println("Packet was not symbol_count bytes long.");
+          }
         }
-        // if (timeout >= SERIAL_TIMEOUT)
-        // {
-        //   message_available = false;
-        //   Serial.println("Timeout");
-        //   Serial.println(timeout, DEC);
-        //   Serial.println(msg_index, DEC);
-        // }
-        // else
-        //{
         message_available = true;
         udpCommand.write("m");
-        // }
       }
 
       // Change offset
@@ -416,19 +406,7 @@ void processCommandUDP()
             Serial.println("Offset packet was not 2 bytes long.");
           }
         }
-        // while (msg_index < 2)
-        // {
-        //   int avail = udpCommand.available();
-        //   Serial.println(avail);
-        //   if (avail > 0)  // We are not getting this.
-        //   {
-        //     Serial.println("udpCommand.available was true.");
-        //     rec_byte[msg_index] = udpCommand.read();
-        //     msg_index++;
-        //   }
-        // }
-        // offset = rec_byte[0] + (rec_byte[1] << 8);
-        // Serial.println(offset);
+
         offset = (incomingPacket[0]) + (incomingPacket[1] << 8);
         udpCommand.write("o");
         Serial.println("Wrote o.");
