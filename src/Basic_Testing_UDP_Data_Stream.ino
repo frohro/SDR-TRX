@@ -17,7 +17,6 @@
  * 3/9/2024
  */
 #include <Arduino.h>
-#include <I2S.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <si5351.h>
@@ -26,26 +25,10 @@
 #define STASSID Frohne-2.4GHz
 #endif
 
-#define RATE 96000
-#define MCLK_MULT 256  // 384 for 48 BCK per frame,  256 for 64 BCK per frame
-
-I2S i2s(INPUT);
-
 WiFiUDP udp;  // For some reason or other, if compiled with platformio on VSCode
 // it will not connect to WIFI, but it works with the Arduino IDE.
 
 void setup() {
-  Serial.begin();
-
-  i2s.setDATA(2);  // These are the pins for the data on the SDR-TRX
-  i2s.setBCLK(0);
-  i2s.setMCLK(3);
-  // Note: LRCK pin is BCK pin plus 1 (1 in this case).
-  i2s.setBitsPerSample(24);
-  i2s.setFrequency(RATE);
-  i2s.setMCLKmult(MCLK_MULT);
-  i2s.setSysClk(RATE);
-  i2s.setBuffers(32, 0, 0);
 
   WiFi.begin("Frohne-2.4GHz");
 
@@ -58,7 +41,6 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   udp.begin(12345);
-  i2s.begin();
 }
 
 const size_t BUFFER_SIZE = 1404;  // Assuming the MTU is 1500 bytes...
@@ -68,35 +50,8 @@ const unsigned int udpPort = 12345;
 
 
 void loop() {
-  static int32_t r, l;
-  size_t bufferIndex = 0;
-
-  // Fill the buffer with 108 lines of "%d\r\n"
-  // while (bufferIndex < BUFFER_SIZE - 26) { // 13 is the max size of "%d\r\n" with 10 digits
-  //   // i2s.read32(&l, &r); // Read the next l and r values
-  //   l = l<<9;
-  //   r = r<<9;
-  //   // This next line is for transferring data over the UART in case you don't have a Pico W,    
-//    Serial.printf("%d,%d\r\n", l, r);  // This only works up 16 kHz.
-    // With the extra four spaces it should wark at 96 kHz with 16 bit samples
-    // and leaving about 90 frames for control packets if we can figure out how
-    // to do that.
-
-    // These next lines create the buffer of slightly less that the MTU (1500 bytes)
-    // int n = snprintf(buffer + bufferIndex, BUFFER_SIZE - bufferIndex, "%d,%d\r\n", l, r);
-    // if (n > 0) {
-    //   bufferIndex += n;
-    // } else {
-    //   Serial.println("Problem with buffer!");
-    //   break;
-    // }
-  // }
-
   // Send the buffer via UDP
   udp.beginPacket(udpAddress, udpPort);
   udp.write((const uint8_t*)buffer, BUFFER_SIZE);
   udp.endPacket();
-
-  // Clear the buffer for the next round
-  // memset(buffer, 0, BUFFER_SIZE);
 }
