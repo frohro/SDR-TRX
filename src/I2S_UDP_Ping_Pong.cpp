@@ -85,7 +85,7 @@ void setup()
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
-    udp.begin(12345);
+    udp.begin(udpPort);
 
     // Set the callback function
     i2s.onReceive(i2sDataReceived);
