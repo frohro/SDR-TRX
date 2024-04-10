@@ -17,8 +17,8 @@
 
 #define RATE 96000
 #define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
-#define BUFFER_SIZE 1400
-
+const uint BUFFER_SIZE = 2*sizeof(int32_t)*180; // Should be 1468, which gives 4 bytes
+// room for an uint32_t to tell the sequence number of the packet. 
 I2S i2s(INPUT);
 
 WiFiUDP udp;
@@ -34,25 +34,32 @@ volatile bool dataReady = false;
 
 void i2sDataReceived()
 {
-    Serial.println("Data received");
-    static int32_t r, l;
+    // Serial.println("Data received");
+    static int32_t r, l, packet_number = 0;  // Static for a tiny boost in speed.
     i2s.read32(&l, &r); // Read the next l and r values
     l = l << 9;
     r = r << 9;
     // Fill the current buffer with data
-    int n = snprintf(currentBuffer + bufferIndex, BUFFER_SIZE - bufferIndex, "%d,%d\r\n", l, r);
+    // Copy the binary data of l and r to the current buffer
+    memcpy(currentBuffer + bufferIndex, &l, sizeof(int32_t));
+    bufferIndex += sizeof(int32_t);
+    memcpy(currentBuffer + bufferIndex, &r, sizeof(int32_t));
+    bufferIndex += sizeof(int32_t);  // Separate increments could be sped up by using a single increment
+    // and pre-computing the number to increment by.  (Maybe the compiler optimizes this already.)
+    // Sending ASCII like this is a problem, because once in a while the number may not require
+    // the same number of characters.  This will cause a problem.  We need to send the data in binary.
     bufferIndex += n;
 
-    // If the buffer is full, swap the buffers
-    if (bufferIndex >= BUFFER_SIZE)
-    {
-        char *temp = currentBuffer;
+    // If the buffer is full, swap the buffers and add the packet number
+    if (bufferIndex == BUFFER_SIZE - sizeof(uint32_t))
+    {  // Send the packet number, swap the buffers, and set the flag.
+        memcpy(currentBuffer + bufferIndex, &packet_number, sizeof(int32_t)); // Before you reinitialize.
+        char *temp = currentBuffer;  // Swap the buffers
         currentBuffer = sendBuffer;
         sendBuffer = temp;
-        bufferIndex = 0;
-
-        // Set the flag to indicate data is ready to be sent
-        dataReady = true;
+        bufferIndex = 0;   // Reset the buffer index
+        packet_number++;   // Increment the packet number
+        dataReady = true;  // Set the flag to indicate data is ready to be sent
     }
 }
 
