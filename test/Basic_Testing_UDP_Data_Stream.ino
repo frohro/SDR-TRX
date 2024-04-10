@@ -32,7 +32,8 @@ const unsigned int udpPort = 12345;
 
 void loop()
 {
-    // Send the buffer via UDP
+    // Send the buffer via UDP over and over again.
+    // Read the data rate using the Ubuntu System Monitor.
     udp.beginPacket(udpAddress, udpPort);
     udp.write((const uint8_t *)buffer, BUFFER_SIZE);
     udp.endPacket();
