@@ -1,17 +1,6 @@
 /*
  * This Pico W program will connect to the PCM1808 via I2S and read the data it RATE samples per second.
- * It then sends the dato over WIFI using UDP.  To receive it and plot the results, you can use the
- * python scripts and this sequence in Linux:
- * $ rm sound_data.csv
- * $ nc -u -l 12345 > sound_data.csv
- * ^C
- * $ python3 plot_sound_data.py
- * The ^C is to stop the nc process which is receiving the data and saving it to sound_data.csv.
- * You can see that every oonce in a while there will be what appears to be a zero in the data.
- * We will have to remove them.  We also have to remove about 90 samples every second at 96 kHz
- * sampling rate.  (Less at slower sampling rates, because the Pico does not have exactly the right
- * crystal frequency to get exactly the audio rate we need.  We could reduce the load on the network
- * by sending the data in a binary way.  It appears we are getting almost 20 Mbits/s through the WIFI!
+ * It then sends the dato over WIFI using UDP.  
  *
  * Author: Rob Frohne, KL7NA, with help from Perplexity and Github Copilot.
  * 3/9/2024
