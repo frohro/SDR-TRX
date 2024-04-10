@@ -105,6 +105,6 @@ void loop()
     udp.endPacket();
 
     // Clear the buffer for the next round
-    memset(buffer, 0, BUFFER_SIZE);
+    memset(buffer, 0, BUFFER_SIZE);  // Do we really need to do this?
 
 }
