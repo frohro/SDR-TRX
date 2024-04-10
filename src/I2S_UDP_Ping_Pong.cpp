@@ -53,10 +53,6 @@ void i2sDataReceived()
 
         // Set the flag to indicate data is ready to be sent
         dataReady = true;
-        // Send the data in the send buffer over UDP
-        udp.beginPacket(udpAddress, udpPort);
-        udp.write((const uint8_t *)sendBuffer, BUFFER_SIZE);
-        udp.endPacket();
     }
 }
 
