@@ -97,7 +97,8 @@ void loop()
             break;
         }
     }
-
+    unsigned long end_time = micros();
+    Serial.printf("Time: %d us\n", end_time - start_time);
     // Send the buffer via UDP
     udp.beginPacket(udpAddress, udpPort);
     udp.write((const uint8_t *)buffer, bufferIndex);
@@ -105,6 +106,5 @@ void loop()
 
     // Clear the buffer for the next round
     memset(buffer, 0, BUFFER_SIZE);
-    unsigned long end_time = micros();
-    Serial.printf("Time: %d us\n", end_time - start_time);
+
 }
