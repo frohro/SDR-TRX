@@ -3,7 +3,7 @@
  * It then sends the dato over WIFI using UDP.  
  *
  * Author: Rob Frohne, KL7NA, with help from Perplexity and Github Copilot.
- * 3/9/2024
+ * 4/9/2024
  */
 #include <Arduino.h>
 #include <I2S.h>
@@ -34,6 +34,7 @@ volatile bool dataReady = false;
 
 void i2sDataReceived()
 {
+    Serial.println("Data received");
     static int32_t r, l;
     i2s.read32(&l, &r); // Read the next l and r values
     l = l << 9;
