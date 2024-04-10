@@ -73,9 +73,10 @@ void loop()
     size_t bufferIndex = 0;
 
     // Fill the buffer with 108 lines of "%d\r\n"
-    unsigned long start_time = micros();
+
     while (bufferIndex < BUFFER_SIZE - 26)
-    {                       // 13 is the max size of "%d\r\n" with 10 digits
+    {     
+                         // 13 is the max size of "%d\r\n" with 10 digits
         i2s.read32(&l, &r); // Read the next l and r values
         l = l << 9;
         r = r << 9;
@@ -84,7 +85,7 @@ void loop()
         // With the extra four spaces it should wark at 96 kHz with 16 bit samples
         // and leaving about 90 frames for control packets if we can figure out how
         // to do that.
-
+        unsigned long start_time = micros(); 
         // These next lines create the buffer of slightly less that the MTU (1500 bytes)
         int n = snprintf(buffer + bufferIndex, BUFFER_SIZE - bufferIndex, "%d,%d\r\n", l, r);
         if (n > 0)
@@ -96,9 +97,10 @@ void loop()
             Serial.println("Problem with buffer!");
             break;
         }
+        unsigned long end_time = micros();
+        Serial.printf("Time: %d us\n", end_time - start_time);
     }
-    unsigned long end_time = micros();
-    Serial.printf("Time: %d us\n", end_time - start_time);
+    
     // Send the buffer via UDP
     udp.beginPacket(udpAddress, udpPort);
     udp.write((const uint8_t *)buffer, bufferIndex);
