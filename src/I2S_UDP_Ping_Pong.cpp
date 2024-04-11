@@ -111,8 +111,8 @@ void loop()
 
     if (dataReady)
     {
-        start_time = micros();
         udp.beginPacket(udpAddress, udpPort);
+        start_time = micros();
         udp.write((const uint8_t *)sendBuffer, BUFFER_SIZE);
         udp.endPacket();
         dataReady = false;
