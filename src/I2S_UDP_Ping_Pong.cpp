@@ -48,7 +48,6 @@ void i2sDataReceived()
     // and pre-computing the number to increment by.  (Maybe the compiler optimizes this already.)
     // Sending ASCII like this is a problem, because once in a while the number may not require
     // the same number of characters.  This will cause a problem.  We need to send the data in binary.
-    bufferIndex += n;
 
     // If the buffer is full, swap the buffers and add the packet number
     if (bufferIndex == BUFFER_SIZE - sizeof(uint32_t))
