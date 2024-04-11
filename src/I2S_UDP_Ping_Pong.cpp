@@ -38,7 +38,6 @@ void i2sDataReceived()
 {
     // Serial.println("Micros");
   
-    uint32_t start_time = micros();
     static int32_t r, l, packet_number = 0;  // Static for a tiny boost in speed.
     i2s.read32(&l, &r); // Read the next l and r values
     l = l << 9;
@@ -56,6 +55,7 @@ void i2sDataReceived()
     // If the buffer is full, swap the buffers and add the packet number
     if (bufferIndex == BUFFER_SIZE)
     {  // Send the packet number, swap the buffers, and set the flag.
+        uint32_t start_time = micros();
         Serial.print("bufferIndex: ");
         Serial.println(bufferIndex);
         Serial.print("BUFFER_SIZE: ");
