@@ -37,8 +37,8 @@ volatile bool dataReady = false;
 void i2sDataReceived()
 {
     // Serial.println("Micros");
-    Serial.println(micros());
-
+  
+    uint32_t start_time = micros();
     static int32_t r, l, packet_number = 0;  // Static for a tiny boost in speed.
     i2s.read32(&l, &r); // Read the next l and r values
     l = l << 9;
@@ -67,6 +67,9 @@ void i2sDataReceived()
         bufferIndex = 4;   // Reset the buffer index
         packet_number++;   // Increment the packet number
         dataReady = true;  // Set the flag to indicate data is ready to be sent
+          Serial.println(micros());
+          Serial.print(" Delta time: ");
+          Serial.println(micros() - start_time);
     }
 }
 
