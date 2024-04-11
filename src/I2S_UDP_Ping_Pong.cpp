@@ -45,10 +45,10 @@ void i2sDataReceived()
     r = r << 9;
     // Fill the current buffer with data
     // Copy the binary data of l and r to the current buffer
-    memcpy(currentBuffer + bufferIndex, &l, sizeof(int32_t));
-    bufferIndex += sizeof(int32_t);
-    memcpy(currentBuffer + bufferIndex, &r, sizeof(int32_t));
-    bufferIndex += sizeof(int32_t);  // Separate increments could be sped up by using a single increment
+    // memcpy(currentBuffer + bufferIndex, &l, sizeof(int32_t));
+    // bufferIndex += sizeof(int32_t);
+    // memcpy(currentBuffer + bufferIndex, &r, sizeof(int32_t));
+    // bufferIndex += sizeof(int32_t);  // Separate increments could be sped up by using a single increment
     // and pre-computing the number to increment by.  (Maybe the compiler optimizes this already.)
     // Sending ASCII like this is a problem, because once in a while the number may not require
     // the same number of characters.  This will cause a problem.  We need to send the data in binary.
