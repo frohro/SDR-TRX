@@ -90,7 +90,7 @@ void setup()
     udp.begin(udpPort);
 
     // Set the callback function
-    // i2s.onReceive(i2sDataReceived);
+    i2s.onReceive(i2sDataReceived);
     i2s.begin();
 }
 
