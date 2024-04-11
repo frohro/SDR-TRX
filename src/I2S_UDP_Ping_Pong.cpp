@@ -56,10 +56,10 @@ void i2sDataReceived()
     if (bufferIndex == BUFFER_SIZE)
     {  // Send the packet number, swap the buffers, and set the flag.
         uint32_t start_time = micros();
-        Serial.print("bufferIndex: ");
-        Serial.println(bufferIndex);
-        Serial.print("BUFFER_SIZE: ");
-        Serial.println(BUFFER_SIZE);
+        // Serial.print("bufferIndex: ");
+        // Serial.println(bufferIndex);
+        // Serial.print("BUFFER_SIZE: ");
+        // Serial.println(BUFFER_SIZE);
         memcpy(currentBuffer, &packet_number, sizeof(int32_t));// Make the first 4 bytes the packet number. 
         char *temp = currentBuffer;  // Swap the buffers
         currentBuffer = sendBuffer;
