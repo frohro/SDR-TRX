@@ -52,7 +52,7 @@ void i2sDataReceived()
     // the same number of characters.  This will cause a problem.  We need to send the data in binary.
 
     // If the buffer is full, swap the buffers and add the packet number
-    if (bufferIndex == BUFFER_SIZE)
+    if (bufferIndex >= BUFFER_SIZE)
     {  // Send the packet number, swap the buffers, and set the flag.
  // Before you reinitialize.
         Serial.print("bufferIndex: ");
