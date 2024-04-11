@@ -112,8 +112,9 @@ void loop()
     if (dataReady)
     {
         udp.beginPacket(udpAddress, udpPort);
-        start_time = micros();
+
         udp.write((const uint8_t *)sendBuffer, BUFFER_SIZE);
+        start_time = micros();
         udp.endPacket();
         dataReady = false;
         Serial.println(micros() - start_time);
