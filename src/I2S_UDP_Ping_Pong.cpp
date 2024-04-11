@@ -17,7 +17,7 @@
 
 #define RATE 16000
 #define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
-const uint BUFFER_SIZE = 2*sizeof(int32_t)*160; // Should be 1468, which gives 4 bytes
+const uint BUFFER_SIZE = 2*sizeof(int32_t)*180; // Should be 1468, which gives 4 bytes
 // room for an uint32_t to tell the sequence number of the packet. 
 I2S i2s(INPUT);
 
@@ -36,6 +36,8 @@ void i2sDataReceived()
 {
     // Serial.println("Data received");
     static int32_t r, l, packet_number = 0;  // Static for a tiny boost in speed.
+    memcpy(currentBuffer + bufferIndex, &packet_number, sizeof(int32_t));  // Write the packet number.
+    bufferIndex += sizeof(int32_t);
     i2s.read32(&l, &r); // Read the next l and r values
     l = l << 9;
     r = r << 9;
@@ -50,9 +52,11 @@ void i2sDataReceived()
     // the same number of characters.  This will cause a problem.  We need to send the data in binary.
 
     // If the buffer is full, swap the buffers and add the packet number
-    if (bufferIndex >= BUFFER_SIZE - sizeof(uint32_t))
+    if (bufferIndex >= BUFFER_SIZE)
     {  // Send the packet number, swap the buffers, and set the flag.
-        memcpy(currentBuffer + bufferIndex, &packet_number, sizeof(int32_t)); // Before you reinitialize.
+ // Before you reinitialize.
+        Serial.print("Packet number: ");
+        Serial.println(packet_number);
         char *temp = currentBuffer;  // Swap the buffers
         currentBuffer = sendBuffer;
         sendBuffer = temp;
