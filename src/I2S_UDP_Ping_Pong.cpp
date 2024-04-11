@@ -55,8 +55,8 @@ void i2sDataReceived()
     if (bufferIndex >= BUFFER_SIZE)
     {  // Send the packet number, swap the buffers, and set the flag.
  // Before you reinitialize.
-        Serial.print("Packet number: ");
-        Serial.println(packet_number);
+        Serial.print("bufferIndex: ");
+        Serial.println(bufferIndex);
         char *temp = currentBuffer;  // Swap the buffers
         currentBuffer = sendBuffer;
         sendBuffer = temp;
