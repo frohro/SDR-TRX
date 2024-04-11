@@ -67,8 +67,8 @@ void i2sDataReceived()
         bufferIndex = 4;   // Reset the buffer index
         packet_number++;   // Increment the packet number
         dataReady = true;  // Set the flag to indicate data is ready to be sent
-          Serial.println(micros());
-          Serial.print(" Delta time: ");
+        //   Serial.println(micros());
+        //   Serial.print(" Delta time: ");
           Serial.println(micros() - start_time);
     }
 }
