@@ -17,14 +17,15 @@
 
 #define RATE 16000
 #define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
-const uint BUFFER_SIZE = (2*sizeof(int32_t)*180) + sizeof(uint32_t); 
-// room for an uint32_t to tell the sequence number of the packet. 
+
 I2S i2s(INPUT);
 
 WiFiUDP udp;
 const char *udpAddress = "192.168.1.101"; // Put your laptop IP here.
 const unsigned int udpPort = 12345;
 
+const uint BUFFER_SIZE = (2*sizeof(int32_t)*180) + sizeof(uint32_t); 
+// room for an uint32_t to tell the sequence number of the packet. 
 char bufferA[BUFFER_SIZE];
 char bufferB[BUFFER_SIZE];
 char *currentBuffer = bufferA;
@@ -37,15 +38,14 @@ void i2sDataReceived()
     // Serial.println("Data received");
     static int32_t r, l, packet_number = 0;  // Static for a tiny boost in speed.
     memcpy(currentBuffer + bufferIndex, &packet_number, sizeof(int32_t));  // Write the packet number.
-    bufferIndex += sizeof(uint32_t);
     i2s.read32(&l, &r); // Read the next l and r values
     l = l << 9;
     r = r << 9;
     // Fill the current buffer with data
     // Copy the binary data of l and r to the current buffer
-    memcpy(currentBuffer + bufferIndex, &l, sizeof(int32_t));
+    memcpy(currentBuffer + bufferIndex + sizeof(uint32_t), &l, sizeof(int32_t));
     bufferIndex += sizeof(int32_t);
-    memcpy(currentBuffer + bufferIndex, &r, sizeof(int32_t));
+    memcpy(currentBuffer + bufferIndex + sizeof(uint32_t), &r, sizeof(int32_t));
     bufferIndex += sizeof(int32_t);  // Separate increments could be sped up by using a single increment
     // and pre-computing the number to increment by.  (Maybe the compiler optimizes this already.)
     // Sending ASCII like this is a problem, because once in a while the number may not require
@@ -54,11 +54,11 @@ void i2sDataReceived()
     // If the buffer is full, swap the buffers and add the packet number
     if (bufferIndex >= BUFFER_SIZE)
     {  // Send the packet number, swap the buffers, and set the flag.
- // Before you reinitialize.
         Serial.print("bufferIndex: ");
         Serial.println(bufferIndex);
         Serial.print("BUFFER_SIZE: ");
         Serial.println(BUFFER_SIZE);
+        memcpy(currentBuffer, &packet_number, sizeof(int32_t));// Make the first 4 bytes the packet number. 
         char *temp = currentBuffer;  // Swap the buffers
         currentBuffer = sendBuffer;
         sendBuffer = temp;
