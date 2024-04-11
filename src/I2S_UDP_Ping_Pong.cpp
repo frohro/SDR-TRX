@@ -37,15 +37,14 @@ void i2sDataReceived()
 {
     // Serial.println("Data received");
     static int32_t r, l, packet_number = 0;  // Static for a tiny boost in speed.
-    memcpy(currentBuffer + bufferIndex, &packet_number, sizeof(int32_t));  // Write the packet number.
     i2s.read32(&l, &r); // Read the next l and r values
     l = l << 9;
     r = r << 9;
     // Fill the current buffer with data
     // Copy the binary data of l and r to the current buffer
-    memcpy(currentBuffer + bufferIndex + sizeof(uint32_t), &l, sizeof(int32_t));
+    memcpy(currentBuffer + bufferIndex, &l, sizeof(int32_t));
     bufferIndex += sizeof(int32_t);
-    memcpy(currentBuffer + bufferIndex + sizeof(uint32_t), &r, sizeof(int32_t));
+    memcpy(currentBuffer + bufferIndex, &r, sizeof(int32_t));
     bufferIndex += sizeof(int32_t);  // Separate increments could be sped up by using a single increment
     // and pre-computing the number to increment by.  (Maybe the compiler optimizes this already.)
     // Sending ASCII like this is a problem, because once in a while the number may not require
@@ -62,7 +61,7 @@ void i2sDataReceived()
         char *temp = currentBuffer;  // Swap the buffers
         currentBuffer = sendBuffer;
         sendBuffer = temp;
-        bufferIndex = 0;   // Reset the buffer index
+        bufferIndex = 4;   // Reset the buffer index
         packet_number++;   // Increment the packet number
         dataReady = true;  // Set the flag to indicate data is ready to be sent
     }
