@@ -54,8 +54,8 @@ void i2sDataReceived()
 
     // If the buffer is full, swap the buffers and add the packet number
     if (bufferIndex == BUFFER_SIZE)
-    {  // Send the packet number, swap the buffers, and set the flag.
-        uint32_t start_time = micros();
+    {   // Send the packet number, swap the buffers, and set the flag.
+        static uint32_t start_time = micros();
         // Serial.print("bufferIndex: ");
         // Serial.println(bufferIndex);
         // Serial.print("BUFFER_SIZE: ");
@@ -69,7 +69,8 @@ void i2sDataReceived()
         dataReady = true;  // Set the flag to indicate data is ready to be sent
         //   Serial.println(micros());
         //   Serial.print(" Delta time: ");
-          Serial.println(micros() - start_time);
+        Serial.println(micros() - start_time);
+        start_time = micros();
     }
 }
 
