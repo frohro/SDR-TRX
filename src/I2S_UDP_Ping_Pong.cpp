@@ -30,7 +30,7 @@ char bufferA[BUFFER_SIZE];
 char bufferB[BUFFER_SIZE];
 char *currentBuffer = bufferA;
 char *sendBuffer = bufferB;
-int bufferIndex = 0;
+int bufferIndex = 4;
 volatile bool dataReady = false;
 
 void i2sDataReceived()
