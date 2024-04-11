@@ -33,10 +33,11 @@ char *sendBuffer = bufferB;
 int bufferIndex = 4;
 volatile bool dataReady = false;
 
+
 void i2sDataReceived()
 {
-    Serial.println("Micros");
-    Serial.print(micros());
+    // Serial.println("Micros");
+    Serial.println(micros());
 
     static int32_t r, l, packet_number = 0;  // Static for a tiny boost in speed.
     i2s.read32(&l, &r); // Read the next l and r values
