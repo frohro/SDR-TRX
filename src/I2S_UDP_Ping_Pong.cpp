@@ -17,7 +17,7 @@
 
 #define RATE 16000
 #define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
-const uint BUFFER_SIZE = 2*sizeof(int32_t)*180; // Should be 1468, which gives 4 bytes
+const uint BUFFER_SIZE = 2*sizeof(int32_t)*160; // Should be 1468, which gives 4 bytes
 // room for an uint32_t to tell the sequence number of the packet. 
 I2S i2s(INPUT);
 
