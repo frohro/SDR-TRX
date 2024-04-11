@@ -50,7 +50,7 @@ void i2sDataReceived()
     // the same number of characters.  This will cause a problem.  We need to send the data in binary.
 
     // If the buffer is full, swap the buffers and add the packet number
-    if (bufferIndex == BUFFER_SIZE - sizeof(uint32_t))
+    if (bufferIndex >= BUFFER_SIZE - sizeof(uint32_t))
     {  // Send the packet number, swap the buffers, and set the flag.
         memcpy(currentBuffer + bufferIndex, &packet_number, sizeof(int32_t)); // Before you reinitialize.
         char *temp = currentBuffer;  // Swap the buffers
