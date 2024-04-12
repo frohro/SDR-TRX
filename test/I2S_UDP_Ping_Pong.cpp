@@ -1,6 +1,7 @@
 /*
  * This Pico W program will connect to the PCM1808 via I2S and read the data it RATE samples per second.
- * It then sends the dato over WIFI using UDP.  
+ * It then sends the dato over WIFI using UDP.  As of 4/11/2024, this is too slow.
+ * It is taking 0.7ms for sending one UDP packet.
  *
  * Author: Rob Frohne, KL7NA, with help from Perplexity and Github Copilot.
  * 4/9/2024
