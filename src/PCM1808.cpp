@@ -590,7 +590,7 @@ void sendDataUDP()
   udpData.beginPacket(remoteIp, DATA_UDPPORT);
   udpData.write((const uint8_t *)buffer, bufferIndex);
   udpData.endPacket();
-  // Clear the buffer for the next round
+  // Clear the buffer for the next round.  (Do we need this?)
   memset(buffer, 0, BUFFER_SIZE);
 }
 
