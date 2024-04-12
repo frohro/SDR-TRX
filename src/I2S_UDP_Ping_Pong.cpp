@@ -42,6 +42,8 @@ void i2sDataReceived()
     // Serial.println("Micros");
   
     static int32_t r, l, packet_number = 0;  // Static for a tiny boost in speed.
+    int n = i2s.available();
+    Serial.println();
     i2s.read32(&l, &r); // Read the next l and r values
     l = l << 9;
     r = r << 9;
@@ -82,10 +84,10 @@ void setup()
     i2s.setBCLK(0);
     i2s.setMCLK(3);
     // Note: LRCK pin is BCK pin plus 1 (1 in this case).
-    i2s.setBitsPerSample(24);
-    i2s.setFrequency(RATE);
     i2s.setMCLKmult(MCLK_MULT);
     i2s.setSysClk(RATE);
+    i2s.setBitsPerSample(24);
+    i2s.setFrequency(RATE);
     i2s.setBuffers(32, 0, 0);
 
     WiFi.begin("Frohne-2.4GHz");
@@ -112,14 +114,12 @@ void loop()
 
 
     if (dataReady)
-    {
+    {  // This is getting interrupted at 1/f_s with the I2S callback.  The problem is that the
+        // end of a packet can happen in the middle of this code.  This is a problem.  We need to
         udp.beginPacket(udpAddress, udpPort);
-
         udp.write((const uint8_t *)sendBuffer, BUFFER_SIZE);
-        start_time = micros();
         udp.endPacket();
         dataReady = false;
-        Serial.println(micros() - start_time);
     }
 
     // Your other main loop code goes here...
