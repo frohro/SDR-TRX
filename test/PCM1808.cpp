@@ -559,7 +559,7 @@ void processCommandUDP()
   }
 }
 void sendDataUDP()
-{
+{ // This is too slow.  It only get 80 kB/s.
   static int32_t r, l;
   size_t bufferIndex = 0;
   // Fill the buffer with 108 lines of "%d\r\n"
