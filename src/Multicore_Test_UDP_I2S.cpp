@@ -89,6 +89,7 @@ public:
     void fillBuffer()
     {
         char *buffer = queue.getNextBuffer(true);
+        Serial.println("Got into fillBuffer");
         if (buffer != nullptr)
         {
             Serial.println("Filling buffer");
