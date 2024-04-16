@@ -151,9 +151,19 @@ public:
 CircularBufferQueue bufferQueue;
 uint32_t packet_number = 0;
 
+void setup()
+{ // This runs on Core0.  It is the UDP setup.
+    Serial.begin();
+    WiFi.begin("Frohne-2.4GHz");
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(10000);
+    }
+    udp.begin(12345);
+}
+
 void setup1()
 { // This runs on Core1.  It is the I2S setup.
-    Serial.begin();
     i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
     i2s.setBCLK(0);
     i2s.setMCLK(3);
