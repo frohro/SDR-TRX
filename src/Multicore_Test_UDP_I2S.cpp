@@ -19,7 +19,7 @@
 #include <si5351.h>
 
 #ifndef STASSID
-#define STASSID Frohne - 2.4GHz
+#define STASSID "Frohne-2.4GHz"
 #endif
 
 // Use #define for common constants to both cores.
@@ -127,6 +127,7 @@ public:
             udp.write((const uint8_t *)&buffer, BUFFER_SIZE);
             udp.endPacket();
             queue.moveToNextBuffer(false);
+            Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
         }
     }
 };
@@ -142,6 +143,7 @@ void setup()
         delay(10000);
     }
     udp.begin(12345);
+    Serial.printf("Connected to %s\n", STASSID);
 }
 
 void setup1()
