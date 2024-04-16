@@ -113,6 +113,7 @@ public:
         memcpy(buffer, &packet_number, sizeof(int32_t)); 
         packet_number++;
         queue.moveToNextBuffer(true);
+        Serial.println("Filled buffer");
     }
 };
 };
