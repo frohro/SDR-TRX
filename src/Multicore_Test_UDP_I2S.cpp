@@ -17,7 +17,6 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <si5351.h>
-#include <atomic> // Do we need this?
 
 #ifndef STASSID
 #define STASSID Frohne - 2.4GHz
