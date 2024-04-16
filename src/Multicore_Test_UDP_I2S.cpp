@@ -36,61 +36,45 @@ const unsigned int udpPort = 12345;
 
 #define BUFFER_SIZE 1468 // 183 samples of 4 bytes + 4 bytes for the packet number
 #define QUEUE_SIZE 9
-
 class CircularBufferQueue
-{ // Need to use rp2040.fifo for this.
+{
 private:
     char buffers[QUEUE_SIZE][BUFFER_SIZE];
-    std::atomic<int> fillIndex;  // Index for filling the buffer
-    std::atomic<int> emptyIndex; // Index for emptying the buffer
+    uint32_t fillIndex;
+    uint32_t emptyIndex;
 
 public:
-    // Constructor
     CircularBufferQueue() : fillIndex(0), emptyIndex(0) {}
 
-    // Get a pointer to the next buffer to be filled
-    char *getNextFillBuffer()
+    // Get a pointer to the next buffer to be processed
+    char *getNextBuffer(bool isFiller)
     {
-        // Check if the fill index is about to overtake the empty index
-        if ((fillIndex + 1) % QUEUE_SIZE != emptyIndex)
+        uint32_t currentIndex = isFiller ? fillIndex : emptyIndex;
+        uint32_t otherIndex;
+        rp2040.fifo.pop_nb(&otherIndex);
+
+        // Check if the current index is about to overtake the other index
+        if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
         {
-            return buffers[fillIndex % QUEUE_SIZE];
+            return buffers[currentIndex % QUEUE_SIZE];
         }
         else
         {
-            return nullptr; // Return null if the buffer is full
+            return nullptr; // Return null if the buffer is full/empty
         }
     }
 
-    // Move to the next buffer to be filled
-    void moveToNextFillBuffer()
+    // Move to the next buffer to be processed
+    void moveToNextBuffer(bool isFiller)
     {
-        if ((fillIndex + 1) % QUEUE_SIZE != emptyIndex)
-        {
-            fillIndex = (fillIndex + 1) % QUEUE_SIZE;
-        }
-    }
+        uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
+        uint32_t otherIndex;
+        rp2040.fifo.pop_nb(&otherIndex);
 
-    // Get a pointer to the next buffer to be emptied
-    char *getNextEmptyBuffer()
-    {
-        // Check if the empty index is about to overtake the fill index
-        if (emptyIndex != fillIndex)
+        if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
         {
-            return buffers[emptyIndex % QUEUE_SIZE];
-        }
-        else
-        {
-            return nullptr; // Return null if the buffer is empty
-        }
-    }
-
-    // Move to the next buffer to be emptied
-    void moveToNextEmptyBuffer()
-    {
-        if (emptyIndex != fillIndex)
-        {
-            emptyIndex = (emptyIndex + 1) % QUEUE_SIZE;
+            currentIndex = (currentIndex + 1) % QUEUE_SIZE;
+            rp2040.fifo.push(currentIndex);
         }
     }
 };
@@ -105,26 +89,26 @@ public:
 
     void fillBuffer()
     {
-        char *buffer = queue.getNextFillBuffer();
+        char *buffer = queue.getNextBuffer(true);
         if (buffer != nullptr)
-        {                                                      // There is space to fill the buffer with data
-            static int32_t r, l, packet_number = 0;            // Static r, l for a tiny boost in speed.
-            uint32_t bufferIndex = 4;                          // Leave four bytes for the packet number.
-            i2s.read32(&l, &r);                                // Read the next l and r values (blocking)
-            l = l << 9;                                        // These should be 8 I think, but this works and 8 does not.
-            r = r << 9;                                        // https://github.com/earlephilhower/arduino-pico/issues/2037
-            memcpy(buffer + bufferIndex, &l, sizeof(int32_t)); // These are sending 2 32 bit integers per sample.
+        {
+            static int32_t r, l, packet_number = 0;
+            uint32_t bufferIndex = 4;
+            i2s.read32(&l, &r);
+            l = l << 9;
+            r = r << 9;
+            memcpy(buffer + bufferIndex, &l, sizeof(int32_t));
             bufferIndex += sizeof(int32_t);
             memcpy(buffer + bufferIndex, &r, sizeof(int32_t));
             bufferIndex += sizeof(int32_t);
             if (bufferIndex == BUFFER_SIZE)
             {
-                memcpy(buffer, &packet_number, sizeof(int32_t)); // Before you reinitialize.
+                memcpy(buffer, &packet_number, sizeof(int32_t));
                 packet_number++;
-                queue.moveToNextFillBuffer();
+                queue.moveToNextBuffer(true);
             }
         }
-    };
+    }
 };
 
 class BufferEmptyer
@@ -137,19 +121,18 @@ public:
 
     void emptyBuffer()
     {
-        char *buffer = queue.getNextEmptyBuffer();
+        char *buffer = queue.getNextBuffer(false);
         if (buffer != nullptr)
         {
             udp.beginPacket(udpAddress, udpPort);
             udp.write((const uint8_t *)&buffer, BUFFER_SIZE);
             udp.endPacket();
-            queue.moveToNextEmptyBuffer();
+            queue.moveToNextBuffer(false);
         }
     }
 };
 
 CircularBufferQueue bufferQueue;
-uint32_t packet_number = 0;
 
 void setup()
 { // This runs on Core0.  It is the UDP setup.
@@ -163,7 +146,7 @@ void setup()
 }
 
 void setup1()
-{ // This runs on Core1.  It is the I2S setup.
+{                   // This runs on Core1.  It is the I2S setup.
     i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
     i2s.setBCLK(0);
     i2s.setMCLK(3);
