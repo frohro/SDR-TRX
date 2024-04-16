@@ -43,14 +43,17 @@ private:
     uint32_t emptyIndex;
 
 public:
-    CircularBufferQueue() : fillIndex(0), emptyIndex(0) {}
+    CircularBufferQueue() : fillIndex(1), emptyIndex(0) {}
 
     // Get a pointer to the next buffer to be processed
     char *getNextBuffer(bool isFiller)
     {
         uint32_t currentIndex = isFiller ? fillIndex : emptyIndex;
-        uint32_t otherIndex;
-        rp2040.fifo.pop_nb(&otherIndex);
+        uint32_t otherIndex, temp;
+        while (rp2040.fifo.pop_nb(&temp))  // Gets most recent otherIndex, empties FIFO
+        {
+            otherIndex = temp;
+        }
 
         // Check if the current index is about to overtake the other index
         if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
@@ -67,9 +70,11 @@ public:
     void moveToNextBuffer(bool isFiller)
     {
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
-        uint32_t otherIndex;
-        rp2040.fifo.pop_nb(&otherIndex);
-
+        uint32_t otherIndex, temp;
+        while (rp2040.fifo.pop_nb(&temp))  // Gets most recent otherIndex, empties FIFO
+        {
+            otherIndex = temp;
+        }
         if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
         {
             currentIndex = (currentIndex + 1) % QUEUE_SIZE;
@@ -89,7 +94,7 @@ public:
     void fillBuffer()
     {
         char *buffer = queue.getNextBuffer(true);
-        Serial.println("Got into fillBuffer");
+        // Serial.println("Got into fillBuffer");
         if (buffer != nullptr)
         {
             Serial.println("Filling buffer");
