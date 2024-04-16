@@ -92,30 +92,29 @@ public:
     BufferFiller(CircularBufferQueue &q) : queue(q) {}
 
     void fillBuffer()
-    {
-        char *buffer = queue.getNextBuffer(true);
-        // Serial.println("Got into fillBuffer");
-        if (buffer != nullptr)
+{
+    char *buffer = queue.getNextBuffer(true);
+    if (buffer != nullptr)
+    {                                                     
+        static int32_t r, l, packet_number = 0;            
+        uint32_t bufferIndex = 4;                          
+
+        while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
         {
-            // Serial.println("Filling buffer");
-            static int32_t r, l, packet_number = 0;
-            uint32_t bufferIndex = 4;
-            i2s.read32(&l, &r);
-            l = l << 9;
-            r = r << 9;
-            memcpy(buffer + bufferIndex, &l, sizeof(int32_t));
+            i2s.read32(&l, &r);                                
+            l = l << 9;                                        
+            r = r << 9;                                        
+            memcpy(buffer + bufferIndex, &l, sizeof(int32_t)); 
             bufferIndex += sizeof(int32_t);
             memcpy(buffer + bufferIndex, &r, sizeof(int32_t));
             bufferIndex += sizeof(int32_t);
-            if (bufferIndex == BUFFER_SIZE)
-            {
-                memcpy(buffer, &packet_number, sizeof(int32_t));
-                packet_number++;
-                queue.moveToNextBuffer(true);
-                Serial.printf("Filled buffer %d\n", packet_number);
-            }
         }
+
+        memcpy(buffer, &packet_number, sizeof(int32_t)); 
+        packet_number++;
+        queue.moveToNextBuffer(true);
     }
+};
 };
 
 class BufferEmptyer
