@@ -97,7 +97,7 @@ public:
         // Serial.println("Got into fillBuffer");
         if (buffer != nullptr)
         {
-            Serial.println("Filling buffer");
+            // Serial.println("Filling buffer");
             static int32_t r, l, packet_number = 0;
             uint32_t bufferIndex = 4;
             i2s.read32(&l, &r);
