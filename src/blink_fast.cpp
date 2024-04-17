@@ -1,12 +1,23 @@
 #include <Arduino.h>
 
-const int LED_PIN = 16;
+const int SW_PIN = 16;
+const int SW1_PIN = 17;
 
 void setup() {
-    pinMode(LED_PIN, OUTPUT);
+    pinMode(SW_PIN, OUTPUT);
+}
+void setup1()
+{
+    pinMode(SW1_PIN, OUTPUT);
 }
 
 void loop() {
-    digitalWrite(LED_PIN, HIGH);
-    digitalWrite(LED_PIN, LOW);
+    digitalWrite(SW_PIN, HIGH);
+    digitalWrite(SW_PIN, LOW);
+}
+
+void loop1()
+{
+    digitalWrite(SW1_PIN, HIGH);
+    digitalWrite(SW1_PIN, LOW);
 }
