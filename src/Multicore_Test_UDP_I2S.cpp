@@ -176,6 +176,7 @@ void setup()
         delay(10);
     }
     udp.begin(udpPort);
+    rp2040.restartCore1();
     Serial.printf("Connected to %s\n", STASSID);
 }
 
