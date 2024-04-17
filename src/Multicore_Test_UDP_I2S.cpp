@@ -45,59 +45,6 @@ private:
 public:
     CircularBufferQueue() : fillIndex(1), emptyIndex(0) {}
 
-    // Get a pointer to the next buffer to be processed
-    // char *getNextBuffer(bool isFiller)
-    // {
-    //     uint32_t currentIndex = isFiller ? fillIndex : emptyIndex;
-    //     uint32_t otherIndex, temp;
-    //     if (rp2040.fifo.available() == 0)
-    //     {
-    //         otherIndex = isFiller ? emptyIndex : fillIndex; // otherIndex has not changed.
-    //     }
-    //     else
-    //     {
-    //         while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
-    //         {
-    //             otherIndex = temp;
-    //         }
-    //     }
-
-    //     // Check if the current index is about to overtake the other index
-    //     // Serial.printf("Current index: %d, Other index: %d\n", currentIndex, otherIndex);
-    //     if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
-    //     {
-    //         return buffers[currentIndex % QUEUE_SIZE];
-    //     }
-    //     else
-    //     {
-    //         return nullptr; // Return null if the buffer is full/empty
-    //         Serial.printf("fillIndex: %d, emptyIndex: %d\n", fillIndex, emptyIndex);
-    //     }
-    // }
-
-    // Move to the next buffer to be processed
-    // void moveToNextBuffer(bool isFiller)
-    // {
-    //     uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
-    //     uint32_t otherIndex, temp;
-    //     if (rp2040.fifo.available() == 0)
-    //     {
-    //         otherIndex = isFiller ? emptyIndex : fillIndex; // Return nullptr if the other op is not done.
-    //     }
-    //     else
-    //     {
-    //         while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
-    //         {                                 // This does not appear to work if the FIFO is empty.  Need to check if it is empty.
-    //             otherIndex = temp;
-    //         }
-    //     }
-    //     if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
-    //     {
-    //         currentIndex = (currentIndex + 1) % QUEUE_SIZE;
-    //         rp2040.fifo.push(currentIndex);
-    //     }
-    // }
-
     char *getNextBufferAndUpdate(bool isFiller)
     {
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
@@ -141,11 +88,14 @@ public:
         char *buffer = queue.getNextBufferAndUpdate(true);
         rp2040.resumeOtherCore();
         // Serial.printf("Got filler buffer %p\n", buffer);
-        if (buffer != nullptr)
+        if (buffer == nullptr)
+        {
+            digitalWrite(20, HIGH);
+        }
+        else
         {
             static int32_t r, l, packet_number = 0;
             uint32_t bufferIndex = 4;
-
             while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
             {
                 i2s.read32(&l, &r);
@@ -159,15 +109,8 @@ public:
 
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
-            // rp2040.idleOtherCore();
-            // queue.moveToNextBuffer(true);
-            // rp2040.resumeOtherCore();
             Serial.printf("Filled packet %d\n", packet_number);
             digitalWrite(20, LOW);
-        }
-        else
-        {
-            digitalWrite(20, HIGH);
         }   
     }
 };
@@ -215,7 +158,7 @@ void setup()
         delay(1000);
     }
     udp.begin(udpPort);
-    // rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
+    rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
     pinMode(19, OUTPUT);
     pinMode(20, OUTPUT);
