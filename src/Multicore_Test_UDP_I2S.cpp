@@ -113,6 +113,7 @@ public:
             packet_number++;
             Serial.printf("Filled packet %d\n", packet_number);
             digitalWrite(17, HIGH);
+            digitalWrite(19, LOW);
         }   
     }
 };
