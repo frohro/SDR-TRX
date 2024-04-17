@@ -23,6 +23,7 @@ void setup()
     }
 
     udp.begin(12345);
+    Serial.begin(115200);
 }
 
 const size_t BUFFER_SIZE = 1470; // Assuming the MTU is 1500 bytes...
