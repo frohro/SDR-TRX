@@ -121,7 +121,7 @@ public:
         }
         else
         {
-            Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d\n", fillIndex, emptyIndex);
+            // Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d\n", fillIndex, emptyIndex);
             return nullptr; // Return null if the buffer is full/empty
         }
     }
@@ -195,6 +195,7 @@ public:
             // queue.moveToNextBuffer(false);
             // rp2040.resumeOtherCore();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
+            digitalWrite(19, LOW);
         }
         else
         {
