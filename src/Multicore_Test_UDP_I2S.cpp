@@ -92,6 +92,7 @@ public:
         {
             digitalWrite(17, HIGH);
             Serial.printf("Pin 17 should be high now.\n");
+            digitalWrite(19, HIGH);
         }
         else
         {
@@ -166,6 +167,7 @@ void setup()
     pinMode(16, OUTPUT);
     pinMode(17, OUTPUT);
     pinMode(18, OUTPUT);
+    pinMode(19, OUTPUT);
     rp2040.resumeOtherCore();
 }
 
