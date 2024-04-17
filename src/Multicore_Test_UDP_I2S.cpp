@@ -96,6 +96,7 @@ public:
         }
         else
         {
+        Serial.printf("Should be filling buffer now.\n");
             static int32_t r, l, packet_number = 0;
             uint32_t bufferIndex = 4;
             while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
