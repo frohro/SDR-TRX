@@ -148,6 +148,7 @@ public:
 
     void emptyBuffer()
     {
+        Serial.printf("Emptying buffer\n");
         rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(false);
         rp2040.resumeOtherCore();
@@ -203,7 +204,7 @@ void loop()
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
-    Serial.printf("Core 1\n");
+    // Serial.printf("Core 1\n");
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
 }
