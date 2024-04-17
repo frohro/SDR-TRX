@@ -111,7 +111,7 @@ public:
         rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(true);
         rp2040.resumeOtherCore();
-        Serial.printf("Got buffer %p\n", buffer);
+        Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer != nullptr)
         {
             static int32_t r, l, packet_number = 0;
@@ -195,6 +195,7 @@ void setup1()
 
 void loop()
 { // This should run on Core0.  It is the UDP loop.
+    Serial.printf("Core 0\n");
     static BufferEmptyer emptyer(bufferQueue);
     emptyer.emptyBuffer(); // Empty the buffer
 }
