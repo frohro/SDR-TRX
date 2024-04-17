@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 const int SW_PIN = 16;
-const int SW1_PIN = 17;
+const int SW1_PIN = 18;
 
 void setup() {
     pinMode(SW_PIN, OUTPUT);
@@ -12,8 +12,10 @@ void setup1()
 }
 
 void loop() {
+    rp2040.idleOtherCore();
     digitalWrite(SW_PIN, HIGH);
     digitalWrite(SW_PIN, LOW);
+    rp2040.resumeOtherCore();
 }
 
 void loop1()
