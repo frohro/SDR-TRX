@@ -87,7 +87,7 @@ public:
         rp2040.idleOtherCore();
         char *buffer = queue.getNextBufferAndUpdate(true);
         rp2040.resumeOtherCore();
-        // Serial.printf("Got filler buffer %p\n", buffer);
+        Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer == nullptr)
         {
             digitalWrite(20, HIGH);
