@@ -111,7 +111,7 @@ public:
         // rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(true);
         // rp2040.resumeOtherCore();
-        Serial.printf("Got filler buffer %p\n", buffer);
+        // Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer != nullptr)
         {
             static int32_t r, l, packet_number = 0;
@@ -173,7 +173,7 @@ void setup()
     WiFi.begin(STASSID);
     while (WiFi.status() != WL_CONNECTED)
     {
-        delay(10);
+        delay(1000);
     }
     udp.begin(udpPort);
     rp2040.restartCore1();
