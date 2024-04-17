@@ -45,7 +45,7 @@ void loop()
     udp.endPacket();  // Takes about 670 us
     int time_elapsed = micros() - start_time;
     total_time += time_elapsed;
-    if (n++ == 5000) 
+    if (n++ == 500) 
     {
         Serial.printf("Time per statement: %f\n", (float)total_time / n);
         start_time = micros();
@@ -53,4 +53,16 @@ void loop()
         n = 0;
     }
     
+}
+
+void setup1()
+{
+    pinMode(16, OUTPUT);
+}
+
+void loop1()
+{
+    rp2040.idleOtherCore();
+    delay(100);
+    rp2040.resumeOtherCore();
 }

@@ -138,9 +138,6 @@ public:
             udp.beginPacket(udpAddress, udpPort);
             udp.write((const uint8_t *)&buffer, BUFFER_SIZE);
             udp.endPacket();
-            // rp2040.idleOtherCore();
-            // queue.moveToNextBuffer(false);
-            // rp2040.resumeOtherCore();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
             digitalWrite(16, LOW);
             digitalWrite(18, HIGH);
@@ -157,7 +154,7 @@ CircularBufferQueue bufferQueue;
 
 void setup()
 { // This runs on Core0.  It is the UDP setup.
-    rp2040.idleOtherCore();
+    rp2040.idleOtherCore();  // These are to try and somewhat synchronize the cores.
     Serial.begin();
     WiFi.begin(STASSID);
     while (WiFi.status() != WL_CONNECTED)
@@ -165,7 +162,6 @@ void setup()
         delay(1000);
     }
     udp.begin(udpPort);
-    // rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
     pinMode(16, OUTPUT);
     pinMode(17, OUTPUT);
