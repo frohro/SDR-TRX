@@ -163,6 +163,7 @@ void setup()
     // rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
     pinMode(16, OUTPUT);
+    digitalWrite(16, HIGH);
     pinMode(17, OUTPUT);
     pinMode(18, OUTPUT);
     rp2040.resumeOtherCore();
