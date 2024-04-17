@@ -91,7 +91,7 @@ public:
         if (buffer == nullptr)
         {
             digitalWrite(17, HIGH);
-            Serial.printf("Pin 20 should be high now.\n");
+            Serial.printf("Pin 17 should be high now.\n");
         }
         else
         {
@@ -162,14 +162,15 @@ void setup()
     udp.begin(udpPort);
     // rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
-    rp2040.resumeOtherCore();
     pinMode(16, OUTPUT);
     pinMode(17, OUTPUT);
     pinMode(18, OUTPUT);
+    rp2040.resumeOtherCore();
 }
 
 void setup1()
 {                   // This runs on Core1.  It is the I2S setup.
+    rp2040.idleOtherCore();
     i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
     i2s.setBCLK(0);
     i2s.setMCLK(3);
@@ -180,6 +181,7 @@ void setup1()
     i2s.setMCLKmult(MCLK_MULT);
     i2s.setBuffers(32, 0, 0);
     i2s.begin();
+    rp2040.resumeOtherCore();
 }
 
 void loop()
