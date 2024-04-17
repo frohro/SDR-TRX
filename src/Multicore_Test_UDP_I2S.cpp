@@ -140,6 +140,7 @@ public:
             // rp2040.resumeOtherCore();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
             digitalWrite(16, LOW);
+            digitalWrite(16, HIGH);
         }
         else
         {
