@@ -72,6 +72,7 @@ public:
         {
             return nullptr; // Return null if the buffer is full/empty
         }
+        Serial.printf("fillIndex: %d, emptyIndex: %d\n", fillIndex, emptyIndex);
     }
 
     // Move to the next buffer to be processed
