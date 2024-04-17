@@ -108,9 +108,9 @@ public:
 
     void fillBuffer()
     {
-        // rp2040.idleOtherCore();
+        rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(true);
-        // rp2040.resumeOtherCore();
+        rp2040.resumeOtherCore();
         // Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer != nullptr)
         {
@@ -130,9 +130,9 @@ public:
 
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
-            // rp2040.idleOtherCore();
+            rp2040.idleOtherCore();
             queue.moveToNextBuffer(true);
-            // rp2040.resumeOtherCore();
+            rp2040.resumeOtherCore();
             Serial.printf("Filled packet %d\n", packet_number);
         }
     }
@@ -148,18 +148,18 @@ public:
 
     void emptyBuffer()
     {
-        // rp2040.idleOtherCore();
+        rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(false);
-        // rp2040.resumeOtherCore();
+        rp2040.resumeOtherCore();
         Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
         {
             udp.beginPacket(udpAddress, udpPort);
             udp.write((const uint8_t *)&buffer, BUFFER_SIZE);
             udp.endPacket();
-            // rp2040.idleOtherCore();
+            rp2040.idleOtherCore();
             queue.moveToNextBuffer(false);
-            // rp2040.resumeOtherCore();
+            rp2040.resumeOtherCore();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
         }
     }
@@ -176,7 +176,7 @@ void setup()
         delay(1000);
     }
     udp.begin(udpPort);
-    rp2040.restartCore1();
+    rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
 }
 
@@ -203,6 +203,7 @@ void loop()
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
+    Serial.printf("Core 1\n");
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
 }
