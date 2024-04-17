@@ -43,7 +43,7 @@ private:
     uint32_t emptyIndex;
 
 public:
-    CircularBufferQueue() : fillIndex(0), emptyIndex(1) {}
+    CircularBufferQueue() : fillIndex(1), emptyIndex(0) {}
 
     // Get a pointer to the next buffer to be processed
     char *getNextBuffer(bool isFiller)
@@ -161,12 +161,12 @@ CircularBufferQueue bufferQueue;
 void setup()
 { // This runs on Core0.  It is the UDP setup.
     Serial.begin();
-    WiFi.begin("Frohne-2.4GHz");
+    WiFi.begin(STASSID);
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(10000);
     }
-    udp.begin(12345);
+    udp.begin(udpPort);
     Serial.printf("Connected to %s\n", STASSID);
 }
 
