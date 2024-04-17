@@ -148,7 +148,6 @@ public:
 
     void emptyBuffer()
     {
-        Serial.printf("Emptying buffer\n");
         rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(false);
         rp2040.resumeOtherCore();
@@ -162,6 +161,10 @@ public:
             queue.moveToNextBuffer(false);
             rp2040.resumeOtherCore();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
+        }
+        else
+        {
+            digitalWrite(19, HIGH);
         }
     }
 };
@@ -179,6 +182,7 @@ void setup()
     udp.begin(udpPort);
     rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
+    pinMode(19, OUTPUT);
 }
 
 void setup1()
