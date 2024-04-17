@@ -6,12 +6,13 @@ const int SW1_PIN = 18;
 void setup() {
     rp2040.idleOtherCore();
     pinMode(SW_PIN, OUTPUT);
+    pinMode(SW1_PIN, OUTPUT);
     delay(100);
     rp2040.resumeOtherCore();
 }
 void setup1()
 {
-    pinMode(SW1_PIN, OUTPUT);
+
 }
 
 void loop() {
