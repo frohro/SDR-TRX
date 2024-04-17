@@ -63,6 +63,7 @@ public:
         }
 
         // Check if the current index is about to overtake the other index
+        Serial.printf("Current index: %d, Other index: %d\n", currentIndex, otherIndex);
         if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
         {
             return buffers[currentIndex % QUEUE_SIZE];
