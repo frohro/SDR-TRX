@@ -68,7 +68,7 @@ public:
         }
         else
         {
-            // Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d\n", fillIndex, emptyIndex);
+            Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d, isFiller is%d.\n", fillIndex, emptyIndex, isFiller);
             return nullptr; // Return null if the buffer is full/empty
         }
     }
