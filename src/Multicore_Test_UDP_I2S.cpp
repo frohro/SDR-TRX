@@ -90,13 +90,12 @@ public:
         Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer == nullptr)
         {
-            digitalWrite(17, HIGH);
+            digitalWrite(17, LOW);
             Serial.printf("Pin 17 should be high now.\n");
             digitalWrite(19, HIGH);
         }
         else
         {
-        Serial.printf("Should be filling buffer now.\n");
             static int32_t r, l, packet_number = 0;
             uint32_t bufferIndex = 4;
             while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
@@ -113,7 +112,7 @@ public:
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
             Serial.printf("Filled packet %d\n", packet_number);
-            digitalWrite(17, LOW);
+            digitalWrite(17, HIGH);
         }   
     }
 };
