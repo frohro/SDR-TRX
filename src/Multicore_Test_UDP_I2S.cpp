@@ -60,7 +60,7 @@ public:
                 otherIndex = temp;
             }
         }
-        if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
+        if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)  // If we can move to the next buffer...
         {
             currentIndex = (currentIndex + 1) % QUEUE_SIZE;
             rp2040.fifo.push(currentIndex);
@@ -84,9 +84,9 @@ public:
 
     void fillBuffer()
     {
-        rp2040.idleOtherCore();
+        // rp2040.idleOtherCore();
         char *buffer = queue.getNextBufferAndUpdate(true);
-        rp2040.resumeOtherCore();
+        // rp2040.resumeOtherCore();
         Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer == nullptr)
         {
@@ -128,9 +128,9 @@ public:
 
     void emptyBuffer()
     {
-        rp2040.idleOtherCore();
+        // rp2040.idleOtherCore();
         char *buffer = queue.getNextBufferAndUpdate(false);
-        rp2040.resumeOtherCore();
+        // rp2040.resumeOtherCore();
         Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
         {
@@ -192,13 +192,17 @@ void setup1()
 void loop()
 { // This should run on Core0.  It is the UDP loop.
     Serial.printf("Core 0\n");
+    rp2040.idleOtherCore();
     static BufferEmptyer emptyer(bufferQueue);
     emptyer.emptyBuffer(); // Empty the buffer
+    rp2040.resumeOtherCore();
 }
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
     // Serial.printf("Core 1\n");
+    rp2040.idleOtherCore();
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
+    rp2040.resumeOtherCore();
 }
