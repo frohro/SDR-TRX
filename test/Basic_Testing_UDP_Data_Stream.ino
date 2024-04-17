@@ -8,10 +8,6 @@
 #include <WiFiUdp.h>
 #include <si5351.h>
 
-#ifndef STASSID
-#define STASSID Frohne - 2.4GHz
-#endif
-
 WiFiUDP udp;
 void setup()
 {
@@ -53,12 +49,12 @@ void loop()
         total_time = 0;
         n = 0;
     }
-    
+  
 }
 
 void setup1()
 {
-    pinMode(16, OUTPUT);
+
 }
 
 void loop1()
