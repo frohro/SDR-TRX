@@ -151,6 +151,7 @@ public:
         rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(false);
         rp2040.resumeOtherCore();
+        Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
         {
             udp.beginPacket(udpAddress, udpPort);
