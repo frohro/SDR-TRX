@@ -139,11 +139,11 @@ public:
             // queue.moveToNextBuffer(false);
             // rp2040.resumeOtherCore();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
-            digitalWrite(19, LOW);
+            digitalWrite(16, LOW);
         }
         else
         {
-            digitalWrite(19, HIGH);
+            digitalWrite(16, HIGH);
         }
     }
 };
@@ -163,7 +163,6 @@ void setup()
     // rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
     pinMode(16, OUTPUT);
-    digitalWrite(16, HIGH);
     pinMode(17, OUTPUT);
     pinMode(18, OUTPUT);
     rp2040.resumeOtherCore();
