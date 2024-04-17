@@ -43,7 +43,7 @@ private:
     uint32_t emptyIndex;
 
 public:
-    CircularBufferQueue() : fillIndex(1), emptyIndex(0) {}
+    CircularBufferQueue() : fillIndex(0), emptyIndex(1) {}
 
     // Get a pointer to the next buffer to be processed
     char *getNextBuffer(bool isFiller)
