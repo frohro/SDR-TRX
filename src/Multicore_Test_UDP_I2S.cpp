@@ -90,7 +90,7 @@ public:
         Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer == nullptr)
         {
-            digitalWrite(20, HIGH);
+            digitalWrite(17, HIGH);
             Serial.printf("Pin 20 should be high now.\n");
         }
         else
@@ -111,7 +111,7 @@ public:
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
             Serial.printf("Filled packet %d\n", packet_number);
-            digitalWrite(20, LOW);
+            digitalWrite(17, LOW);
         }   
     }
 };
@@ -159,11 +159,11 @@ void setup()
         delay(1000);
     }
     udp.begin(udpPort);
-    rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
+    // rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
-    pinMode(19, OUTPUT);
-    pinMode(20, OUTPUT);
-    pinMode(21, OUTPUT);
+    pinMode(16, OUTPUT);
+    pinMode(17, OUTPUT);
+    pinMode(18, OUTPUT);
 }
 
 void setup1()
