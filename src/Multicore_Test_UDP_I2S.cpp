@@ -135,6 +135,10 @@ public:
             rp2040.resumeOtherCore();
             Serial.printf("Filled packet %d\n", packet_number);
         }
+        else
+        {
+            digitalWrite(20, HIGH);
+        }   
     }
 };
 
@@ -183,6 +187,8 @@ void setup()
     // rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
     pinMode(19, OUTPUT);
+    pinMode(20, OUTPUT);
+    pinMode(21, OUTPUT);
 }
 
 void setup1()
