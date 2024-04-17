@@ -180,7 +180,7 @@ void setup()
         delay(1000);
     }
     udp.begin(udpPort);
-    rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
+    // rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
     pinMode(19, OUTPUT);
 }
