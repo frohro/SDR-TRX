@@ -9,7 +9,7 @@
  * It then sends the dato over WIFI using UDP.
  *
  *
- * Author: Rob Frohne, KL7NA, with help from Perplexity and Github Copilot.
+ * Author: Rob Frohne, KL7NA, with help from Github Copilot.
  * 4/9/2024
  */
 #include <Arduino.h>
@@ -50,7 +50,7 @@ public:
     {
         uint32_t currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
-        while (rp2040.fifo.pop_nb(&temp))  // Gets most recent otherIndex, empties FIFO
+        while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
         {
             otherIndex = temp;
         }
@@ -71,7 +71,7 @@ public:
     {
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
-        while (rp2040.fifo.pop_nb(&temp))  // Gets most recent otherIndex, empties FIFO
+        while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
         {
             otherIndex = temp;
         }
@@ -92,30 +92,30 @@ public:
     BufferFiller(CircularBufferQueue &q) : queue(q) {}
 
     void fillBuffer()
-{
-    char *buffer = queue.getNextBuffer(true);
-    if (buffer != nullptr)
-    {                                                     
-        static int32_t r, l, packet_number = 0;            
-        uint32_t bufferIndex = 4;                          
-
-        while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
+    {
+        char *buffer = queue.getNextBuffer(true);
+        if (buffer != nullptr)
         {
-            i2s.read32(&l, &r);                                
-            l = l << 9;                                        
-            r = r << 9;                                        
-            memcpy(buffer + bufferIndex, &l, sizeof(int32_t)); 
-            bufferIndex += sizeof(int32_t);
-            memcpy(buffer + bufferIndex, &r, sizeof(int32_t));
-            bufferIndex += sizeof(int32_t);
-        }
+            static int32_t r, l, packet_number = 0;
+            uint32_t bufferIndex = 4;
 
-        memcpy(buffer, &packet_number, sizeof(int32_t)); 
-        packet_number++;
-        queue.moveToNextBuffer(true);
-        Serial.printf("Filled packet %d\n", packet_number);
+            while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
+            {
+                i2s.read32(&l, &r);
+                l = l << 9;
+                r = r << 9;
+                memcpy(buffer + bufferIndex, &l, sizeof(int32_t));
+                bufferIndex += sizeof(int32_t);
+                memcpy(buffer + bufferIndex, &r, sizeof(int32_t));
+                bufferIndex += sizeof(int32_t);
+            }
+
+            memcpy(buffer, &packet_number, sizeof(int32_t));
+            packet_number++;
+            queue.moveToNextBuffer(true);
+            Serial.printf("Filled packet %d\n", packet_number);
+        }
     }
-};
 };
 
 class BufferEmptyer
