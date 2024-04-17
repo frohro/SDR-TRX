@@ -134,6 +134,7 @@ public:
             queue.moveToNextBuffer(true);
             rp2040.resumeOtherCore();
             Serial.printf("Filled packet %d\n", packet_number);
+            digitalWrite(20, LOW);
         }
         else
         {
