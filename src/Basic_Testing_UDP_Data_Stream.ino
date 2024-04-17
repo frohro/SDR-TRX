@@ -63,7 +63,7 @@ void setup1()
 
 void loop1()
 {
-    // rp2040.idleOtherCore();
-    // delay(100);
-    // rp2040.resumeOtherCore();
+    rp2040.idleOtherCore();
+    delay(100);
+    rp2040.resumeOtherCore();
 }
