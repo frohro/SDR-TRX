@@ -50,6 +50,7 @@ public:
     {
         uint32_t currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
+        if (rp2040.fifo.available() == 0) return nullptr;  // Return nullptr if the other op is not done.    
         while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
         {
             otherIndex = temp;
@@ -71,9 +72,16 @@ public:
     {
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
-        while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
+        if (rp2040.fifo.available() == 0) 
         {
-            otherIndex = temp;
+            otherIndex = isFiller ? emptyIndex: fillIndex;  // Return nullptr if the other op is not done.    
+        }
+        else
+        {
+            while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
+            {  // This does not appear to work if the FIFO is empty.  Need to check if it is empty.
+                otherIndex = temp;
+            }
         }
         if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
         {
@@ -93,7 +101,9 @@ public:
 
     void fillBuffer()
     {
+        rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(true);
+        rp2040.resumeOtherCore();
         if (buffer != nullptr)
         {
             static int32_t r, l, packet_number = 0;
@@ -112,7 +122,9 @@ public:
 
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
+            rp2040.idleOtherCore();
             queue.moveToNextBuffer(true);
+            rp2040.resumeOtherCore();
             Serial.printf("Filled packet %d\n", packet_number);
         }
     }
@@ -128,13 +140,17 @@ public:
 
     void emptyBuffer()
     {
+        rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(false);
+        rp2040.resumeOtherCore();
         if (buffer != nullptr)
         {
             udp.beginPacket(udpAddress, udpPort);
             udp.write((const uint8_t *)&buffer, BUFFER_SIZE);
             udp.endPacket();
+            rp2040.idleOtherCore();
             queue.moveToNextBuffer(false);
+            rp2040.resumeOtherCore();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
         }
     }
