@@ -64,6 +64,7 @@ public:
         {
             currentIndex = (currentIndex + 1) % QUEUE_SIZE;
             rp2040.fifo.push(currentIndex);
+            Serial.printf("Going: fillIndex: %d, emptyIndex: %d, isFiller is%d.\n", fillIndex, emptyIndex, isFiller);
             return buffers[currentIndex];
         }
         else
