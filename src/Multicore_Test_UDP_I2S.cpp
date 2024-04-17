@@ -91,6 +91,7 @@ public:
         if (buffer == nullptr)
         {
             digitalWrite(20, HIGH);
+            Serial.printf("Pin 20 should be high now.\n");
         }
         else
         {
