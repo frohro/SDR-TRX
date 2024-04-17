@@ -108,9 +108,9 @@ public:
 
     void fillBuffer()
     {
-        rp2040.idleOtherCore();
+        // rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(true);
-        rp2040.resumeOtherCore();
+        // rp2040.resumeOtherCore();
         Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer != nullptr)
         {
@@ -130,9 +130,9 @@ public:
 
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
-            rp2040.idleOtherCore();
+            // rp2040.idleOtherCore();
             queue.moveToNextBuffer(true);
-            rp2040.resumeOtherCore();
+            // rp2040.resumeOtherCore();
             Serial.printf("Filled packet %d\n", packet_number);
         }
     }
@@ -148,18 +148,18 @@ public:
 
     void emptyBuffer()
     {
-        rp2040.idleOtherCore();
+        // rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(false);
-        rp2040.resumeOtherCore();
+        // rp2040.resumeOtherCore();
         Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
         {
             udp.beginPacket(udpAddress, udpPort);
             udp.write((const uint8_t *)&buffer, BUFFER_SIZE);
             udp.endPacket();
-            rp2040.idleOtherCore();
+            // rp2040.idleOtherCore();
             queue.moveToNextBuffer(false);
-            rp2040.resumeOtherCore();
+            // rp2040.resumeOtherCore();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
         }
     }
