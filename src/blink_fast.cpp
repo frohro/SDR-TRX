@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <si5351.h>
 
-const int LED_PIN = 19;
+const int LED_PIN = 18;
 
 void setup() {
     pinMode(LED_PIN, OUTPUT);
