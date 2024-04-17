@@ -1,7 +1,6 @@
 #include <Arduino.h>
-// #include <si5351.h>
 
-const int LED_PIN = 18;
+const int LED_PIN = 17;
 
 void setup() {
     pinMode(LED_PIN, OUTPUT);
@@ -9,7 +8,5 @@ void setup() {
 
 void loop() {
     digitalWrite(LED_PIN, HIGH);
-
     digitalWrite(LED_PIN, LOW);
-
 }
