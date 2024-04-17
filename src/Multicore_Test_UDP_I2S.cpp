@@ -173,7 +173,7 @@ void setup()
     WiFi.begin(STASSID);
     while (WiFi.status() != WL_CONNECTED)
     {
-        delay(10000);
+        delay(10);
     }
     udp.begin(udpPort);
     Serial.printf("Connected to %s\n", STASSID);
