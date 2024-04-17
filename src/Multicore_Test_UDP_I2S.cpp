@@ -50,10 +50,16 @@ public:
     {
         uint32_t currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
-        if (rp2040.fifo.available() == 0) return nullptr;  // Return nullptr if the other op is not done.    
-        while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
+        if (rp2040.fifo.available() == 0)
         {
-            otherIndex = temp;
+            otherIndex = isFiller ? emptyIndex : fillIndex; // Return nullptr if the other op is not done.
+        }
+        else
+        {
+            while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
+            {
+                otherIndex = temp;
+            }
         }
 
         // Check if the current index is about to overtake the other index
@@ -72,14 +78,14 @@ public:
     {
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
-        if (rp2040.fifo.available() == 0) 
+        if (rp2040.fifo.available() == 0)
         {
-            otherIndex = isFiller ? emptyIndex: fillIndex;  // Return nullptr if the other op is not done.    
+            otherIndex = isFiller ? emptyIndex : fillIndex; // Return nullptr if the other op is not done.
         }
         else
         {
             while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
-            {  // This does not appear to work if the FIFO is empty.  Need to check if it is empty.
+            {                                 // This does not appear to work if the FIFO is empty.  Need to check if it is empty.
                 otherIndex = temp;
             }
         }
@@ -104,6 +110,7 @@ public:
         rp2040.idleOtherCore();
         char *buffer = queue.getNextBuffer(true);
         rp2040.resumeOtherCore();
+        Serial.printf("Got buffer %p\n", buffer);
         if (buffer != nullptr)
         {
             static int32_t r, l, packet_number = 0;
