@@ -46,37 +46,59 @@ public:
     CircularBufferQueue() : fillIndex(1), emptyIndex(0) {}
 
     // Get a pointer to the next buffer to be processed
-    char *getNextBuffer(bool isFiller)
-    {
-        uint32_t currentIndex = isFiller ? fillIndex : emptyIndex;
-        uint32_t otherIndex, temp;
-        if (rp2040.fifo.available() == 0)
-        {
-            otherIndex = isFiller ? emptyIndex : fillIndex; // Return nullptr if the other op is not done.
-        }
-        else
-        {
-            while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
-            {
-                otherIndex = temp;
-            }
-        }
+    // char *getNextBuffer(bool isFiller)
+    // {
+    //     uint32_t currentIndex = isFiller ? fillIndex : emptyIndex;
+    //     uint32_t otherIndex, temp;
+    //     if (rp2040.fifo.available() == 0)
+    //     {
+    //         otherIndex = isFiller ? emptyIndex : fillIndex; // otherIndex has not changed.
+    //     }
+    //     else
+    //     {
+    //         while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
+    //         {
+    //             otherIndex = temp;
+    //         }
+    //     }
 
-        // Check if the current index is about to overtake the other index
-        // Serial.printf("Current index: %d, Other index: %d\n", currentIndex, otherIndex);
-        if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
-        {
-            return buffers[currentIndex % QUEUE_SIZE];
-        }
-        else
-        {
-            return nullptr; // Return null if the buffer is full/empty
-            Serial.printf("fillIndex: %d, emptyIndex: %d\n", fillIndex, emptyIndex);
-        }
-    }
+    //     // Check if the current index is about to overtake the other index
+    //     // Serial.printf("Current index: %d, Other index: %d\n", currentIndex, otherIndex);
+    //     if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
+    //     {
+    //         return buffers[currentIndex % QUEUE_SIZE];
+    //     }
+    //     else
+    //     {
+    //         return nullptr; // Return null if the buffer is full/empty
+    //         Serial.printf("fillIndex: %d, emptyIndex: %d\n", fillIndex, emptyIndex);
+    //     }
+    // }
 
     // Move to the next buffer to be processed
-    void moveToNextBuffer(bool isFiller)
+    // void moveToNextBuffer(bool isFiller)
+    // {
+    //     uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
+    //     uint32_t otherIndex, temp;
+    //     if (rp2040.fifo.available() == 0)
+    //     {
+    //         otherIndex = isFiller ? emptyIndex : fillIndex; // Return nullptr if the other op is not done.
+    //     }
+    //     else
+    //     {
+    //         while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
+    //         {                                 // This does not appear to work if the FIFO is empty.  Need to check if it is empty.
+    //             otherIndex = temp;
+    //         }
+    //     }
+    //     if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)
+    //     {
+    //         currentIndex = (currentIndex + 1) % QUEUE_SIZE;
+    //         rp2040.fifo.push(currentIndex);
+    //     }
+    // }
+
+    char *getNextBufferAndUpdate(bool isFiller)
     {
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
@@ -95,6 +117,12 @@ public:
         {
             currentIndex = (currentIndex + 1) % QUEUE_SIZE;
             rp2040.fifo.push(currentIndex);
+            return buffers[currentIndex];
+        }
+        else
+        {
+            Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d\n", fillIndex, emptyIndex);
+            return nullptr; // Return null if the buffer is full/empty
         }
     }
 };
@@ -110,7 +138,7 @@ public:
     void fillBuffer()
     {
         rp2040.idleOtherCore();
-        char *buffer = queue.getNextBuffer(true);
+        char *buffer = queue.getNextBufferAndUpdate(true);
         rp2040.resumeOtherCore();
         // Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer != nullptr)
@@ -131,9 +159,9 @@ public:
 
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
-            rp2040.idleOtherCore();
-            queue.moveToNextBuffer(true);
-            rp2040.resumeOtherCore();
+            // rp2040.idleOtherCore();
+            // queue.moveToNextBuffer(true);
+            // rp2040.resumeOtherCore();
             Serial.printf("Filled packet %d\n", packet_number);
             digitalWrite(20, LOW);
         }
@@ -155,7 +183,7 @@ public:
     void emptyBuffer()
     {
         rp2040.idleOtherCore();
-        char *buffer = queue.getNextBuffer(false);
+        char *buffer = queue.getNextBufferAndUpdate(false);
         rp2040.resumeOtherCore();
         Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
@@ -163,9 +191,9 @@ public:
             udp.beginPacket(udpAddress, udpPort);
             udp.write((const uint8_t *)&buffer, BUFFER_SIZE);
             udp.endPacket();
-            rp2040.idleOtherCore();
-            queue.moveToNextBuffer(false);
-            rp2040.resumeOtherCore();
+            // rp2040.idleOtherCore();
+            // queue.moveToNextBuffer(false);
+            // rp2040.resumeOtherCore();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
         }
         else
