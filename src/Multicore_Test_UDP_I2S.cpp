@@ -152,6 +152,7 @@ CircularBufferQueue bufferQueue;
 
 void setup()
 { // This runs on Core0.  It is the UDP setup.
+    rp2040.idleOtherCore();
     Serial.begin();
     WiFi.begin(STASSID);
     while (WiFi.status() != WL_CONNECTED)
@@ -161,6 +162,7 @@ void setup()
     udp.begin(udpPort);
     // rp2040.restartCore1();  // Connecting to WIFI can take some time.  This synchronizes things (I hope).
     Serial.printf("Connected to %s\n", STASSID);
+    rp2040.resumeOtherCore();
     pinMode(16, OUTPUT);
     pinMode(17, OUTPUT);
     pinMode(18, OUTPUT);
