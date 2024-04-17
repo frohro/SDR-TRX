@@ -4,12 +4,10 @@
 const int SW_PIN = 16;
 const int SW1_PIN = 18;
 
-void setup() {
-    rp2040.idleOtherCore();
+void setup() 
+{
     pinMode(SW_PIN, OUTPUT);
     pinMode(SW1_PIN, OUTPUT);
-    delay(100);
-    rp2040.resumeOtherCore();
 }
 void setup1()
 {
@@ -17,6 +15,7 @@ void setup1()
 }
 
 void loop() {
+    Serial.printf("Core 0\n");
     rp2040.idleOtherCore();
     digitalWrite(SW_PIN, HIGH);
     digitalWrite(SW_PIN, LOW);
@@ -25,6 +24,7 @@ void loop() {
 
 void loop1()
 {
+    Serial.printf("Core 1\n");
     rp2040.idleOtherCore();
     digitalWrite(SW1_PIN, HIGH);
     digitalWrite(SW1_PIN, LOW);
