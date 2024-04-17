@@ -201,7 +201,7 @@ void loop()
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
-    // Serial.printf("Core 1\n");
+    Serial.printf("Core 1\n");
     rp2040.idleOtherCore();
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
