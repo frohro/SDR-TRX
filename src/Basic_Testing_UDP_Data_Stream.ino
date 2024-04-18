@@ -48,7 +48,7 @@ void loop()
     }
     else
     {
-        Serial.println("Mutex not entered Core0.");
+        // Serial.println("Mutex not entered Core0.");
     }
     
     udp.write((const uint8_t *)buffer, BUFFER_SIZE); // Takes about 810 us.
