@@ -139,6 +139,7 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
         }
         char *buffer = queue.getNextBufferAndUpdate(false);
         mutex_exit(&my_mutex);
+        Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
         {
             Serial.println("Sending packet.");
