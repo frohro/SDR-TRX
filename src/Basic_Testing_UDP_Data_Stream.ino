@@ -41,6 +41,16 @@ void loop()
     udp.beginPacket(udpAddress, udpPort); // Takes about 7 us.
 
     start_time = micros();
+    if (mutex_try_enter(&my_mutex, &save))
+    {
+        Serial.println("Mutex entered Core0.");
+        mutex_exit(&my_mutex);
+    }
+    else
+    {
+        Serial.println("Mutex not entered Core0.");
+    }
+    
     udp.write((const uint8_t *)buffer, BUFFER_SIZE); // Takes about 810 us.
     udp.endPacket();                                 // Takes about 670 us
     int time_elapsed = micros() - start_time;
@@ -64,11 +74,11 @@ void loop1()
     delay(100);
     if (!mutex_try_enter(&my_mutex, &save))
     {
-        Serial.println("Mutex not entered.");
+        Serial.println("Mutex not entered Core1.");
     }
     else
     {
-        Serial.println("Mutex entered.");
+        Serial.println("Mutex entered Core1.");
         delay(1000);
         mutex_exit(&my_mutex);
     }
