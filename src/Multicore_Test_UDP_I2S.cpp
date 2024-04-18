@@ -70,12 +70,12 @@ public:
         {
             currentIndex = (currentIndex + 1) % QUEUE_SIZE;
             rp2040.fifo.push(currentIndex);
-            Serial.printf("Going: fillIndex: %d, emptyIndex: %d, isFiller is%d.\n", fillIndex, emptyIndex, isFiller);
+            Serial.printf("Going: fillIndex: %d, emptyIndex: %d, isFiller is %d.\n", fillIndex, emptyIndex, isFiller);
             return buffers[currentIndex];
         }
         else
         {
-            Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d, isFiller is%d.\n", fillIndex, emptyIndex, isFiller);
+            Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d, isFiller is %d.\n", fillIndex, emptyIndex, isFiller);
             return nullptr; // Return null if the buffer is full/empty
         }
     }
@@ -93,10 +93,8 @@ public:
     {
         while(!mutex_try_enter(&my_mutex, &mutex_save)) {
             // Mutex is locked, so wait here.
+            Serial.println("Mutex locked in filler.");
         }
-        // Mutex was not locked and is now locked by this core
-        // Access shared data here...
-        // Don't forget to unlock the mutex when done
         char *buffer = queue.getNextBufferAndUpdate(true);
         mutex_exit(&my_mutex);
 
@@ -141,13 +139,9 @@ public:
 
     void emptyBuffer()
     {
-        // rp2040.idleOtherCore();
         while (!mutex_try_enter(&my_mutex, &mutex_save)) {
-        // Mutex is already locked, wait here.
+            Serial.println("Mutex locked in emptyer.");
         } 
-        // Mutex was not locked and is now locked by this core
-        // Access shared data here...
-        // Don't forget to unlock the mutex when done
         char *buffer = queue.getNextBufferAndUpdate(false);
         mutex_exit(&my_mutex);
         Serial.printf("Got emptying buffer %p\n", buffer);
@@ -224,5 +218,4 @@ void loop1()
     Serial.printf("Core 1\n");
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
-
 }
