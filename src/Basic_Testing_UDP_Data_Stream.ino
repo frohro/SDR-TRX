@@ -7,6 +7,15 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <si5351.h>
+#include "pico/mutex.h"
+
+static mutex_t my_mutex;
+
+void some_function() {
+    mutex_enter_blocking(&my_mutex);
+    // Access shared data here...
+    mutex_exit(&my_mutex);
+}
 
 WiFiUDP udp;
 void setup()

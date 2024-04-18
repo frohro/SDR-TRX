@@ -189,17 +189,14 @@ void setup1()
 void loop()
 { // This should run on Core0.  It is the UDP loop.
     Serial.printf("Core 0\n");
-    rp2040.idleOtherCore();
     static BufferEmptyer emptyer(bufferQueue);
     emptyer.emptyBuffer(); // Empty the buffer
-    rp2040.resumeOtherCore();
 }
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
     Serial.printf("Core 1\n");
-    rp2040.idleOtherCore();
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
-    rp2040.resumeOtherCore();
+
 }
