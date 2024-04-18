@@ -11,11 +11,7 @@
 
 static mutex_t my_mutex;
 
-void some_function() {
-    mutex_enter_blocking(&my_mutex);
-    // Access shared data here...
-    mutex_exit(&my_mutex);
-}
+
 
 WiFiUDP udp;
 void setup()
@@ -38,6 +34,7 @@ const unsigned int udpPort = 12345;
 uint32_t start_time;
 uint32_t total_time = 0;
 uint32_t n = 0;
+uint32_t save;
 
 void loop()
 {
@@ -63,12 +60,19 @@ void loop()
 
 void setup1()
 {
-
+    mutex_init(&my_mutex);
 }
 
 void loop1()
 {
-    rp2040.idleOtherCore();
-    delay(100);
-    rp2040.resumeOtherCore();
+delay(100);
+if (!mutex_try_enter(&my_mutex, &save))
+{
+    Serial.println("Mutex not entered.");
+}
+else
+{
+    Serial.println("Mutex entered.");
+    mutex_exit(&my_mutex);
+}
 }
