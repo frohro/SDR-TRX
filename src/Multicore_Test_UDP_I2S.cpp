@@ -149,7 +149,9 @@ public:
         {
             Serial.println("Sending packet.");
             udp.beginPacket(udpAddress, udpPort);
+            Serial.println("after beginPacket.");
             udp.write((const uint8_t *)&buffer, BUFFER_SIZE);
+            Serial.println("after write.");
             udp.endPacket();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
             digitalWrite(16, LOW);
