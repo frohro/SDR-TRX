@@ -69,12 +69,10 @@ public:
         {
             currentIndex = (currentIndex + 1) % QUEUE_SIZE;
             rp2040.fifo.push(currentIndex);
-            Serial.printf("Going: fillIndex: %d, emptyIndex: %d, isFiller is %d.\n", fillIndex, emptyIndex, isFiller);
             return buffers[currentIndex];
         }
         else
         {
-            Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d, isFiller is %d.\n", fillIndex, emptyIndex, isFiller);
             return nullptr; // Return null if the buffer is full/empty
         }
     }
@@ -110,7 +108,6 @@ public:
                 memcpy(buffer + bufferIndex, &r, sizeof(int32_t));
                 bufferIndex += sizeof(int32_t);
             }
-
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
             Serial.printf("Filled packet %d\n", packet_number);
