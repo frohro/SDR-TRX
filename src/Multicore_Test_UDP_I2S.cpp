@@ -93,12 +93,9 @@ public:
         while (!mutex_try_enter(&my_mutex, &mutex_save))
         {
             // Mutex is locked, so wait here.
-            Serial.println("Mutex locked in filler.");
         }
         char *buffer = queue.getNextBufferAndUpdate(true);
         mutex_exit(&my_mutex);
-
-        Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer != nullptr)
         {
             static int32_t r, l, packet_number = 0;
@@ -139,16 +136,12 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
         }
         char *buffer = queue.getNextBufferAndUpdate(false);
         mutex_exit(&my_mutex);
-        delay(1);  // This is needed to slow it down.  Otherwise, it goes too fast.  (I think
-        // Serial.printf("Got emptying buffer %p\n", buffer);  // If I remove this, it stops working (slows it down a lot.)
+        delay(1);  // This is needed to slow it down.  Otherwise, data doesn't get sent over the network.
         if (buffer != nullptr)
         {
-            // Serial.println("Sending packet.");
             udp.beginPacket(udpAddress, udpPort);  // Needed
-            // Serial.println("after beginPacket.");  // Needed
             memcpy(test_buffer, buffer, BUFFER_SIZE);
             udp.write((const uint8_t *)&test_buffer, BUFFER_SIZE); // It goes picking daiseys here.
-            // Serial.println("after write.");  // Needed
             udp.endPacket();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer); 
 
