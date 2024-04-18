@@ -39,7 +39,7 @@ const unsigned int udpPort = 12345;
 
 #define BUFFER_SIZE 1468 // 183 samples of 4 bytes + 4 bytes for the packet number
 #define QUEUE_SIZE 9
-char test_buffer[BUFFER_SIZE];
+
 class CircularBufferQueue
 {
 private:
@@ -89,7 +89,7 @@ class BufferFiller
 {
 private:
     CircularBufferQueue &queue;
-
+    
 public:
     BufferFiller(CircularBufferQueue &q) : queue(q) {}
 
@@ -138,7 +138,7 @@ class BufferEmptyer
 {
 private:
     CircularBufferQueue &queue;
-
+    char test_buffer[BUFFER_SIZE];
 public:
     BufferEmptyer(CircularBufferQueue &q) : queue(q) {}
 
