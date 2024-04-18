@@ -101,9 +101,7 @@ public:
         Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer == nullptr)
         {
-            digitalWrite(17, LOW);
-            Serial.printf("Pin 17 should be high now.\n");
-            digitalWrite(19, HIGH);
+
         }
         else
         {
@@ -123,8 +121,6 @@ public:
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
             Serial.printf("Filled packet %d\n", packet_number);
-            digitalWrite(17, HIGH);
-            digitalWrite(19, LOW);
         }
     }
 };
@@ -158,13 +154,11 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
             Serial.println("after write.");
             udp.endPacket();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
-            digitalWrite(16, LOW);
-            digitalWrite(18, HIGH);
+
         }
         else
         {
-            digitalWrite(16, HIGH);
-            digitalWrite(18, LOW);
+
         }
     }
 };
@@ -188,10 +182,6 @@ void setup()
         }
         udp.begin(udpPort);
         Serial.printf("Connected to %s\n", STASSID);
-        pinMode(16, OUTPUT);
-        pinMode(17, OUTPUT);
-        pinMode(18, OUTPUT);
-        pinMode(19, OUTPUT);
         mutex_exit(&my_mutex);
     }
 }
