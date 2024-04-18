@@ -158,6 +158,7 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
             Serial.println("Sending packet.");
             udp.beginPacket(udpAddress, udpPort);
             Serial.println("after beginPacket.");
+            memcpy(test_buffer, buffer, BUFFER_SIZE);
             udp.write((const uint8_t *)&test_buffer, BUFFER_SIZE); // It goes picking daiseys here.
             Serial.println("after write.");
             udp.endPacket();
