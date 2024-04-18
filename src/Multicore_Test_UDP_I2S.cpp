@@ -166,11 +166,11 @@ CircularBufferQueue bufferQueue;
 
 void setup()
 { // This runs on Core0.  It is the UDP setup.
+    Serial.begin();
     mutex_init(&my_mutex);  
     if (!mutex_try_enter(&my_mutex, &mutex_save)) {
             Serial.println("Mutex is already locked, better do it the other way around");
         } else {
-        Serial.begin();
         WiFi.begin(STASSID);
         while (WiFi.status() != WL_CONNECTED)
         {
@@ -182,9 +182,6 @@ void setup()
         pinMode(17, OUTPUT);
         pinMode(18, OUTPUT);
         pinMode(19, OUTPUT);
-        // Mutex was not locked and is now locked by this core
-        // Access shared data here...
-        // Don't forget to unlock the mutex when done
         mutex_exit(&my_mutex);
     }
 }
