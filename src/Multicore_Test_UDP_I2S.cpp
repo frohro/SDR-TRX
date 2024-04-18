@@ -133,11 +133,11 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
         }
         char *buffer = queue.getNextBufferAndUpdate(false);
         mutex_exit(&my_mutex);
-        delay(1);  // This is needed to slow it down.  Otherwise, data doesn't get sent over the network.
         if (buffer != nullptr)
         {
+            delay(1);  // This is needed to slow it down.  Otherwise, data doesn't get sent over the network.  Why???
             udp.beginPacket(udpAddress, udpPort);  // Needed
-            memcpy(test_buffer, buffer, BUFFER_SIZE);
+            memcpy(test_buffer, buffer, BUFFER_SIZE);  // If we don't do this, it hangs in the udp.write below.
             udp.write((const uint8_t *)&test_buffer, BUFFER_SIZE); // It goes picking daiseys here.
             udp.endPacket();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer); 
