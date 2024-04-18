@@ -140,7 +140,9 @@ private:
     CircularBufferQueue &queue;
     char test_buffer[BUFFER_SIZE];
 public:
-    BufferEmptyer(CircularBufferQueue &q) : queue(q) {}
+BufferEmptyer(CircularBufferQueue &q) : queue(q) {
+    memset(test_buffer, 0xff, BUFFER_SIZE);
+}
 
     void emptyBuffer()
     {
