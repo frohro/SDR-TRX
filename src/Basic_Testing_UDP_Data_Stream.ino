@@ -79,7 +79,7 @@ void loop1()
     else
     {
         Serial.println("Mutex entered Core1.");
-        delay(1000);
+        delay(10);
         mutex_exit(&my_mutex);
     }
 }
