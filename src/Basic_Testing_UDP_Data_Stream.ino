@@ -37,10 +37,6 @@ void loop()
     // Send the buffer via UDP over and over again.
     // Read the data rate using the Ubuntu System Monitor.
     udp.beginPacket(udpAddress, udpPort); // Takes about 7 us.
-    if (rp2040.fifo.available() > 0)
-    {
-        rp2040.fifo.pop_nb(&junk);
-    }
     start_time = micros();
 
     Serial.println("Mutex entered Core0.");
