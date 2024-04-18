@@ -99,11 +99,7 @@ public:
         mutex_exit(&my_mutex);
 
         Serial.printf("Got filler buffer %p\n", buffer);
-        if (buffer == nullptr)
-        {
-
-        }
-        else
+        if (buffer != nullptr)
         {
             static int32_t r, l, packet_number = 0;
             uint32_t bufferIndex = 4;
