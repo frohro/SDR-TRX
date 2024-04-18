@@ -129,7 +129,7 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
     {
         while (!mutex_try_enter(&my_mutex, &mutex_save))
         {
-            Serial.println("Mutex locked in emptyer.");
+            // Mutex is locked, so wait here.
         }
         char *buffer = queue.getNextBufferAndUpdate(false);
         mutex_exit(&my_mutex);
@@ -141,7 +141,6 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
             udp.write((const uint8_t *)&test_buffer, BUFFER_SIZE); // It goes picking daiseys here.
             udp.endPacket();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer); 
-
         }
     }
 };
@@ -150,14 +149,10 @@ CircularBufferQueue bufferQueue;
 
 void setup()
 { // This runs on Core0.  It is the UDP setup.
-    Serial.begin();
     mutex_init(&my_mutex);
-    if (!mutex_try_enter(&my_mutex, &mutex_save))
+    if (mutex_try_enter(&my_mutex, &mutex_save))  // Synchronze cores so they start about the same time.
     {
-        Serial.println("Mutex is already locked, better do it the other way around");
-    }
-    else
-    {
+        Serial.begin();
         WiFi.begin(STASSID);
         while (WiFi.status() != WL_CONNECTED)
         {
