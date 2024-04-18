@@ -147,6 +147,7 @@ public:
         Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
         {
+            Serial.println("Sending packet.");
             udp.beginPacket(udpAddress, udpPort);
             udp.write((const uint8_t *)&buffer, BUFFER_SIZE);
             udp.endPacket();
