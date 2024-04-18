@@ -139,7 +139,6 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
         }
         char *buffer = queue.getNextBufferAndUpdate(false);
         mutex_exit(&my_mutex);
-        Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
         {
             Serial.println("Sending packet.");
@@ -150,10 +149,6 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
             Serial.println("after write.");
             udp.endPacket();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
-
-        }
-        else
-        {
 
         }
     }
@@ -201,14 +196,12 @@ void setup1()
 
 void loop()
 { // This should run on Core0.  It is the UDP loop.
-    // Serial.printf("Core 0\n");
     static BufferEmptyer emptyer(bufferQueue);
     emptyer.emptyBuffer(); // Empty the buffer
 }
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
-    // Serial.printf("Core 1\n");
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
 }
