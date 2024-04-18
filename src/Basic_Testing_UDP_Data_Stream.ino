@@ -47,11 +47,12 @@ void loop()
     start_time = micros();
     if (mutex_try_enter(&my_mutex, &save))
     {
-        // Serial.println("Mutex entered Core0.");
+        Serial.println("Mutex entered Core0.");
         udp.write((const uint8_t *)buffer, BUFFER_SIZE); // Takes about 810 us.
         udp.endPacket();                                 // Takes about 670 us
         int time_elapsed = micros() - start_time;
         total_time += time_elapsed;
+        Serial.println("Sent packet.");
         if (n++ == 5000)
         {
             Serial.printf("Time per statement: %f\n", (float)total_time / n);
