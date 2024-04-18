@@ -24,7 +24,7 @@
 #endif
 
 // Use #define for common constants to both cores.
-#define RATE 48000 // To do 96000, we need to use 24 bits instead of 32.
+#define RATE 96000 // To do 96000, we need to use 24 bits instead of 32.
 // For now we will use 32 bits for debugging ease.
 #define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
 
@@ -219,14 +219,14 @@ void setup1()
 
 void loop()
 { // This should run on Core0.  It is the UDP loop.
-    Serial.printf("Core 0\n");
+    // Serial.printf("Core 0\n");
     static BufferEmptyer emptyer(bufferQueue);
     emptyer.emptyBuffer(); // Empty the buffer
 }
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
-    Serial.printf("Core 1\n");
+    // Serial.printf("Core 1\n");
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
 }
