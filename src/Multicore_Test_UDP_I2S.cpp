@@ -24,7 +24,7 @@
 #endif
 
 // Use #define for common constants to both cores.
-#define RATE 000 // To do 96000, we need to use 24 bits instead of 32.
+#define RATE 48000 // To do 96000, we need to use 24 bits instead of 32.
 // For now we will use 32 bits for debugging ease.
 #define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
 
@@ -52,11 +52,6 @@ public:
 
     char *getNextBufferAndUpdate(bool isFiller)
     {
-        // void *ptr = malloc(1024); // Try to allocate 1024 bytes
-        // if (ptr == NULL)
-        // {
-        //     Serial.println("Failed to allocate memory");
-        // }
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
         if (rp2040.fifo.available() == 0)
@@ -158,6 +153,7 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
             Serial.println("Sending packet.");
             udp.beginPacket(udpAddress, udpPort);
             Serial.println("after beginPacket.");
+            memcpy(test_buffer, buffer, BUFFER_SIZE);
             udp.write((const uint8_t *)&test_buffer, BUFFER_SIZE); // It goes picking daiseys here.
             Serial.println("after write.");
             udp.endPacket();
