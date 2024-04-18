@@ -17,7 +17,7 @@ void setup()
     WiFi.begin("Frohne-2.4GHz");
     while (WiFi.status() != WL_CONNECTED)
     {
-        delay(10000);
+        delay(1000);
     }
 
     udp.begin(12345);
