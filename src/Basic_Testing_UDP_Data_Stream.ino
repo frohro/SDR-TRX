@@ -11,8 +11,6 @@
 
 static mutex_t my_mutex;
 
-
-
 WiFiUDP udp;
 void setup()
 {
@@ -40,22 +38,20 @@ void loop()
 {
     // Send the buffer via UDP over and over again.
     // Read the data rate using the Ubuntu System Monitor.
-    udp.beginPacket(udpAddress, udpPort);  // Takes about 7 us.
+    udp.beginPacket(udpAddress, udpPort); // Takes about 7 us.
 
     start_time = micros();
-    udp.write((const uint8_t *)buffer, BUFFER_SIZE);  // Takes about 810 us.
-  
-    udp.endPacket();  // Takes about 670 us
+    udp.write((const uint8_t *)buffer, BUFFER_SIZE); // Takes about 810 us.
+    udp.endPacket();                                 // Takes about 670 us
     int time_elapsed = micros() - start_time;
     total_time += time_elapsed;
-    if (n++ == 5000) 
+    if (n++ == 5000)
     {
         Serial.printf("Time per statement: %f\n", (float)total_time / n);
         start_time = micros();
         total_time = 0;
         n = 0;
     }
-  
 }
 
 void setup1()
@@ -65,15 +61,15 @@ void setup1()
 
 void loop1()
 {
-delay(100);
-if (!mutex_try_enter(&my_mutex, &save))
-{
-    Serial.println("Mutex not entered.");
-}
-else
-{
-    Serial.println("Mutex entered.");
-    delay(10);
-    mutex_exit(&my_mutex);
-}
+    delay(100);
+    if (!mutex_try_enter(&my_mutex, &save))
+    {
+        Serial.println("Mutex not entered.");
+    }
+    else
+    {
+        Serial.println("Mutex entered.");
+        delay(1000);
+        mutex_exit(&my_mutex);
+    }
 }
