@@ -139,17 +139,17 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
         }
         char *buffer = queue.getNextBufferAndUpdate(false);
         mutex_exit(&my_mutex);
-        Serial.printf("Got emptying buffer %p\n", buffer);
+        Serial.printf("Got emptying buffer %p\n", buffer);  // If I remove this, it stops working (slows it down a lot.)
         if (buffer != nullptr)
         {
-            Serial.println("Sending packet.");
+            // Serial.println("Sending packet.");
             udp.beginPacket(udpAddress, udpPort);
-            Serial.println("after beginPacket.");
+            // Serial.println("after beginPacket.");
             memcpy(test_buffer, buffer, BUFFER_SIZE);
             udp.write((const uint8_t *)&test_buffer, BUFFER_SIZE); // It goes picking daiseys here.
-            Serial.println("after write.");
+            // Serial.println("after write.");
             udp.endPacket();
-            Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
+            Serial.printf("Sent packet %d\n", *(int32_t *)test_buffer[0]);
 
         }
     }
