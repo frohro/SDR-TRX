@@ -17,6 +17,9 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <si5351.h>
+#include "pico/mutex.h"
+
+
 
 #ifndef STASSID
 #define STASSID "Frohne-2.4GHz"
@@ -26,6 +29,9 @@
 #define RATE 48000 // To do 96000, we need to use 24 bits instead of 32.
 // For now we will use 32 bits for debugging ease.
 #define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
+
+static mutex_t my_mutex;
+uint32_t mutex_save;
 
 I2S i2s(INPUT);
 
@@ -85,9 +91,15 @@ public:
 
     void fillBuffer()
     {
-        // rp2040.idleOtherCore();
+        while(!mutex_try_enter(&my_mutex, &mutex_save)) {
+            // Mutex is locked, so wait here.
+        }
+        // Mutex was not locked and is now locked by this core
+        // Access shared data here...
+        // Don't forget to unlock the mutex when done
         char *buffer = queue.getNextBufferAndUpdate(true);
-        // rp2040.resumeOtherCore();
+        mutex_exit(&my_mutex);
+
         Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer == nullptr)
         {
@@ -130,8 +142,14 @@ public:
     void emptyBuffer()
     {
         // rp2040.idleOtherCore();
+        while (!mutex_try_enter(&my_mutex, &mutex_save)) {
+        // Mutex is already locked, wait here.
+        } 
+        // Mutex was not locked and is now locked by this core
+        // Access shared data here...
+        // Don't forget to unlock the mutex when done
         char *buffer = queue.getNextBufferAndUpdate(false);
-        // rp2040.resumeOtherCore();
+        mutex_exit(&my_mutex);
         Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
         {
@@ -154,25 +172,31 @@ CircularBufferQueue bufferQueue;
 
 void setup()
 { // This runs on Core0.  It is the UDP setup.
-    rp2040.idleOtherCore();  // These are to try and somewhat synchronize the cores.
-    Serial.begin();
-    WiFi.begin(STASSID);
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(1000);
+    mutex_init(&my_mutex);  
+    if (!mutex_try_enter(&my_mutex, &mutex_save)) {
+            Serial.println("Mutex is already locked, better do it the other way around");
+        } else {
+        Serial.begin();
+        WiFi.begin(STASSID);
+        while (WiFi.status() != WL_CONNECTED)
+        {
+            delay(1000);
+        }
+        udp.begin(udpPort);
+        Serial.printf("Connected to %s\n", STASSID);
+        pinMode(16, OUTPUT);
+        pinMode(17, OUTPUT);
+        pinMode(18, OUTPUT);
+        pinMode(19, OUTPUT);
+        // Mutex was not locked and is now locked by this core
+        // Access shared data here...
+        // Don't forget to unlock the mutex when done
+        mutex_exit(&my_mutex);
     }
-    udp.begin(udpPort);
-    Serial.printf("Connected to %s\n", STASSID);
-    pinMode(16, OUTPUT);
-    pinMode(17, OUTPUT);
-    pinMode(18, OUTPUT);
-    pinMode(19, OUTPUT);
-    rp2040.resumeOtherCore();
 }
 
 void setup1()
 {                   // This runs on Core1.  It is the I2S setup.
-    rp2040.idleOtherCore();
     i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
     i2s.setBCLK(0);
     i2s.setMCLK(3);
@@ -183,7 +207,9 @@ void setup1()
     i2s.setMCLKmult(MCLK_MULT);
     i2s.setBuffers(32, 0, 0);
     i2s.begin();
-    rp2040.resumeOtherCore();
+    mutex_enter_blocking(&my_mutex);  // This should syschornize the cores, so one doesn't fill the buffer
+    // before the other is ready.
+    mutex_exit(&my_mutex);
 }
 
 void loop()
