@@ -52,6 +52,11 @@ public:
 
     char *getNextBufferAndUpdate(bool isFiller)
     {
+        // void *ptr = malloc(1024); // Try to allocate 1024 bytes
+        // if (ptr == NULL)
+        // {
+        //     Serial.println("Failed to allocate memory");
+        // }
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
         if (rp2040.fifo.available() == 0)
@@ -69,10 +74,12 @@ public:
         {
             currentIndex = (currentIndex + 1) % QUEUE_SIZE;
             rp2040.fifo.push(currentIndex);
+            Serial.printf("Going: fillIndex: %d, emptyIndex: %d, isFiller is %d.\n", fillIndex, emptyIndex, isFiller);
             return buffers[currentIndex];
         }
         else
         {
+            Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d, isFiller is %d.\n", fillIndex, emptyIndex, isFiller);
             return nullptr; // Return null if the buffer is full/empty
         }
     }
@@ -91,10 +98,19 @@ public:
         while (!mutex_try_enter(&my_mutex, &mutex_save))
         {
             // Mutex is locked, so wait here.
+            Serial.println("Mutex locked in filler.");
         }
         char *buffer = queue.getNextBufferAndUpdate(true);
         mutex_exit(&my_mutex);
+
+        Serial.printf("Got filler buffer %p\n", buffer);
         if (buffer == nullptr)
+        {
+            digitalWrite(17, LOW);
+            Serial.printf("Pin 17 should be high now.\n");
+            digitalWrite(19, HIGH);
+        }
+        else
         {
             static int32_t r, l, packet_number = 0;
             uint32_t bufferIndex = 4;
