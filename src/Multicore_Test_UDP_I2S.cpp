@@ -24,7 +24,7 @@
 #endif
 
 // Use #define for common constants to both cores.
-#define RATE 96000 // To do 96000, we need to use 24 bits instead of 32.
+#define RATE 48000 // To do 96000, we need to use 24 bits instead of 32.
 // For now we will use 32 bits for debugging ease.
 #define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
 
