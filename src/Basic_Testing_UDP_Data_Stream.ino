@@ -47,7 +47,7 @@ void loop()
     start_time = micros();
     if (mutex_try_enter(&my_mutex, &save))
     {
-        Serial.println("Mutex entered Core0.");
+        // Serial.println("Mutex entered Core0.");
         udp.write((const uint8_t *)buffer, BUFFER_SIZE); // Takes about 810 us.
         udp.endPacket();                                 // Takes about 670 us
         int time_elapsed = micros() - start_time;
@@ -63,7 +63,7 @@ void loop()
     }
     else
     {
-        Serial.println("Mutex not entered Core0.");
+        // Serial.println("Mutex not entered Core0.");
     }
 }
 
@@ -77,11 +77,11 @@ void loop1()
     // delay(100);
     if (!mutex_try_enter(&my_mutex, &save))
     {
-        Serial.println("Mutex not entered Core1.");
+        // Serial.println("Mutex not entered Core1.");
     }
     else
     {
-        Serial.println("Mutex entered Core1.");
+        // Serial.println("Mutex entered Core1.");
         rp2040.fifo.push_nb(0);
         mutex_exit(&my_mutex);
     }
