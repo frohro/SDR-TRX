@@ -43,7 +43,7 @@ void loop()
     start_time = micros();
     if (mutex_try_enter(&my_mutex, &save))
     {
-        Serial.println("Mutex entered Core0.");
+        // Serial.println("Mutex entered Core0.");
         mutex_exit(&my_mutex);
     }
     else
