@@ -39,6 +39,7 @@ const unsigned int udpPort = 12345;
 
 #define BUFFER_SIZE 1468 // 183 samples of 4 bytes + 4 bytes for the packet number
 #define QUEUE_SIZE 9
+char test_buffer[BUFFER_SIZE];
 class CircularBufferQueue
 {
 private:
@@ -51,11 +52,11 @@ public:
 
     char *getNextBufferAndUpdate(bool isFiller)
     {
-        void *ptr = malloc(1024); // Try to allocate 1024 bytes
-        if (ptr == NULL)
-        {
-            Serial.println("Failed to allocate memory");
-        }
+        // void *ptr = malloc(1024); // Try to allocate 1024 bytes
+        // if (ptr == NULL)
+        // {
+        //     Serial.println("Failed to allocate memory");
+        // }
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
         if (rp2040.fifo.available() == 0)
@@ -155,7 +156,7 @@ public:
             Serial.println("Sending packet.");
             udp.beginPacket(udpAddress, udpPort);
             Serial.println("after beginPacket.");
-            udp.write((const uint8_t *)&buffer, BUFFER_SIZE); // It goes picking daiseys here.
+            udp.write((const uint8_t *)&test_buffer, BUFFER_SIZE); // It goes picking daiseys here.
             Serial.println("after write.");
             udp.endPacket();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
