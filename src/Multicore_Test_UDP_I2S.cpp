@@ -2,15 +2,15 @@
  * Project Name: Multicore_Test_UDP_I2S
  * File Name: Multicore_Test_UDP_I2S.cpp
  * This is a test of the multicore Arudino Pico librory for the Pico W
- * to use both cors and a circular queue of buffers to send data over UDP from the I2S
+ * to use both cores and a circular queue of buffers to send data over UDP from the I2S
  * using the PCM1808.
  *
  * This Pico W program will connect to the PCM1808 via I2S and read the data it RATE samples per second.
  * It then sends the dato over WIFI using UDP.
  *
  *
- * Author: Rob Frohne, KL7NA, with help from Github Copilot.
- * 4/9/2024
+ * Author: Rob Frohne, KL7NA, with help from Github Copilot and @earlephilhower.
+ * 4/18/2024
  */
 #include <Arduino.h>
 #include <I2S.h>
@@ -26,7 +26,7 @@
 // Use #define for common constants to both cores.
 #define RATE 48000 // To do 96000, we need to use 24 bits instead of 32.
 // For now we will use 32 bits for debugging ease.
-#define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
+const int MCLK_MULT = 256; // 384 for 48 BCK per frame,  256 for 64 BCK per frame
 
 static mutex_t my_mutex;
 uint32_t mutex_save;
@@ -37,8 +37,8 @@ WiFiUDP udp;
 const char *udpAddress = "192.168.1.101"; // Put your laptop IP here.
 const unsigned int udpPort = 12345;
 
-#define BUFFER_SIZE 1468 // 183 samples of 4 bytes + 4 bytes for the packet number
-#define QUEUE_SIZE 9
+#define BUFFER_SIZE 1468 // 183 samples of 8 bytes + 4 bytes for the packet number
+#define QUEUE_SIZE 9  // This determines the latency.  9 is about 275 ms at 48 kHz.
 
 class CircularBufferQueue
 {
@@ -48,15 +48,10 @@ private:
     uint32_t emptyIndex;
 
 public:
-    CircularBufferQueue() : fillIndex(1), emptyIndex(0) {}
+    CircularBufferQueue() : fillIndex(1), emptyIndex(0) {}  // Start fill ahead of empty by 1 buffer.
 
     char *getNextBufferAndUpdate(bool isFiller)
     {
-        // void *ptr = malloc(1024); // Try to allocate 1024 bytes
-        // if (ptr == NULL)
-        // {
-        //     Serial.println("Failed to allocate memory");
-        // }
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
         if (rp2040.fifo.available() == 0)
@@ -74,12 +69,10 @@ public:
         {
             currentIndex = (currentIndex + 1) % QUEUE_SIZE;
             rp2040.fifo.push(currentIndex);
-            Serial.printf("Going: fillIndex: %d, emptyIndex: %d, isFiller is %d.\n", fillIndex, emptyIndex, isFiller);
             return buffers[currentIndex];
         }
         else
         {
-            Serial.printf("Stopped: fillIndex: %d, emptyIndex: %d, isFiller is %d.\n", fillIndex, emptyIndex, isFiller);
             return nullptr; // Return null if the buffer is full/empty
         }
     }
@@ -98,26 +91,17 @@ public:
         while (!mutex_try_enter(&my_mutex, &mutex_save))
         {
             // Mutex is locked, so wait here.
-            Serial.println("Mutex locked in filler.");
         }
         char *buffer = queue.getNextBufferAndUpdate(true);
         mutex_exit(&my_mutex);
-
-        Serial.printf("Got filler buffer %p\n", buffer);
-        if (buffer == nullptr)
-        {
-            digitalWrite(17, LOW);
-            Serial.printf("Pin 17 should be high now.\n");
-            digitalWrite(19, HIGH);
-        }
-        else
+        if (buffer != nullptr)
         {
             static int32_t r, l, packet_number = 0;
             uint32_t bufferIndex = 4;
             while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
             {
                 i2s.read32(&l, &r);
-                l = l << 9;
+                l = l << 9;  // Not sure why this is 9.  It should be 8 I think, but this works.
                 r = r << 9;
                 memcpy(buffer + bufferIndex, &l, sizeof(int32_t));
                 bufferIndex += sizeof(int32_t);
@@ -128,8 +112,6 @@ public:
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
             Serial.printf("Filled packet %d\n", packet_number);
-            digitalWrite(17, HIGH);
-            digitalWrite(19, LOW);
         }
     }
 };
@@ -148,28 +130,17 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
     {
         while (!mutex_try_enter(&my_mutex, &mutex_save))
         {
-            Serial.println("Mutex locked in emptyer.");
+            // Mutex is locked, so wait here.
         }
         char *buffer = queue.getNextBufferAndUpdate(false);
         mutex_exit(&my_mutex);
-        Serial.printf("Got emptying buffer %p\n", buffer);
         if (buffer != nullptr)
         {
-            Serial.println("Sending packet.");
             udp.beginPacket(udpAddress, udpPort);
-            Serial.println("after beginPacket.");
-            memcpy(test_buffer, buffer, BUFFER_SIZE);
+            memcpy(test_buffer, buffer, BUFFER_SIZE);  // This is needed or the next statement hangs.
             udp.write((const uint8_t *)&test_buffer, BUFFER_SIZE); // It goes picking daiseys here.
-            Serial.println("after write.");
             udp.endPacket();
-            Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
-            digitalWrite(16, LOW);
-            digitalWrite(18, HIGH);
-        }
-        else
-        {
-            digitalWrite(16, HIGH);
-            digitalWrite(18, LOW);
+            Serial.printf("Sent packet number %d\n", *(int32_t *)test_buffer[0]);
         }
     }
 };
@@ -193,10 +164,6 @@ void setup()
         }
         udp.begin(udpPort);
         Serial.printf("Connected to %s\n", STASSID);
-        pinMode(16, OUTPUT);
-        pinMode(17, OUTPUT);
-        pinMode(18, OUTPUT);
-        pinMode(19, OUTPUT);
         mutex_exit(&my_mutex);
     }
 }
@@ -220,14 +187,12 @@ void setup1()
 
 void loop()
 { // This should run on Core0.  It is the UDP loop.
-    // Serial.printf("Core 0\n");
     static BufferEmptyer emptyer(bufferQueue);
     emptyer.emptyBuffer(); // Empty the buffer
 }
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
-    // Serial.printf("Core 1\n");
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
 }
