@@ -19,8 +19,6 @@
 #include <si5351.h>
 #include "pico/mutex.h"
 
-
-
 #ifndef STASSID
 #define STASSID "Frohne-2.4GHz"
 #endif
@@ -53,6 +51,11 @@ public:
 
     char *getNextBufferAndUpdate(bool isFiller)
     {
+        void *ptr = malloc(1024); // Try to allocate 1024 bytes
+        if (ptr == NULL)
+        {
+            Serial.println("Failed to allocate memory");
+        }
         uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
         uint32_t otherIndex, temp;
         if (rp2040.fifo.available() == 0)
@@ -66,7 +69,7 @@ public:
                 otherIndex = temp;
             }
         }
-        if ((currentIndex + 1) % QUEUE_SIZE != otherIndex)  // If we can move to the next buffer...
+        if ((currentIndex + 1) % QUEUE_SIZE != otherIndex) // If we can move to the next buffer...
         {
             currentIndex = (currentIndex + 1) % QUEUE_SIZE;
             rp2040.fifo.push(currentIndex);
@@ -91,7 +94,8 @@ public:
 
     void fillBuffer()
     {
-        while(!mutex_try_enter(&my_mutex, &mutex_save)) {
+        while (!mutex_try_enter(&my_mutex, &mutex_save))
+        {
             // Mutex is locked, so wait here.
             Serial.println("Mutex locked in filler.");
         }
@@ -125,7 +129,7 @@ public:
             Serial.printf("Filled packet %d\n", packet_number);
             digitalWrite(17, HIGH);
             digitalWrite(19, LOW);
-        }   
+        }
     }
 };
 
@@ -139,9 +143,10 @@ public:
 
     void emptyBuffer()
     {
-        while (!mutex_try_enter(&my_mutex, &mutex_save)) {
+        while (!mutex_try_enter(&my_mutex, &mutex_save))
+        {
             Serial.println("Mutex locked in emptyer.");
-        } 
+        }
         char *buffer = queue.getNextBufferAndUpdate(false);
         mutex_exit(&my_mutex);
         Serial.printf("Got emptying buffer %p\n", buffer);
@@ -150,7 +155,7 @@ public:
             Serial.println("Sending packet.");
             udp.beginPacket(udpAddress, udpPort);
             Serial.println("after beginPacket.");
-            udp.write((const uint8_t *)&buffer, BUFFER_SIZE);  // It goes picking daiseys here.
+            udp.write((const uint8_t *)&buffer, BUFFER_SIZE); // It goes picking daiseys here.
             Serial.println("after write.");
             udp.endPacket();
             Serial.printf("Sent packet %d\n", *(int32_t *)buffer);
@@ -170,10 +175,13 @@ CircularBufferQueue bufferQueue;
 void setup()
 { // This runs on Core0.  It is the UDP setup.
     Serial.begin();
-    mutex_init(&my_mutex);  
-    if (!mutex_try_enter(&my_mutex, &mutex_save)) {
-            Serial.println("Mutex is already locked, better do it the other way around");
-        } else {
+    mutex_init(&my_mutex);
+    if (!mutex_try_enter(&my_mutex, &mutex_save))
+    {
+        Serial.println("Mutex is already locked, better do it the other way around");
+    }
+    else
+    {
         WiFi.begin(STASSID);
         while (WiFi.status() != WL_CONNECTED)
         {
@@ -201,7 +209,7 @@ void setup1()
     i2s.setMCLKmult(MCLK_MULT);
     i2s.setBuffers(32, 0, 0);
     i2s.begin();
-    mutex_enter_blocking(&my_mutex);  // This should syschornize the cores, so one doesn't fill the buffer
+    mutex_enter_blocking(&my_mutex); // This should syschornize the cores, so one doesn't fill the buffer
     // before the other is ready.
     mutex_exit(&my_mutex);
 }
