@@ -28,7 +28,6 @@
 #include <pico/mutex.h>
 #include "PCM1808_I2S_UDP.h"
 
-
 // To do:
 // 1) We need to add I2C code eand calibrate thu INA219.
 // 2) Refactor this into a library so you can do a receiver, transmitter
@@ -43,7 +42,7 @@ const char *STASSID = "Frohne-2.4GHz";
 // const char *STASSID = "rosbots";
 // const char *PASSWORD = "ros2bots"; // In case you have a password,
 // you must add this to the WiFi.begin() call, or if you have no
-// passward, you need to take the PASSWORD arguement out. 
+// passward, you need to take the PASSWORD arguement out.
 const unsigned int DATA_UDPPORT = 12345;
 const unsigned int COMMAND_UDPPORT = 12346;
 const char *VERSION_NUMBER = "0.1.1";
@@ -53,7 +52,7 @@ IPAddress remoteIp(192, 168, 1, 101); // This is the IP address of the computer 
 const int FREQ_LIMIT_LOWER = 3500000;
 const int FREQ_LIMIT_UPPER = 30000000;
 const int RX_SWITCH = 10;          // GPIO pin for RX/TX switch (High is RX)
-const int CAL_FACTOR = 1.00007587; // Calibration factor for the Si5351
+const int CAL_FACTOR = 1.00007587; // Calibration factor for the Si5351 (multiply by this number to get the right frequency)
 uint_fast32_t rx_freq = 14074000;  // 20 meter FT8 frequency
 uint_fast32_t tx_freq = 14074000;  // 20 meter FT8 frequency
 int rx_relay_state = 0;            // 0 is RX, 1 is TX
@@ -65,6 +64,8 @@ WiFiUDP udpData;                   // UDP object for data packets  (Is this a se
 WiFiUDP udpCommand;                // UDP object for control packets
 
 Si5351 si5351(0x60); // 0x60 is the normal I2C address for the Si5351A or MS5351M
+
+CircularBufferQueue bufferQueue;
 
 // Mode defines
 const int JT9_TONE_SPACING = 174;  // ~1.74 Hz
@@ -374,14 +375,17 @@ void processCommandUDP()
       {
         Serial.println("Received an m.");
         int packetSize = udpCommand.parsePacket();
-        if (packetSize) {
+        if (packetSize)
+        {
           // If there's a packet available, read it into a buffer
           int len = udpCommand.read(tx_buffer, 255);
-          if (len == symbol_count) {
+          if (len == symbol_count)
+          {
             tx_buffer[len] = 0;
-            Serial.println((char*)tx_buffer);
+            Serial.println((char *)tx_buffer);
           }
-          else {
+          else
+          {
             Serial.println("Packet was not symbol_count bytes long.");
           }
         }
@@ -395,13 +399,16 @@ void processCommandUDP()
         // Serial.println("Received an o.");
         // Offset encoded in two bytes
         int packetSize = udpCommand.parsePacket();
-        if (packetSize) {
+        if (packetSize)
+        {
           // If there's a packet available, read it into a buffer
           int len = udpCommand.read(incomingPacket, 255);
-          if (len == 2) {
+          if (len == 2)
+          {
             incomingPacket[len] = 0;
           }
-          else {
+          else
+          {
             Serial.println("Offset packet was not 2 bytes long.");
           }
         }
@@ -779,46 +786,55 @@ void processCommandUART()
 
 void setup()
 {
-  Serial.begin(); // Pico uses /dev/ttyACM0.  No baud rate needed.
-  i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
-  i2s.setBCLK(0);
-  i2s.setMCLK(3);
-  // Note: LRCK pin is BCK pin plus 1 (1 in this case).
-  i2s.setBitsPerSample(24);
-  i2s.setFrequency(RATE);
-  i2s.setMCLKmult(MCLK_MULT);
-  i2s.setSysClk(RATE);
-  i2s.setBuffers(32, 0, 0);
-  // WiFi.begin(STASSID, PASSWORD); // Add , PASSWORD after STASSID if you have one.
-  WiFi.begin(STASSID); // Add , PASSWORD after STASSID if you have one.
-  for (int i = 0; i < 15 && WiFi.status() != WL_CONNECTED; i++)
+  mutex_init(&my_mutex);
+  if (mutex_try_enter(&my_mutex, &mutex_save)) // Synchronze cores so they start about the same time.
   {
-    delay(1000); // Delay for 1 second
-    Serial.println("Trying to connect to WiFi...");
+    Serial.begin(); // Pico uses /dev/ttyACM0.  No baud rate needed.
+    // WiFi.begin(STASSID, PASSWORD); // Add , PASSWORD after STASSID if you have one.
+    WiFi.begin(STASSID); // Add , PASSWORD after STASSID if you have one.
+    for (int i = 0; i < 15 && WiFi.status() != WL_CONNECTED; i++)
+    {
+      delay(1000); // Delay for 1 second
+      Serial.println("Trying to connect to WiFi...");
+    }
+    if (WiFi.status() != WL_CONNECTED)
+    {
+      Serial.println("Failed to connect to WiFi after 15 seconds");
+      useUDP = false;
+    }
+    else
+    {
+      Serial.printf("WiFi connected; IP address: %s\n", WiFi.localIP().toString().c_str());
+      udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
+      udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
+      useUDP = true;
+    }
+    si5351_init();
+    pinMode(RX_SWITCH, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT); // Set the LED pin as output.  It is used for TX mode.
+    cur_mode = MODE_FT8;
+    setup_mode(cur_mode);
+    rx();          // Set RX mode
+    useUDP = true; // False only for testing out FT8
+    mutex_exit(&my_mutex);
   }
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println("Failed to connect to WiFi after 15 seconds");
-    useUDP = false;
-  }
-  else
-  {
-    Serial.println("Connected to WiFi");
-    Serial.println("WiFi connected");
-    Serial.print("Pico IP address: ");
-    Serial.println(WiFi.localIP());
-    udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
-    udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
-    useUDP = true;
-  }
-  si5351_init();
-  pinMode(RX_SWITCH, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT); // Set the LED pin as output.  It is used for TX mode.
-  i2s.begin();
-  cur_mode = MODE_FT8;
-  setup_mode(cur_mode);
-  rx();          // Set RX mode
-  useUDP = true; // False only for testing out FT8
+}
+
+void setup1()
+{                   // This runs on Core1.  It is the I2S setup.
+    i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
+    i2s.setBCLK(0);
+    i2s.setMCLK(3);
+    // Note: LRCK pin is BCK pin plus 1 (1 in this case).
+    i2s.setSysClk(RATE);
+    i2s.setBitsPerSample(24);
+    i2s.setFrequency(RATE);
+    i2s.setMCLKmult(MCLK_MULT);
+    i2s.setBuffers(32, 0, 0);
+    i2s.begin();
+    mutex_enter_blocking(&my_mutex); // This should syschornize the cores, so one doesn't fill the buffer
+    // before the other is ready.
+    mutex_exit(&my_mutex);
 }
 
 void loop()
@@ -834,6 +850,14 @@ void loop()
   // if (data_sending)
   //  if (udpData.remoteIP() != IPAddress(0, 0, 0, 0))  Things were not working with this line.
   {
-    // sendDataUDP();
+    // This should run on Core0.  It is the UDP loop.
+    static BufferEmptyer emptyer(bufferQueue);
+    emptyer.emptyBuffer(); // Empty the buffer
   }
+}
+
+void loop1()
+{ // This should run on Core1.  It is the I2S loop.
+    static BufferFiller filler(bufferQueue);
+    filler.fillBuffer(); // Fill the buffer
 }

@@ -1,4 +1,6 @@
 #include "PCM1808_I2S_UDP.h"
+
+// Things you might want to change for your situation...
 IPAddress remoteIP(192, 168, 1, 101); // Put your laptop IP here.
 const unsigned int DATA_UDPPORT = 12345; // UDP server port
 const char* STASSID = "Frohne-2.4GHz"; // Put your access point SSID here. 
