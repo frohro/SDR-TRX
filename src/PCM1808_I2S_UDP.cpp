@@ -1,8 +1,6 @@
 #include "PCM1808_I2S_UDP.h"
 uint32_t mutex_save;
-mutex_t my_mutex; // Mutex for thread safety
-WiFiUDP udpData;  
-I2S i2s(INPUT);
+mutex_t my_mutex; // Mutex for thread safety 
 
 CircularBufferQueue::CircularBufferQueue() : fillIndex(1), emptyIndex(0)
 {
