@@ -629,21 +629,9 @@ void processCommandUART()
           tx_buffer[msg_index] = received;
           msg_index++;
         }
-        // delay(1); // Wait for the next character (1ms). This was to get rid of the timeout in FT4.
-        //  timeout += 1;
       }
-      // if (timeout >= SERIAL_TIMEOUT)
-      // {
-      //   message_available = false;
-      //   Serial.println("Timeout");
-      //   Serial.println(timeout, DEC);
-      //   Serial.println(msg_index, DEC);
-      // }
-      // else
-      //{
       message_available = true;
       Serial.print("m");
-      // }
     }
 
     // Change offset
@@ -846,6 +834,6 @@ void loop()
   // if (data_sending)
   //  if (udpData.remoteIP() != IPAddress(0, 0, 0, 0))  Things were not working with this line.
   {
-    sendDataUDP();
+    // sendDataUDP();
   }
 }
