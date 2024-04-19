@@ -25,6 +25,9 @@
 #include <WiFiUdp.h>
 #include <si5351.h>
 #include <JTEncode.h>
+#include <pico/mutex.h>
+#include "PCM1808_I2S_UDP.h"
+
 
 // To do:
 // 1) We need to add I2C code eand calibrate thu INA219.
@@ -34,18 +37,16 @@
 // 4) We need to add the transmitter control code.
 
 // These are things you might want to change for your situation.
-const int RATE = 16000;    // Your network needs to handle this.
+const int RATE = 48000;    // Your network needs to handle this.
 const int MCLK_MULT = 256; //
-const char *SSID = "Frohne-2.4GHz";
-// const char *SSID = "rosbots";
+const char *STASSID = "Frohne-2.4GHz";
+// const char *STASSID = "rosbots";
 // const char *PASSWORD = "ros2bots"; // In case you have a password,
 // you must add this to the WiFi.begin() call, or if you have no
-// passward, you need to take the PASSWORD arguement out.
-const size_t BUFFER_SIZE = 1404; // Assuming the MTU is 1500 bytes...
-char buffer[BUFFER_SIZE];
+// passward, you need to take the PASSWORD arguement out. 
 const unsigned int DATA_UDPPORT = 12345;
 const unsigned int COMMAND_UDPPORT = 12346;
-const char *VERSION_NUMBER = "0.1.0";
+const char *VERSION_NUMBER = "0.1.1";
 IPAddress remoteIp(192, 168, 1, 101); // This is the IP address of the computer running Quisk.
 // It will be replaced with the IP of the competer that sends the command.
 // Radio specific parameters go here.
@@ -63,7 +64,7 @@ const int SERIAL_TIMEOUT = 20000;  // 20 seconds
 WiFiUDP udpData;                   // UDP object for data packets  (Is this a server or a client?)
 WiFiUDP udpCommand;                // UDP object for control packets
 
-Si5351 si5351(0x60); // 0x60 is the normal I2C address for the Si5351A
+Si5351 si5351(0x60); // 0x60 is the normal I2C address for the Si5351A or MS5351M
 
 // Mode defines
 const int JT9_TONE_SPACING = 174;  // ~1.74 Hz
@@ -558,41 +559,41 @@ void processCommandUDP()
     }
   }
 }
-void sendDataUDP()
-{ // This is too slow.  It only get 80 kB/s.
-  static int32_t r, l;
-  size_t bufferIndex = 0;
-  // Fill the buffer with 108 lines of "%d\r\n"
-  while (bufferIndex < BUFFER_SIZE - 26)
-  {                     // Change to 23?  23 is the max size of "%d,%d\r\n" with 10 digits
-    i2s.read32(&l, &r); // Read the next l and r values
-    l = l << 9;
-    r = r << 9;
-    // This next line is for transferring data over the UART in case you don't have a Pico W,
-    // Serial.printf("%d,%d\r\n", l, r); // This only works up 16 kHz.
-    // With the extra four spaces it should wark at 96 kHz with 16 bit samples
-    // and leaving about 90 frames for control packets if we can figure out how
-    // to do that.
-    // These next lines create the buffer of slightly less than the MTU (1500 bytes)
-    int n = snprintf(buffer + bufferIndex, BUFFER_SIZE - bufferIndex, "%d,%d\r\n", l, r);
-    if (n > 0)
-    {
-      bufferIndex += n;
-    }
-    else
-    {
-      Serial.println("Problem with buffer!");
-      break;
-    }
-  }
-  // Send the data buffer via UDP
-  // udpData.beginPacket(udpCommand.remoteIP(), DATA_UDPPORT); // Same IP for both ports.
-  udpData.beginPacket(remoteIp, DATA_UDPPORT);
-  udpData.write((const uint8_t *)buffer, bufferIndex);
-  udpData.endPacket();
-  // Clear the buffer for the next round.  (Do we need this?)
-  memset(buffer, 0, BUFFER_SIZE);
-}
+// void sendDataUDP()
+// { // This is too slow.  It only get 80 kB/s.
+//   static int32_t r, l;
+//   size_t bufferIndex = 0;
+//   // Fill the buffer with 108 lines of "%d\r\n"
+//   while (bufferIndex < BUFFER_SIZE - 26)
+//   {                     // Change to 23?  23 is the max size of "%d,%d\r\n" with 10 digits
+//     i2s.read32(&l, &r); // Read the next l and r values
+//     l = l << 9;
+//     r = r << 9;
+//     // This next line is for transferring data over the UART in case you don't have a Pico W,
+//     // Serial.printf("%d,%d\r\n", l, r); // This only works up 16 kHz.
+//     // With the extra four spaces it should wark at 96 kHz with 16 bit samples
+//     // and leaving about 90 frames for control packets if we can figure out how
+//     // to do that.
+//     // These next lines create the buffer of slightly less than the MTU (1500 bytes)
+//     int n = snprintf(buffer + bufferIndex, BUFFER_SIZE - bufferIndex, "%d,%d\r\n", l, r);
+//     if (n > 0)
+//     {
+//       bufferIndex += n;
+//     }
+//     else
+//     {
+//       Serial.println("Problem with buffer!");
+//       break;
+//     }
+//   }
+//   // Send the data buffer via UDP
+//   // udpData.beginPacket(udpCommand.remoteIP(), DATA_UDPPORT); // Same IP for both ports.
+//   udpData.beginPacket(remoteIp, DATA_UDPPORT);
+//   udpData.write((const uint8_t *)buffer, bufferIndex);
+//   udpData.endPacket();
+//   // Clear the buffer for the next round.  (Do we need this?)
+//   memset(buffer, 0, BUFFER_SIZE);
+// }
 
 void processCommandUART()
 {
@@ -800,8 +801,8 @@ void setup()
   i2s.setMCLKmult(MCLK_MULT);
   i2s.setSysClk(RATE);
   i2s.setBuffers(32, 0, 0);
-  // WiFi.begin(SSID, PASSWORD); // Add , PASSWORD after SSID if you have one.
-  WiFi.begin(SSID); // Add , PASSWORD after SSID if you have one.
+  // WiFi.begin(STASSID, PASSWORD); // Add , PASSWORD after STASSID if you have one.
+  WiFi.begin(STASSID); // Add , PASSWORD after STASSID if you have one.
   for (int i = 0; i < 15 && WiFi.status() != WL_CONNECTED; i++)
   {
     delay(1000); // Delay for 1 second

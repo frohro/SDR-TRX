@@ -19,26 +19,22 @@
 #include <si5351.h>
 #include "pico/mutex.h"
 
-#ifndef STASSID
-#define STASSID "Frohne-2.4GHz"
-#endif
+const char *STASSID = "Frohne-2.4GHz";
 
-// Use #define for common constants to both cores.
-#define RATE 48000 // To do 96000, we need to use 24 bits instead of 32.
-// For now we will use 32 bits for debugging ease.
-#define MCLK_MULT 256 // 384 for 48 BCK per frame,  256 for 64 BCK per frame
+const int RATE = 96000; // Works with 32 bits per sample at 96 ks/s.  This is 768 kBps.  We cound save by using 24 bits per sample.
+const int MCLK_MULT = 256; // 384 for 48 BCK per frame,  256 for 64 BCK per frame
 
 static mutex_t my_mutex;
 uint32_t mutex_save;
 
 I2S i2s(INPUT);
 
-WiFiUDP udp;
+WiFiUDP udpData;
 const char *udpAddress = "192.168.1.101"; // Put your laptop IP here.
-const unsigned int udpPort = 12345;
+const unsigned int udpDataPort = 12345;
 
-#define BUFFER_SIZE 1468 // 183 samples of 4 bytes + 4 bytes for the packet number
-#define QUEUE_SIZE 9
+#define BUFFER_SIZE 1468 // 183 samples of 8 bytes + 4 bytes for the packet number
+#define QUEUE_SIZE 9  // Maximum latency is 8 packets, which is 15 ms.  Average is 2 packets, or 4 ms.  
 
 class CircularBufferQueue
 {
@@ -103,14 +99,14 @@ public:
                 i2s.read32(&l, &r);
                 l = l << 9;
                 r = r << 9;
-                memcpy(buffer + bufferIndex, &l, sizeof(int32_t));
+                memcpy(buffer + bufferIndex, &l, sizeof(int32_t));  // We could speed this up for the network by sending 24 bits instead of 32.
                 bufferIndex += sizeof(int32_t);
                 memcpy(buffer + bufferIndex, &r, sizeof(int32_t));
                 bufferIndex += sizeof(int32_t);
             }
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
-            Serial.printf("Filled packet %d\n", packet_number);
+            Serial.printf("Filled %d\n", packet_number);
         }
     }
 };
@@ -119,10 +115,10 @@ class BufferEmptyer
 {
 private:
     CircularBufferQueue &queue;
-    char test_buffer[BUFFER_SIZE];
+    char temp_buffer[BUFFER_SIZE];
 public:
 BufferEmptyer(CircularBufferQueue &q) : queue(q) {
-    memset(test_buffer, 0xff, BUFFER_SIZE);
+    memset(temp_buffer, 0xff, BUFFER_SIZE);
 }
 
     void emptyBuffer()
@@ -135,12 +131,11 @@ BufferEmptyer(CircularBufferQueue &q) : queue(q) {
         mutex_exit(&my_mutex);
         if (buffer != nullptr)
         {
-            delay(1);  // This is needed to slow it down.  Otherwise, data doesn't get sent over the network.  Why???
-            udp.beginPacket(udpAddress, udpPort);  // Needed
-            memcpy(test_buffer, buffer, BUFFER_SIZE);  // If we don't do this, it hangs in the udp.write below.
-            udp.write((const uint8_t *)&test_buffer, BUFFER_SIZE); // It goes picking daiseys here.
-            udp.endPacket();
-            Serial.printf("Sent packet %d\n", *(int32_t *)buffer); 
+            udpData.beginPacket(udpAddress, udpDataPort);  // Needed
+            memcpy(temp_buffer, buffer, BUFFER_SIZE);  // If we don't do this, it hangs in the udpData.write below.
+            udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE); 
+            udpData.endPacket();
+            Serial.printf("Sent %d\n", *(int32_t *)buffer); 
         }
     }
 };
@@ -153,12 +148,13 @@ void setup()
     if (mutex_try_enter(&my_mutex, &mutex_save))  // Synchronze cores so they start about the same time.
     {
         Serial.begin();
+        // delay(10);
         WiFi.begin(STASSID);
         while (WiFi.status() != WL_CONNECTED)
         {
             delay(1000);
         }
-        udp.begin(udpPort);
+        udpData.begin(udpDataPort);
         Serial.printf("Connected to %s\n", STASSID);
         mutex_exit(&my_mutex);
     }
