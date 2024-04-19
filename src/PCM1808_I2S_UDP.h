@@ -12,7 +12,7 @@
 extern uint32_t mutex_save;
 extern mutex_t my_mutex; // Mutex for thread safety
 extern WiFiUDP udpData;
-extern IPAddress remoteIP;
+extern IPAddress remoteIp;
 extern const char* STASSID;
 
 extern I2S i2s;

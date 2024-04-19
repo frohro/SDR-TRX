@@ -31,12 +31,10 @@
 // To do:
 // 1) We need to add I2C code eand calibrate thu INA219.
 // 2) Refactor this into a library so you can do a receiver, transmitter
-// or transceiver.  Use OOP.  Make the code maintainable.
-// 3) We need to add a way to send the data in binary.
-// 4) We need to add the transmitter control code.
+// or transceiver.  Use OOP.  Make the code maintainable..
 
 // These are things you might want to change for your situation.
-const int RATE = 48000;    // Your network needs to handle this.
+const int RATE = 96000;    // Your network needs to handle this, but 96000 should also work.
 const int MCLK_MULT = 256; //
 const char *STASSID = "Frohne-2.4GHz";
 // const char *STASSID = "rosbots";
@@ -821,20 +819,20 @@ void setup()
 }
 
 void setup1()
-{                   // This runs on Core1.  It is the I2S setup.
-    i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
-    i2s.setBCLK(0);
-    i2s.setMCLK(3);
-    // Note: LRCK pin is BCK pin plus 1 (1 in this case).
-    i2s.setSysClk(RATE);
-    i2s.setBitsPerSample(24);
-    i2s.setFrequency(RATE);
-    i2s.setMCLKmult(MCLK_MULT);
-    i2s.setBuffers(32, 0, 0);
-    i2s.begin();
-    mutex_enter_blocking(&my_mutex); // This should syschornize the cores, so one doesn't fill the buffer
-    // before the other is ready.
-    mutex_exit(&my_mutex);
+{                 // This runs on Core1.  It is the I2S setup.
+  i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
+  i2s.setBCLK(0);
+  i2s.setMCLK(3);
+  // Note: LRCK pin is BCK pin plus 1 (1 in this case).
+  i2s.setSysClk(RATE);
+  i2s.setBitsPerSample(24);
+  i2s.setFrequency(RATE);
+  i2s.setMCLKmult(MCLK_MULT);
+  i2s.setBuffers(32, 0, 0);
+  i2s.begin();
+  mutex_enter_blocking(&my_mutex); // This should syschornize the cores, so one doesn't fill the buffer
+  // before the other is ready.
+  mutex_exit(&my_mutex);
 }
 
 void loop()
@@ -847,8 +845,7 @@ void loop()
   {
     processCommandUART();
   }
-  // if (data_sending)
-  //  if (udpData.remoteIP() != IPAddress(0, 0, 0, 0))  Things were not working with this line.
+  if (data_sending)
   {
     // This should run on Core0.  It is the UDP loop.
     static BufferEmptyer emptyer(bufferQueue);
@@ -858,6 +855,9 @@ void loop()
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
+  if (data_sending)
+  {
     static BufferFiller filler(bufferQueue);
     filler.fillBuffer(); // Fill the buffer
+  }
 }
