@@ -46,4 +46,4 @@ def main():
     print("Audio data written to output.wav")
 
 if __name__ == "__main__":
-    cProfile.run('main()')
+    cProfile.run('main()', 'my-script.profile')
