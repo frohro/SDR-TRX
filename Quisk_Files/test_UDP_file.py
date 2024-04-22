@@ -33,10 +33,10 @@ while expected_packet_number < 4000:
         # Append audio data pairs to the list
         audio_data.extend(data_pairs)
 
-        # Increment expected packet number
-        expected_packet_number += 1
+    # Increment expected packet number
+    expected_packet_number += 1
 
-print (expected_packet_number)
+    print (expected_packet_number)
 # Save audio data to a stereo .wav file
 with wave.open('output.wav', 'wb') as wav_file:
     wav_file.setnchannels(2)  # Stereo
