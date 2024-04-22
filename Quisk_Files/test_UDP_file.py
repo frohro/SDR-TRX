@@ -38,6 +38,7 @@ packets.sort(key=lambda x: x[0])
 audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
 
 # Write to a .wav file
+print(audio_data_sorted)
 with wave.open('output.wav', 'wb') as wav_file:
     wav_file.setnchannels(CHANNELS)
     wav_file.setsampwidth(4) # Assuming 16-bit samples
