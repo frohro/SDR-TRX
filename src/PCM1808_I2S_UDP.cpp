@@ -48,10 +48,16 @@ void BufferEmptyer::emptyBuffer()
     mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
+        static uint32_t packet_number = 0;
         udpData.beginPacket(remoteIp, DATA_UDPPORT);
         memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
         udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE);
         udpData.endPacket();
+        if (*(uint32_t *)temp_buffer != packet_number)
+        {
+            Serial.printf("packet_number %d != %d\n", *(uint32_t *)temp_buffer, packet_number);
+        }
+        packet_number++;
         Serial.printf("Sent %d\n", *(int32_t *)buffer);
     }
 }
