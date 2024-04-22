@@ -21,20 +21,22 @@ print("Listening for packets on port 12345...")
 while len(packets) < 4000:
     data, addr = sock.recvfrom(PACKET_SIZE)
     packet_number = struct.unpack('<I', data[:4])[0] # Little endian
+    # Unpack the stereo audio data into a list of tuples (right, left)
     audio_data = struct.unpack('<183i', data[4:]) # Little endian
+    audio_data = [(audio_data[i], audio_data[i+1]) for i in range(0, len(audio_data), 2)]
     packets.append((packet_number, audio_data))
 
 # Sort packets by packet number
 packets.sort(key=lambda x: x[0])
 
 # Prepare the audio data for writing to a .wav file
-audio_data_sorted = np.array([item[1] for item in packets], dtype=np.int32)
-audio_data_sorted = audio_data_sorted.flatten()
+# Since the audio data is now a list of tuples, we need to flatten it
+audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
 
 # Write to a .wav file
 with wave.open('output.wav', 'wb') as wav_file:
     wav_file.setnchannels(CHANNELS)
-    wav_file.setsampwidth(4) # Assuming 32-bit samples
+    wav_file.setsampwidth(2) # Assuming 16-bit samples
     wav_file.setframerate(SAMPLE_RATE)
     wav_file.writeframes(audio_data_sorted.tobytes())
 
