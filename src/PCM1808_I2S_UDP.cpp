@@ -49,7 +49,7 @@ void BufferEmptyer::emptyBuffer()
     if (buffer != nullptr)
     {    
         // static uint32_t packet_number = 0;
-        delay(1);
+        delayMicroseconds(100);
         udpData.beginPacket(remoteIp, DATA_UDPPORT);
         memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
         udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE);
