@@ -39,7 +39,7 @@ while expected_packet_number < 4000:
     # Check if all packets have been received
     if len(audio_data) == NUM_DATA_PAIRS * expected_packet_number:
         break
-
+print (expected_packet_number)
 # Save audio data to a stereo .wav file
 with wave.open('output.wav', 'wb') as wav_file:
     wav_file.setnchannels(2)  # Stereo
