@@ -13,7 +13,7 @@ CHANNELS = 2 # Stereo
 def main():
     # Create a UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4096)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 1024*1024)
     sock.bind(('', PORT))
 
     # Prepare to receive packets
