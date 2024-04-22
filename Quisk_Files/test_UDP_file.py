@@ -17,12 +17,16 @@ def main():
 
     # Prepare to receive packets
     packets = []
-    expected_packet_number = 0
+    expected_packet_number = None
 
     print("Listening for packets on port 12345...")
     while len(packets) < 4000:
         data, addr = sock.recvfrom(PACKET_SIZE)
         packet_number = struct.unpack('<I', data[:4])[0] # Little endian
+
+        # Set expected_packet_number to the first received packet number
+        if expected_packet_number is None:
+            expected_packet_number = packet_number
 
         # Check for missing or out-of-order packets
         if packet_number != expected_packet_number:
