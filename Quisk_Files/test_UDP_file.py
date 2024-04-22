@@ -23,13 +23,12 @@ while len(packets) < 4000:
     # Unpack the stereo audio data into a list of tuples (right, left)
     audio_data = struct.unpack('<366i', data[4:]) # Little endian
 
-    # Assuming audio_data is a bytes object
-    audio_data_ints = struct.unpack('<' + 'i' * (len(audio_data) // 4), audio_data)
+    # Convert audio_data to a bytes-like object
+    audio_data_bytes = struct.pack('<' + 'i' * len(audio_data), *audio_data)
 
     # Pair up the integers as left and right audio samples
-    audio_data_pairs = [(audio_data_ints[i], audio_data_ints[i+1]) for i in range(0, len(audio_data_ints), 2)]
-    audio_data = [(audio_data_pairs[i][1], audio_data_pairs[i][0]) for i in range(len(audio_data_pairs))]
-    packets.append((packet_number, audio_data))
+    audio_data_pairs = [(audio_data_bytes[i+4], audio_data_bytes[i]) for i in range(0, len(audio_data_bytes), 8)]
+    packets.append((packet_number, audio_data_pairs))
 
 # Sort packets by packet number
 packets.sort(key=lambda x: x[0])
