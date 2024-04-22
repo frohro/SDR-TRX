@@ -2,6 +2,7 @@ import socket
 import struct
 import wave
 import numpy as np
+import cProfile
 
 # Constants
 PORT = 12345
@@ -34,7 +35,7 @@ packets.sort(key=lambda x: x[0])
 audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
 
 # Write to a .wav file
-print(audio_data_pairs)
+# print(audio_data_pairs)
 with wave.open('output.wav', 'wb') as wav_file:
     wav_file.setnchannels(CHANNELS)
     wav_file.setsampwidth(4) # Assuming 16-bit samples
@@ -42,3 +43,6 @@ with wave.open('output.wav', 'wb') as wav_file:
     wav_file.writeframes(audio_data_sorted.tobytes())
 
 print("Audio data written to output.wav")
+
+if __name__ == "__main__":
+    cProfile.run('main()')
