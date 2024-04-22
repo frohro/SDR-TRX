@@ -1,13 +1,11 @@
 import socket
 import struct
-import wave
 
 UDP_IP = "0.0.0.0"
 UDP_PORT = 12345
 
 PACKET_SIZE = 1468
 PACKET_HEADER_SIZE = 4
-DATA_PAIR_SIZE = 8
 NUM_DATA_PAIRS = 183
 
 # Create a UDP socket
@@ -39,8 +37,8 @@ while True:
         # Append audio data pairs to the list
         audio_data.extend(data_pairs)
 
-        # Increment expected packet number
-        expected_packet_number += 1
+    # Increment expected packet number regardless of whether the packet was in order
+    expected_packet_number += 1
 
     # Stop the loop after receiving 4000 packets
     if len(audio_data) // NUM_DATA_PAIRS >= 4000:
