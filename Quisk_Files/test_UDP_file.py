@@ -1,45 +1,41 @@
 import socket
 import struct
+import wave
+import numpy as np
 
-UDP_IP = "0.0.0.0"
-UDP_PORT = 12345
-
-PACKET_SIZE = 1468
-PACKET_HEADER_SIZE = 4
-NUM_DATA_PAIRS = 183
+# Constants
+PORT = 12345
+PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
+SAMPLE_RATE = 96000 # 96 ks/s
+CHANNELS = 2 # Stereo
 
 # Create a UDP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind((UDP_IP, UDP_PORT))
+sock.bind(('', PORT))
 
-# Initialize variables
-expected_packet_number = None
-audio_data = []
+# Prepare to receive packets
+packets = []
 
-while True:
-    # Receive UDP packet
-    packet, addr = sock.recvfrom(PACKET_SIZE)
+print("Listening for packets on port 12345...")
 
-    # Extract packet number
-    packet_number = struct.unpack('!I', packet[:PACKET_HEADER_SIZE])[0]
+while len(packets) < 4000:
+    data, addr = sock.recvfrom(PACKET_SIZE)
+    packet_number = struct.unpack('<I', data[:4])[0] # Little endian
+    audio_data = struct.unpack('<183i', data[4:]) # Little endian
+    packets.append((packet_number, audio_data))
 
-    # If expected_packet_number is None, this is the first packet
-    if expected_packet_number is None:
-        expected_packet_number = packet_number
+# Sort packets by packet number
+packets.sort(key=lambda x: x[0])
 
-    # Check if packet is in order
-    print(packet_number, expected_packet_number)
-    if packet_number == expected_packet_number:
-        # Extract audio data pairs
-        print(packet[PACKET_HEADER_SIZE:])
-        data_pairs = struct.unpack('<' + 'ii' * NUM_DATA_PAIRS, packet[PACKET_HEADER_SIZE:])
-        print(data_pairs)
-        # Append audio data pairs to the list
-        audio_data.extend(data_pairs)
+# Prepare the audio data for writing to a .wav file
+audio_data_sorted = np.array([item[1] for item in packets], dtype=np.int32)
+audio_data_sorted = audio_data_sorted.flatten()
 
-    # Increment expected packet number regardless of whether the packet was in order
-    expected_packet_number += 1
+# Write to a .wav file
+with wave.open('output.wav', 'wb') as wav_file:
+    wav_file.setnchannels(CHANNELS)
+    wav_file.setsampwidth(4) # Assuming 32-bit samples
+    wav_file.setframerate(SAMPLE_RATE)
+    wav_file.writeframes(audio_data_sorted.tobytes())
 
-    # Stop the loop after receiving 4000 packets
-    if len(audio_data) // NUM_DATA_PAIRS >= 4000:
-        break
+print("Audio data written to output.wav")
