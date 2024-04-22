@@ -17,12 +17,11 @@ sock.bind(('', PORT))
 packets = []
 
 print("Listening for packets on port 12345...")
-
 while len(packets) < 4000:
     data, addr = sock.recvfrom(PACKET_SIZE)
     packet_number = struct.unpack('<I', data[:4])[0] # Little endian
     # Unpack the stereo audio data into a list of tuples (right, left)
-    audio_data = struct.unpack('<183i', data[4:]) # Little endian
+    audio_data = struct.unpack('<366i', data[4:]) # Little endian
 
     # Assuming audio_data is a bytes object
     audio_data_ints = struct.unpack('<' + 'i' * (len(audio_data) // 4), audio_data)
