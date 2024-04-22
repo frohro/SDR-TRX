@@ -2,6 +2,35 @@ import socket
 import struct
 import matplotlib.pyplot as plt
 
+# Initialize variables to keep track of packet order
+expected_packet_number = 0
+received_packets = {}
+# Create a variable to hold the concatenated data
+concatenated_data = b''
+# Initialize a counter for out-of-order packets
+out_of_order_count = 0
+
+# Create a figure for the plot
+fig, ax = plt.subplots()
+
+# Initialize a list to hold the data points
+data_points = []
+
+def update(num):
+    # Remove the oldest data point if we have 1000 data points
+    if len(data_points) == 1000:
+        data_points.pop(0)
+
+    # Add the newest data point
+    data_points.append(pairs[num])
+
+    # Update the plot
+    ax.clear()
+    ax.plot(data_points)
+    plt.xlabel('Pair Number')
+    plt.ylabel('Value')
+    plt.title('Plot of Data')
+
 # Create a UDP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -38,6 +67,10 @@ while True:
         received_packets[packet_number] = packet_data
         # Increment the out-of-order counter
         out_of_order_count += 1
+
+    ani = FuncAnimation(fig, update, frames=range(1000), repeat=False)
+    plt.show()
+    from matplotlib.animation import FuncAnimation
 
 # After the loop, out_of_order_count will hold the number of out-of-order packets
 print(f"Number of out-of-order packets: {out_of_order_count}")
