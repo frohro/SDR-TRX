@@ -1,12 +1,12 @@
 #include "PCM1808_I2S_UDP.h"
 uint32_t mutex_save;
-mutex_t my_mutex; // Mutex for thread safety 
+mutex_t my_mutex; // Mutex for thread safety
 
 CircularBufferQueue::CircularBufferQueue() : fillIndex(1), emptyIndex(0)
 {
 }
 
-char* CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
+char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
 {
     uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
     uint32_t otherIndex, temp;
@@ -17,7 +17,7 @@ char* CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
     else
     {
         while (rp2040.fifo.pop_nb(&temp)) // Gets most recent otherIndex, empties FIFO
-        {                                 
+        {
             otherIndex = temp;
         }
     }
@@ -48,8 +48,8 @@ void BufferEmptyer::emptyBuffer()
     mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
-        udpData.beginPacket(remoteIp, DATA_UDPPORT); 
-        memcpy(temp_buffer, buffer, BUFFER_SIZE);     // If we don't do this, it hangs in the udpData.write below.
+        udpData.beginPacket(remoteIp, DATA_UDPPORT);
+        memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
         udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE);
         udpData.endPacket();
         Serial.printf("Sent %d\n", *(int32_t *)buffer);

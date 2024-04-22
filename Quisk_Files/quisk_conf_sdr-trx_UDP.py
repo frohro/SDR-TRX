@@ -69,12 +69,16 @@ class Hardware(BaseHardware):
 
         # Connection for WSJT-X
         self.PICO_UDP_IP = "192.168.1.107"  # Put the Pico IP here.
-        self.COMMAND_UDP_PORT = 12346
+        self.COMMAND_UDP_PORT = 12346  # This is the port the Pico listens on for UDP comands coming from quisk.
+        self.DATA_UDP_PORT = 12345  # This is the port the Pico listens on for UDP IQ data coming from the Pico W.
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.command_sock.setblocking(False)
+        self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.data_sock.bind((self.PICO_UDP_IP, self.DATA_UDP_PORT))
+        self.data_sock.setblocking(False)
         time.sleep(2)
         # Poll for version. Should probably confirm the response on this.
-        version = str(self.get_parameter("VER"))  # The way the firmware is now, this sets it up to use the UART.
+        version = str(self.get_parameter("VER"))  # The way the firmware is now, this sets it up to use the UART or UDP.
         print("called version from line 78")
         print(version)
         # Return an informative message for the config screen
