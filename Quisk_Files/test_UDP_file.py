@@ -17,21 +17,11 @@ def main():
 
     # Prepare to receive packets
     packets = []
-    expected_packet_number = None
 
     print("Listening for packets on port 12345...")
     while len(packets) < 4000:
         data, addr = sock.recvfrom(PACKET_SIZE)
         packet_number = struct.unpack('<I', data[:4])[0] # Little endian
-
-        # Set expected_packet_number to the first received packet number
-        if expected_packet_number is None:
-            expected_packet_number = packet_number
-
-        # Check for missing or out-of-order packets
-        if packet_number != expected_packet_number:
-            print(f"Expected packet number {expected_packet_number}, but received packet number {packet_number}")
-        expected_packet_number += 1
 
         # Unpack the stereo audio data into a list of tuples (right, left)
         audio_data = struct.unpack('<366i', data[4:]) # Little endian
@@ -42,6 +32,14 @@ def main():
 
     # Sort packets by packet number
     packets.sort(key=lambda x: x[0])
+
+    # Check for missing or out-of-order packets
+    expected_packet_number = packets[0][0]
+    for packet in packets:
+        packet_number = packet[0]
+        if packet_number != expected_packet_number:
+            print(f"Expected packet number {expected_packet_number}, but received packet number {packet_number}")
+        expected_packet_number += 1
 
     # Prepare the audio data for writing to a .wav file
     # Since the audio data is now a list of tuples, we need to flatten it
