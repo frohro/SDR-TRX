@@ -28,8 +28,7 @@ while expected_packet_number < 4000:
     # Check if packet is in order
     if packet_number == expected_packet_number:
         # Extract audio data pairs
-        data_pairs = struct.unpack('!' + 'ii' * NUM_DATA_PAIRS, packet[PACKET_HEADER_SIZE:])
-
+        data_pairs = struct.unpack('<' + 'ii' * NUM_DATA_PAIRS, packet[PACKET_HEADER_SIZE:])
         # Append audio data pairs to the list
         audio_data.extend(data_pairs)
 
