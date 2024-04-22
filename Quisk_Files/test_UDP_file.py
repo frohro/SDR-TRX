@@ -15,15 +15,19 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind((UDP_IP, UDP_PORT))
 
 # Initialize variables
-expected_packet_number = 0
+expected_packet_number = None
 audio_data = []
 
-while expected_packet_number < 4000:
+while True:
     # Receive UDP packet
     packet, addr = sock.recvfrom(PACKET_SIZE)
 
     # Extract packet number
     packet_number = struct.unpack('!I', packet[:PACKET_HEADER_SIZE])[0]
+
+    # If expected_packet_number is None, this is the first packet
+    if expected_packet_number is None:
+        expected_packet_number = packet_number
 
     # Check if packet is in order
     print(packet_number, expected_packet_number)
@@ -35,14 +39,9 @@ while expected_packet_number < 4000:
         # Append audio data pairs to the list
         audio_data.extend(data_pairs)
 
-    # Increment expected packet number
-    expected_packet_number += 1
+        # Increment expected packet number
+        expected_packet_number += 1
 
-print (expected_packet_number)
-print (len(audio_data))
-# Save audio data to a stereo .wav file
-with wave.open('output.wav', 'wb') as wav_file:
-    wav_file.setnchannels(2)  # Stereo
-    wav_file.setsampwidth(4)  # 4 bytes per sample (int32_t)
-    wav_file.setframerate(44100)  # Sample rate of 44100 Hz
-    wav_file.writeframes(struct.pack('!' + 'ii' * len(audio_data), *audio_data))
+    # Stop the loop after receiving 4000 packets
+    if len(audio_data) // NUM_DATA_PAIRS >= 4000:
+        break
