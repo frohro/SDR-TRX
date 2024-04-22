@@ -28,7 +28,7 @@ def main():
         audio_data = struct.unpack('<366i', data[4:]) # Little endian
 
         # Pair up the integers as left and right audio samples
-        audio_data_pairs = [(audio_data[i+1], audio_data[i]) for i in range(0, len(audio_data), 2)]
+        audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
         packets.append((packet_number, audio_data_pairs))
 
     # Sort packets by packet number
