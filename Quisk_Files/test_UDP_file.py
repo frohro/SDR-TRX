@@ -22,14 +22,14 @@ while len(packets) < 4000:
     data, addr = sock.recvfrom(PACKET_SIZE)
     packet_number = struct.unpack('<I', data[:4])[0] # Little endian
     # Unpack the stereo audio data into a list of tuples (right, left)
-   # audio_data = struct.unpack('<183i', data[4:]) # Little endia
+    audio_data = struct.unpack('<183i', data[4:]) # Little endian
 
-# Assuming audio_data is a bytes object
+    # Assuming audio_data is a bytes object
     audio_data_ints = struct.unpack('<' + 'i' * (len(audio_data) // 4), audio_data)
 
-# Pair up the integers as left and right audio samples
+    # Pair up the integers as left and right audio samples
     audio_data_pairs = [(audio_data_ints[i], audio_data_ints[i+1]) for i in range(0, len(audio_data_ints), 2)]
-    audio_data = [(audio_data[i], audio_data[i+1]) for i in range(0, len(audio_data), 2)]
+    audio_data = [(audio_data_pairs[i][1], audio_data_pairs[i][0]) for i in range(len(audio_data_pairs))]
     packets.append((packet_number, audio_data))
 
 # Sort packets by packet number
