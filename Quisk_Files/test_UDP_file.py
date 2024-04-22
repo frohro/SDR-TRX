@@ -26,6 +26,7 @@ while expected_packet_number < 4000:
     packet_number = struct.unpack('!I', packet[:PACKET_HEADER_SIZE])[0]
 
     # Check if packet is in order
+    print(packet_number, expected_packet_number)
     if packet_number == expected_packet_number:
         # Extract audio data pairs
         print(packet[PACKET_HEADER_SIZE:])
