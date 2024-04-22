@@ -35,12 +35,16 @@ def main():
 
     # Check for missing or out-of-order packets
     expected_packet_number = packets[0][0]
+    previous_packet_number = None
     for packet in packets:
         packet_number = packet[0]
-        if packet_number != expected_packet_number:
-            print(f"Expected packet number {expected_packet_number}, but received packet number {packet_number}")
+        if previous_packet_number is not None:
+            if packet_number < previous_packet_number:
+                print(f"Packets not sorted correctly. Previous packet number {previous_packet_number}, current packet number {packet_number}")
+            elif packet_number != previous_packet_number + 1:
+                print(f"Packet missed. Expected packet number {previous_packet_number + 1}, but received packet number {packet_number}")
+        previous_packet_number = packet_number
         expected_packet_number += 1
-
     # Prepare the audio data for writing to a .wav file
     # Since the audio data is now a list of tuples, we need to flatten it
     audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
