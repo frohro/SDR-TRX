@@ -35,22 +35,22 @@ def main():
     # Sort packets by packet number
     packets.sort(key=lambda x: x[0])
 
-# Check for missing or out-of-order packets
-expected_packet_number = packets[0][0]
-previous_packet_number = None
-missed_packets = 0
-for packet in packets:
-    packet_number = packet[0]
-    if previous_packet_number is not None:
-        if packet_number < previous_packet_number:
-            print(f"Packets not sorted correctly. Previous packet number {previous_packet_number}, current packet number {packet_number}")
-        elif packet_number != previous_packet_number + 1:
-            print(f"Packet missed. Expected packet number {previous_packet_number + 1}, but received packet number {packet_number}")
-            missed_packets += 1
-    previous_packet_number = packet_number
-    expected_packet_number += 1
+    # Check for missing or out-of-order packets
+    expected_packet_number = packets[0][0]
+    previous_packet_number = None
+    missed_packets = 0
+    for packet in packets:
+        packet_number = packet[0]
+        if previous_packet_number is not None:
+            if packet_number < previous_packet_number:
+                print(f"Packets not sorted correctly. Previous packet number {previous_packet_number}, current packet number {packet_number}")
+            elif packet_number != previous_packet_number + 1:
+                print(f"Packet missed. Expected packet number {previous_packet_number + 1}, but received packet number {packet_number}")
+                missed_packets += 1
+        previous_packet_number = packet_number
+        expected_packet_number += 1
 
-print(f"Total missed packets: {missed_packets}")
+    print(f"Total missed packets: {missed_packets}")
 
     # Prepare the audio data for writing to a .wav file
     # Since the audio data is now a list of tuples, we need to flatten it
