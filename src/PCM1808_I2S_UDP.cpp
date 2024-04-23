@@ -80,8 +80,8 @@ void BufferFiller::fillBuffer()
         while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
         {
             i2s.read32(&l, &r);
-            l = l << 9;
-            r = r << 9;
+            l = l << 1;
+            r = r << 1;
             // For 24 bit packing
             l &= 0xFFFFFF;                       // Keep only the lower 24 bits
             r &= 0xFFFFFF;                       // Keep only the lower 24 bits
@@ -96,7 +96,6 @@ void BufferFiller::fillBuffer()
             // memcpy(buffer + bufferIndex, &r, sizeof(int32_t)); // Copy only the lower 3 bytes
             // bufferIndex += sizeof(int32_t);
         }
-        // To change this to 
         memcpy(buffer, &packet_number, sizeof(int32_t));  
         packet_number++;
         Serial.printf("Filled %d\n", packet_number);
