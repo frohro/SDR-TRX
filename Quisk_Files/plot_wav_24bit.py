@@ -18,8 +18,9 @@ wav_file.close()
 audio_data = [audio_data_bytes[i] + (audio_data_bytes[i+1] << 8) + (audio_data_bytes[i+2] << 16) for i in range(0, len(audio_data_bytes), 3)]
 
 # Separate the audio data into left and right channels
-left_channel = audio_data[::2]
-right_channel = audio_data[1::2]
+# Convert the lists to numpy arrays
+left_channel = np.array(left_channel)
+right_channel = np.array(right_channel)
 
 # Calculate the sum and difference of the left and right channels
 sum_audio = left_channel/10. + right_channel/10.
