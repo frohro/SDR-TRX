@@ -2,6 +2,7 @@ import socket
 import struct
 import wave
 import numpy as np
+import matplotlib.pyplot as plt
 import cProfile
 
 # Constants
@@ -56,6 +57,27 @@ def main():
     # Since the audio data is now a list of tuples, we need to flatten it
     audio_data_sorted = np.array([sample for packet in packets for pair in packet[1] for sample in pair], dtype=np.int32)
 
+    # Separate the left and right channels
+    left_channel = audio_data_sorted[::2]
+    right_channel = audio_data_sorted[1::2]
+
+    # Create a time array for the x-axis
+    time = np.arange(len(left_channel))
+
+    # Create the plot
+    plt.figure(figsize=(10, 6))
+
+    # Plot the left channel
+    plt.plot(time, left_channel, label='Left Channel')
+
+    # Plot the right channel
+    plt.plot(time, right_channel, label='Right Channel')
+
+    # Add a legend
+    plt.legend()
+
+    # Show the plot
+    plt.show()
     # Write to a .wav file
     with wave.open('output.wav', 'wb') as wav_file:
         wav_file.setnchannels(CHANNELS)
