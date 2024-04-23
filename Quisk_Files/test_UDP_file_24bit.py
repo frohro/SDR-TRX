@@ -25,11 +25,8 @@ def main():
         data, addr = sock.recvfrom(PACKET_SIZE)
         packet_number = struct.unpack('<I', data[:4])[0] # Little endian
 
-        # Unpack the audio data into bytes
-        audio_data_bytes = struct.unpack('<' + 'B' * (PACKET_SIZE - 4), data[4:])
-
-        # Combine the bytes into integers
-        audio_data = [int.from_bytes(audio_data_bytes[i:i+3], byteorder='little') for i in range(0, len(audio_data_bytes), 3)]
+        # Unpack the audio data into 24-bit signed integers
+        audio_data = [int.from_bytes(data[i:i+3], byteorder='little', signed=True) for i in range(4, len(data), 3)]
 
         # Pair up the integers as left and right audio samples
         audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
@@ -53,7 +50,7 @@ def main():
 
     # Prepare the audio data for writing to a .wav file
     # Since the audio data is now a list of tuples, we need to flatten it
-    audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
+    audio_data_sorted = np.array([sample for packet in packets for pair in packet[1] for sample in pair], dtype=np.int32)
 
     # Write to a .wav file
     with wave.open('output.wav', 'wb') as wav_file:
@@ -65,4 +62,5 @@ def main():
     print("Audio data written to output.wav")
 
 if __name__ == "__main__":
+    main()
     cProfile.run('main()', 'my-script.profile')
