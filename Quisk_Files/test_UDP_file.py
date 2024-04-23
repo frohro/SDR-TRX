@@ -20,7 +20,7 @@ def main():
     packets = []
 
     print("Listening for packets on port 12345...")
-    while len(packets) < 1000:
+    while len(packets) < 10000:
         data, addr = sock.recvfrom(PACKET_SIZE)
         packet_number = struct.unpack('<I', data[:4])[0] # Little endian
 
