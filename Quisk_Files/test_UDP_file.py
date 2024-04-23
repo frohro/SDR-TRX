@@ -6,7 +6,7 @@ import cProfile
 
 # Constants
 PORT = 12345
-PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
+PACKET_SIZE = 732 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE = 96000 # 96 ks/s
 CHANNELS = 2 # Stereo
 
