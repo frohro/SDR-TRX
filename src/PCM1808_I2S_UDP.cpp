@@ -47,7 +47,7 @@ void BufferEmptyer::emptyBuffer()
     char *buffer = queue.getNextBufferAndUpdate(false);
     mutex_exit(&my_mutex);
     if (buffer != nullptr)
-    {    
+    {
         // static uint32_t packet_number = 0;
         delayMicroseconds(100);
         udpData.beginPacket(remoteIp, DATA_UDPPORT);
@@ -82,10 +82,12 @@ void BufferFiller::fillBuffer()
             i2s.read32(&l, &r);
             l = l << 9;
             r = r << 9;
-            memcpy(buffer + bufferIndex, &l, sizeof(int32_t)); // We could speed this up for the network by sending 24 bits instead of 32.
-            bufferIndex += sizeof(int32_t);
-            memcpy(buffer + bufferIndex, &r, sizeof(int32_t));
-            bufferIndex += sizeof(int32_t);
+            l &= 0xFFFFFF;                       // Keep only the lower 24 bits
+            r &= 0xFFFFFF;                       // Keep only the lower 24 bits
+            memcpy(buffer + bufferIndex, &l, 3); // Copy only the lower 3 bytes
+            bufferIndex += 3;
+            memcpy(buffer + bufferIndex, &r, 3); // Copy only the lower 3 bytes
+            bufferIndex += 3;
         }
         // memcpy(buffer, &packet_number, sizeof(int32_t));  // For 32 bit samples
         memcpy(buffer, &packet_number, 3); // For 24 bit samples
