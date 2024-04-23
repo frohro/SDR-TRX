@@ -25,7 +25,7 @@ plt.figure(figsize=(10, 12))
 
 # Plot the sum audio data for the first 1000 points
 plt.subplot(3, 1, 1)
-plt.plot(sum_audio[:1000])
+plt.plot(0.5 * sum_audio[:1000])
 plt.title('Left + Right')
 
 # Plot the difference audio data for the first 1000 points
