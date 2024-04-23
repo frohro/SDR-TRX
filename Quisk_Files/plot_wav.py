@@ -2,20 +2,15 @@ import wave
 import numpy as np
 import matplotlib.pyplot as plt
 
-import numpy as np
-
 # Open the .wav file
 wav_file = wave.open('output.wav', 'rb')
 
 # Read the audio data
 nframes = wav_file.getnframes()
-audio_data_bytes = np.frombuffer(wav_file.readframes(nframes), dtype=np.uint8)
+audio_data = np.frombuffer(wav_file.readframes(nframes), dtype=np.int32)
 
 # Close the .wav file
 wav_file.close()
-
-# Combine the bytes into 24-bit integers
-audio_data = [audio_data_bytes[i] + (audio_data_bytes[i+1] << 8) + (audio_data_bytes[i+2] << 16) for i in range(0, len(audio_data_bytes), 3)]
 
 # Separate the audio data into left and right channels
 left_channel = audio_data[::2]
