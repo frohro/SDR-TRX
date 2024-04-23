@@ -87,7 +87,8 @@ void BufferFiller::fillBuffer()
             memcpy(buffer + bufferIndex, &r, sizeof(int32_t));
             bufferIndex += sizeof(int32_t);
         }
-        memcpy(buffer, &packet_number, sizeof(int32_t));
+        // memcpy(buffer, &packet_number, sizeof(int32_t));  // For 32 bit samples
+        memcpy(buffer, &packet_number, 3); // For 24 bit samples
         packet_number++;
         Serial.printf("Filled %d\n", packet_number);
     }

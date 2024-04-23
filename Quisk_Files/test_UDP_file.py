@@ -20,16 +20,32 @@ def main():
     packets = []
 
     print("Listening for packets on port 12345...")
+    # Comment this if you are using 24 bit samples instead of 32.
+    # while len(packets) < 10000:
+    #     data, addr = sock.recvfrom(PACKET_SIZE)
+    #     packet_number = struct.unpack('<I', data[:4])[0] # Little endian
+
+    #     # Unpack the stereo audio data into a list of tuples (right, left)
+    #     audio_data = struct.unpack('<366i', data[4:]) # Little endian
+
+    #     # Pair up the integers as left and right audio samples
+    #     audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
+    #     packets.append((packet_number, audio_data_pairs))
+
+    # Comment this if you are using 32 bit samples instead of 24.
     while len(packets) < 10000:
-        data, addr = sock.recvfrom(PACKET_SIZE)
-        packet_number = struct.unpack('<I', data[:4])[0] # Little endian
+    data, addr = sock.recvfrom(PACKET_SIZE)
+    packet_number = struct.unpack('<I', data[:4])[0] # Little endian
 
-        # Unpack the stereo audio data into a list of tuples (right, left)
-        audio_data = struct.unpack('<366i', data[4:]) # Little endian
+    # Unpack the audio data into bytes
+    audio_data_bytes = struct.unpack('<' + 'B' * (PACKET_SIZE - 4), data[4:])
 
-        # Pair up the integers as left and right audio samples
-        audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
-        packets.append((packet_number, audio_data_pairs))
+    # Combine the bytes into integers
+    audio_data = [audio_data_bytes[i] + (audio_data_bytes[i+1] << 8) + (audio_data_bytes[i+2] << 16) for i in range(0, len(audio_data_bytes), 3)]
+
+    # Pair up the integers as left and right audio samples
+    audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
+    packets.append((packet_number, audio_data_pairs))
 
     # Sort packets by packet number
     packets.sort(key=lambda x: x[0])
