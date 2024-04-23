@@ -21,17 +21,24 @@ sum_audio = left_channel + right_channel
 diff_audio = left_channel - right_channel
 
 # Create a figure
-plt.figure(figsize=(10, 8))
+plt.figure(figsize=(10, 12))
 
 # Plot the sum audio data for the first 1000 points
-plt.subplot(2, 1, 1)
+plt.subplot(3, 1, 1)
 plt.plot(sum_audio[:1000])
 plt.title('Left + Right')
 
 # Plot the difference audio data for the first 1000 points
-plt.subplot(2, 1, 2)
+plt.subplot(3, 1, 2)
 plt.plot(diff_audio[:1000])
 plt.title('Left - Right')
+
+# Plot the left and right channels for the first 1000 points
+plt.subplot(3, 1, 3)
+plt.plot(left_channel[:1000], label='Left Channel')
+plt.plot(right_channel[:1000], label='Right Channel')
+plt.title('Left and Right Channels')
+plt.legend()
 
 # Show the plot
 plt.tight_layout()
