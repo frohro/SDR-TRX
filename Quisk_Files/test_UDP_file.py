@@ -6,7 +6,7 @@ import cProfile
 
 # Constants
 PORT = 12345
-PACKET_SIZE = 736 # 4 bytes for packet number + 183 * 4 bytes for int32_t values
+PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE = 96000 # 96 ks/s
 CHANNELS = 2 # Stereo
 
@@ -24,11 +24,11 @@ def main():
         data, addr = sock.recvfrom(PACKET_SIZE)
         packet_number = struct.unpack('<I', data[:4])[0] # Little endian
 
-        # Unpack the audio data into a list of int32_t values
-        audio_data = struct.unpack('<183i', data[4:]) # Little endian
+        # Unpack the stereo audio data into a list of tuples (right, left)
+        audio_data = struct.unpack('<366i', data[4:]) # Little endian
 
-        # Pair up the integers as audio samples
-        audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
+        # Pair up the integers as left and right audio samples
+        audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
         packets.append((packet_number, audio_data_pairs))
 
     # Sort packets by packet number
