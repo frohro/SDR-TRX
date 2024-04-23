@@ -25,7 +25,7 @@ def main():
         packet_number = struct.unpack('<I', data[:4])[0] # Little endian
 
         # Unpack the stereo audio data into a list of tuples (right, left)
-        audio_data = struct.unpack('<366i', data[4:]) # Little endian
+        audio_data = struct.unpack('<183i', data[4:]) # Little endian
 
         # Pair up the integers as left and right audio samples
         audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
