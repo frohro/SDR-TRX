@@ -29,7 +29,7 @@ def main():
         audio_data_bytes = struct.unpack('<' + 'B' * (PACKET_SIZE - 4), data[4:])
 
         # Combine the bytes into integers
-        audio_data = [audio_data_bytes[i] + (audio_data_bytes[i+1] << 8) + (audio_data_bytes[i+2] << 16) for i in range(0, len(audio_data_bytes), 3)]
+        audio_data = [int.from_bytes(audio_data_bytes[i:i+3], byteorder='little') for i in range(0, len(audio_data_bytes), 3)]
 
         # Pair up the integers as left and right audio samples
         audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
@@ -50,26 +50,17 @@ def main():
                 print(f"Packet missed. Expected packet number {previous_packet_number + 1}, but received packet number {packet_number}")
         previous_packet_number = packet_number
         expected_packet_number += 1
+
     # Prepare the audio data for writing to a .wav file
     # Since the audio data is now a list of tuples, we need to flatten it
     audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
 
-# Prepare the audio data for writing to a .wav file
-# Since the audio data is now a list of tuples, we need to flatten it
-audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
-
-# # Convert the audio data to 24-bit integers
-# audio_data_sorted = audio_data_sorted.astype(np.int32) >> 8
-
-# Combine the bytes into integers
-audio_data = [int.from_bytes(audio_data_bytes[i:i+3], byteorder='little') for i in range(0, len(audio_data_bytes), 3)]
-
-# Write to a .wav file
-with wave.open('output.wav', 'wb') as wav_file:
-    wav_file.setnchannels(CHANNELS)
-    wav_file.setsampwidth(3) 
-    wav_file.setframerate(SAMPLE_RATE)
-    wav_file.writeframes(audio_data_sorted.tobytes())
+    # Write to a .wav file
+    with wave.open('output.wav', 'wb') as wav_file:
+        wav_file.setnchannels(CHANNELS)
+        wav_file.setsampwidth(3) 
+        wav_file.setframerate(SAMPLE_RATE)
+        wav_file.writeframes(audio_data_sorted.tobytes())
 
     print("Audio data written to output.wav")
 
