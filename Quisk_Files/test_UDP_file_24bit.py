@@ -20,19 +20,7 @@ def main():
     packets = []
 
     print("Listening for packets on port 12345...")
-    # Comment this if you are using 24 bit samples instead of 32.
-    # while len(packets) < 10000:
-    #     data, addr = sock.recvfrom(PACKET_SIZE)
-    #     packet_number = struct.unpack('<I', data[:4])[0] # Little endian
 
-    #     # Unpack the stereo audio data into a list of tuples (right, left)
-    #     audio_data = struct.unpack('<366i', data[4:]) # Little endian
-
-    #     # Pair up the integers as left and right audio samples
-    #     audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
-    #     packets.append((packet_number, audio_data_pairs))
-
-    # Comment this if you are using 32 bit samples instead of 24.
     while len(packets) < 10000:
         data, addr = sock.recvfrom(PACKET_SIZE)
         packet_number = struct.unpack('<I', data[:4])[0] # Little endian
@@ -44,7 +32,7 @@ def main():
         audio_data = [audio_data_bytes[i] + (audio_data_bytes[i+1] << 8) + (audio_data_bytes[i+2] << 16) for i in range(0, len(audio_data_bytes), 3)]
 
         # Pair up the integers as left and right audio samples
-        audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
+        audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
         packets.append((packet_number, audio_data_pairs))
 
     # Sort packets by packet number
@@ -66,12 +54,22 @@ def main():
     # Since the audio data is now a list of tuples, we need to flatten it
     audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
 
-    # Write to a .wav file
-    with wave.open('output.wav', 'wb') as wav_file:
-        wav_file.setnchannels(CHANNELS)
-        wav_file.setsampwidth(3) 
-        wav_file.setframerate(SAMPLE_RATE)
-        wav_file.writeframes(audio_data_sorted.tobytes())
+# Prepare the audio data for writing to a .wav file
+# Since the audio data is now a list of tuples, we need to flatten it
+audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
+
+# # Convert the audio data to 24-bit integers
+# audio_data_sorted = audio_data_sorted.astype(np.int32) >> 8
+
+# Combine the bytes into integers
+audio_data = [int.from_bytes(audio_data_bytes[i:i+3], byteorder='little') for i in range(0, len(audio_data_bytes), 3)]
+
+# Write to a .wav file
+with wave.open('output.wav', 'wb') as wav_file:
+    wav_file.setnchannels(CHANNELS)
+    wav_file.setsampwidth(3) 
+    wav_file.setframerate(SAMPLE_RATE)
+    wav_file.writeframes(audio_data_sorted.tobytes())
 
     print("Audio data written to output.wav")
 
