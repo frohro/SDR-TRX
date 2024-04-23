@@ -17,7 +17,7 @@ left_channel = audio_data[::2]
 right_channel = audio_data[1::2]
 
 # Calculate the sum and difference of the left and right channels
-sum_audio = left_channel + right_channel
+sum_audio = left_channel/10. + right_channel/10.
 diff_audio = left_channel - right_channel
 
 # Create a figure
