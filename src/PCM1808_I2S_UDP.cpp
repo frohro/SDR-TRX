@@ -82,15 +82,22 @@ void BufferFiller::fillBuffer()
             i2s.read32(&l, &r);
             l = l << 9;
             r = r << 9;
+            // For 24 bit packing
             l &= 0xFFFFFF;                       // Keep only the lower 24 bits
             r &= 0xFFFFFF;                       // Keep only the lower 24 bits
             memcpy(buffer + bufferIndex, &l, 3); // Copy only the lower 3 bytes
             bufferIndex += 3;
             memcpy(buffer + bufferIndex, &r, 3); // Copy only the lower 3 bytes
             bufferIndex += 3;
+            // End 24 bit packing
+            // For 32 bit packing
+            // memcpy(buffer + bufferIndex, &l, sizeof(int32_t)); // Copy only the lower 3 bytes
+            // bufferIndex += sizeof(int32_t);
+            // memcpy(buffer + bufferIndex, &r, sizeof(int32_t)); // Copy only the lower 3 bytes
+            // bufferIndex += sizeof(int32_t);
         }
-        // memcpy(buffer, &packet_number, sizeof(int32_t));  // For 32 bit samples
-        memcpy(buffer, &packet_number, 4); 
+        // To change this to 
+        memcpy(buffer, &packet_number, sizeof(int32_t));  
         packet_number++;
         Serial.printf("Filled %d\n", packet_number);
     }
