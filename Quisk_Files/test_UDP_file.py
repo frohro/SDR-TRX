@@ -69,7 +69,7 @@ def main():
     # Write to a .wav file
     with wave.open('output.wav', 'wb') as wav_file:
         wav_file.setnchannels(CHANNELS)
-        wav_file.setsampwidth(4) # Assuming 16-bit samples
+        wav_file.setsampwidth(3) 
         wav_file.setframerate(SAMPLE_RATE)
         wav_file.writeframes(audio_data_sorted.tobytes())
 
