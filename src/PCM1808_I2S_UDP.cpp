@@ -35,6 +35,18 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
 
 BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
 {
+    if (RATE == 48000)
+    {
+        DELAY_TIME = 7500; 
+    }
+    else if (RATE == 96000)
+    {
+        DELAY_TIME = 3250; 
+    }
+    else
+    {
+        DELAY_TIME = 7500; 
+    }
     memset(temp_buffer, 0xff, BUFFER_SIZE);
 }
 
@@ -49,7 +61,7 @@ void BufferEmptyer::emptyBuffer()
     if (buffer != nullptr)
     {
         // static uint32_t packet_number = 0;
-        delayMicroseconds(7500);
+        delayMicroseconds(DELAY_TIME);  // Tune this for minimmum number of missed packets.
         while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
         {
             delayMicroseconds(10);
