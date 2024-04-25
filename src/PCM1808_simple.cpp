@@ -25,7 +25,8 @@ void setup() {
     i2s.read32(&l, &r);
     l = l << 8;
     r = r << 8;
-    Serial.printf("%d %d\r\n", l + r, l - r);
+    // Serial.printf("%d %d\r\n", l + r, l - r);
+    Serial.printf("%d %d\r\n", l, r);
   }
 }
 
