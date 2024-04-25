@@ -49,17 +49,18 @@ void BufferEmptyer::emptyBuffer()
     if (buffer != nullptr)
     {
         // static uint32_t packet_number = 0;
-        delayMicroseconds(100);
-        if(udpData.beginPacket(remoteIp, DATA_UDPPORT))
+
+        while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
         {
+            delayMicroseconds(100);
             Serial.println("udpDat.beginPacket failed");
         }
         memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
-        if(udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
+        if (udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
         {
             Serial.println("udpData.write failed");
         }
-        if(udpData.endPacket())
+        if (udpData.endPacket())
         {
             Serial.println("udpData.endPacket failed");
         }
@@ -100,19 +101,19 @@ void BufferFiller::fillBuffer()
                 memcpy(buffer + bufferIndex, &r, 3); // Copy only the lower 3 bytes
                 bufferIndex += 3;
             }
-            else if(BITS_PER_SAMPLE_SENT == 32)
+            else if (BITS_PER_SAMPLE_SENT == 32)
             {
                 // l = l << 9;  // These were to fix a bug in the Arduino-Pico framework
                 // r = r << 9;
-                l = l << 8; // Keep only the lower 24 bits
-                r = r << 8; // Keep only the lower 24 bits
+                l = l << 8;                                        // Keep only the lower 24 bits
+                r = r << 8;                                        // Keep only the lower 24 bits
                 memcpy(buffer + bufferIndex, &l, sizeof(int32_t)); // Copy only the lower 3 bytes
                 bufferIndex += sizeof(int32_t);
                 memcpy(buffer + bufferIndex, &r, sizeof(int32_t)); // Copy only the lower 3 bytes
                 bufferIndex += sizeof(int32_t);
             }
         }
-        memcpy(buffer, &packet_number, sizeof(int32_t));  
+        memcpy(buffer, &packet_number, sizeof(int32_t));
         packet_number++;
         Serial.printf("Filled %d\n", packet_number);
     }
