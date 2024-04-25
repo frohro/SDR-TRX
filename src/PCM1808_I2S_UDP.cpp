@@ -71,7 +71,7 @@ void BufferEmptyer::emptyBuffer()
         //     Serial.printf("packet_number %d != %d\n", *(uint32_t *)temp_buffer, packet_number);
         // }
         // packet_number++;
-        Serial.printf("Sent %d\n", *(int32_t *)buffer);
+        // Serial.printf("Sent %d\n", *(int32_t *)buffer);
     }
 }
 
@@ -117,6 +117,6 @@ void BufferFiller::fillBuffer()
         }
         memcpy(buffer, &packet_number, sizeof(int32_t));
         packet_number++;
-        Serial.printf("Filled %d\n", packet_number);
+        // Serial.printf("Filled %d\n", packet_number);
     }
 }
