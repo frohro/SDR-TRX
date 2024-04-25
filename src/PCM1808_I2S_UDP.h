@@ -15,7 +15,6 @@ extern WiFiUDP udpData;
 extern IPAddress remoteIp;
 extern const char* STASSID;
 extern const int BITS_PER_SAMPLE_SENT;
-extern int DELAY_TIME;  // Tune this for minimmum number of missed packets
 
 extern I2S i2s;
 
@@ -55,6 +54,7 @@ class BufferEmptyer
 private:
     CircularBufferQueue &queue;
     char temp_buffer[BUFFER_SIZE];
+    int DELAY_TIME;
     
 public:
     BufferEmptyer(CircularBufferQueue &q);

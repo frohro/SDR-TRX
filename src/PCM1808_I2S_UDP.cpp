@@ -1,7 +1,6 @@
 #include "PCM1808_I2S_UDP.h"
 uint32_t mutex_save;
 mutex_t my_mutex; // Mutex for thread safety
-int DELAY_TIME = 7500;  // Tune this for minimmum number of missed packets
 
 CircularBufferQueue::CircularBufferQueue() : fillIndex(1), emptyIndex(0)
 {
@@ -46,7 +45,7 @@ BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
     }
     else
     {
-        DELAY_TIME = 7500; 
+        DELAY_TIME = 22500; // Hasn't been tested, but I think it should work for 16 ks/s.
     }
     memset(temp_buffer, 0xff, BUFFER_SIZE);
 }
