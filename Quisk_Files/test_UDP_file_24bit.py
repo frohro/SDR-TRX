@@ -75,17 +75,17 @@ def main():
     # Since the audio data is now a list of tuples, we need to flatten it
     audio_data_sorted = np.array([sample for packet in packets for pair in packet[1] for sample in pair], dtype=np.int32)
 
-    # Separate the left and right channels
-    left_channel = audio_data_sorted[::2][:NUM_PLOT_POINTS]
-    right_channel = audio_data_sorted[1::2][:NUM_PLOT_POINTS]
-    time_array = np.arange(len(left_channel))/SAMPLE_RATE
-    plt.figure(figsize=(10, 6))
-    plt.plot(time_array, left_channel, label='Left Channel')
-    plt.plot(time_array, right_channel, label='Right Channel')
-    plt.legend()
-    plt.xlabel('Time (s)')
-    plt.title('Audio Data Received from Pico W')
-    plt.show()
+    # # Separate the left and right channels
+    # left_channel = audio_data_sorted[::2][:NUM_PLOT_POINTS]
+    # right_channel = audio_data_sorted[1::2][:NUM_PLOT_POINTS]
+    # time_array = np.arange(len(left_channel))/SAMPLE_RATE
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(time_array, left_channel, label='Left Channel')
+    # plt.plot(time_array, right_channel, label='Right Channel')
+    # plt.legend()
+    # plt.xlabel('Time (s)')
+    # plt.title('Audio Data Received from Pico W')
+    # plt.show()
 
 #    # Convert 24-bit audio to 16-bit
 #     audio_data_16bit = (audio_data_sorted / np.power(2, 8)).astype(np.int16)
