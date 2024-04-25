@@ -42,10 +42,18 @@ def main():
             # audio_data = (audio_data[:, 2] * 2**16 + audio_data[:, 1] * 2**8 + audio_data[:, 0])
             # audio_data = ((audio_data[:, 2].astype(np.int32) << 16)  + (audio_data[:, 1].astype(np.int32) << 8) +  audio_data[:, 0].astype(np.int32))
             #   audio_data[:, 0].astype(np.int32))
-            audio_data = ((audio_data[:, 2] << 16) | 
-                        (audio_data[:, 1] << 8) | 
-                        audio_data[:, 0]).astype(np.int32)
-                
+            # Unpack the audio data into 24-bit signed integers
+            audio_data = np.frombuffer(data[4:], dtype=np.uint8).reshape(-1, 3)
+
+            # Combine the bytes
+            audio_data = ((audio_data[:, 2] << 16) | (audio_data[:, 1] << 8) | audio_data[:, 0])
+
+            # Convert to signed 32-bit integers
+            audio_data = audio_data.view(np.int32)
+
+            # Correct the sign for negative numbers
+            audio_data = np.where(audio_data & (1 << 23), audio_data - (1 << 24), audio_data)
+                            
             # Pair up the integers as left and right audio samples
             audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
             # audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
