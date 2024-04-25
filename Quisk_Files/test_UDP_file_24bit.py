@@ -3,13 +3,20 @@ import struct
 import wave
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+import threading
 import cProfile
+
 
 # Constants
 PORT = 12345
 PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
-SAMPLE_RATE =  96000 
+SAMPLE_RATE =  48000 
 CHANNELS = 2 # Stereo
+NUM_PACKETS = 100
+NUM_PLOT_POINTS = 30
+
+lock = threading.Lock()
 
 def main():
     # Create a UDP socket
@@ -22,17 +29,24 @@ def main():
 
     print("Listening for packets on port 12345...")
 
-    while len(packets) < 10000:
+
+    while len(packets) < NUM_PACKETS:
         data, addr = sock.recvfrom(PACKET_SIZE)
-        packet_number = struct.unpack('<I', data[:4])[0] # Little endian
+        with lock:
+            start = time.time()
+            packet_number = struct.unpack('<I', data[:4])[0] # Little endian
 
-        # Unpack the audio data into 24-bit signed integers
-        audio_data = [int.from_bytes(data[i:i+3], byteorder='little', signed=True) for i in range(4, len(data), 3)]
+            # Unpack the audio data into 24-bit signed integers
+            audio_data = np.frombuffer(data[4:], dtype=np.int8).reshape(-1, 3)
+            audio_data = (audio_data[:, 0] << 16) | (audio_data[:, 1] << 8) | audio_data[:, 2]
 
-        # Pair up the integers as left and right audio samples
-        audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
-        packets.append((packet_number, audio_data_pairs))
+            # Pair up the integers as left and right audio samples
+            audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
+            # audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
+            packets.append((packet_number, audio_data_pairs))
+            time_per_statement = time.time() - start
 
+    print(f"Time per statement: {time_per_statement} seconds")
     # Sort packets by packet number
     packets.sort(key=lambda x: x[0])
 
@@ -52,40 +66,38 @@ def main():
         expected_packet_number += 1
 
     print(f"Total missed packets: {missed_packets}")
-
+    unique_packets = NUM_PACKETS - missed_packets
+    print(f"This is {unique_packets/float(NUM_PACKETS)*100:.8f}% of the total packets received.")
+    if missed_packets != 0:
+        print(f"This is {NUM_PACKETS*244/SAMPLE_RATE/missed_packets:.2f} seconds of audio data per problem.")
+    
     # Prepare the audio data for writing to a .wav file
     # Since the audio data is now a list of tuples, we need to flatten it
     audio_data_sorted = np.array([sample for packet in packets for pair in packet[1] for sample in pair], dtype=np.int32)
 
     # Separate the left and right channels
-    left_channel = audio_data_sorted[::2]
-    right_channel = audio_data_sorted[1::2]
-
-    # Create a time array for the x-axis
-    time = np.arange(len(left_channel))
-
-    # Create the plot
+    left_channel = audio_data_sorted[::2][:NUM_PLOT_POINTS]
+    right_channel = audio_data_sorted[1::2][:NUM_PLOT_POINTS]
+    time_array = np.arange(len(left_channel))/SAMPLE_RATE
     plt.figure(figsize=(10, 6))
-
-    # Plot the left channel
-    plt.plot(time, left_channel, label='Left Channel')
-
-    # Plot the right channel
-    plt.plot(time, right_channel, label='Right Channel')
-
-    # Add a legend
+    plt.plot(time_array, left_channel, label='Left Channel')
+    plt.plot(time_array, right_channel, label='Right Channel')
     plt.legend()
-
-    # Show the plot
+    plt.xlabel('Time (s)')
+    plt.title('Audio Data Received from Pico W')
     plt.show()
-    # Write to a .wav file
-    with wave.open('output.wav', 'wb') as wav_file:
-        wav_file.setnchannels(CHANNELS)
-        wav_file.setsampwidth(3) 
-        wav_file.setframerate(SAMPLE_RATE)
-        wav_file.writeframes(audio_data_sorted.tobytes())
 
-    print("Audio data written to output.wav")
+#    # Convert 24-bit audio to 16-bit
+#     audio_data_16bit = (audio_data_sorted / np.power(2, 8)).astype(np.int16)
+
+#     # Write to a .wav file (16-bith, so we don't have to use soundfile)
+#     with wave.open('output.wav', 'wb') as wav_file:
+#         wav_file.setnchannels(CHANNELS)
+#         wav_file.setsampwidth(2)  # Set sample width to 2 bytes (16 bits)
+#         wav_file.setframerate(SAMPLE_RATE)
+#         wav_file.writeframes(audio_data_16bit.tobytes())
+
+#     print("Audio data written to output.wav")
 
 if __name__ == "__main__":
     cProfile.run('main()', 'my-script.profile')

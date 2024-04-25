@@ -34,7 +34,8 @@
 // or transceiver.  Use OOP.  Make the code maintainable..
 
 // These are things you might want to change for your situation.
-const int RATE = 96000;    // Your network needs to handle this, but 96000 should also work, but misses some packets.
+const int RATE = 48000;    // Your network needs to handle this, but 96000 should also work, but misses some packets.
+const int BITS_PER_SAMPLE_SENT = 24;  // 24 or 32, python can make 32 faster.
 const int MCLK_MULT = 256; //
 const char *STASSID = "Frohne-2.4GHz";
 // const char *STASSID = "rosbots";

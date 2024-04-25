@@ -80,21 +80,28 @@ void BufferFiller::fillBuffer()
         while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
         {
             i2s.read32(&l, &r);
-            l = l << 1;
-            r = r << 1;
-            // For 24 bit packing
-            l &= 0xFFFFFF;                       // Keep only the lower 24 bits
-            r &= 0xFFFFFF;                       // Keep only the lower 24 bits
-            memcpy(buffer + bufferIndex, &l, 3); // Copy only the lower 3 bytes
-            bufferIndex += 3;
-            memcpy(buffer + bufferIndex, &r, 3); // Copy only the lower 3 bytes
-            bufferIndex += 3;
-            // End 24 bit packing
-            // For 32 bit packing
-            // memcpy(buffer + bufferIndex, &l, sizeof(int32_t)); // Copy only the lower 3 bytes
-            // bufferIndex += sizeof(int32_t);
-            // memcpy(buffer + bufferIndex, &r, sizeof(int32_t)); // Copy only the lower 3 bytes
-            // bufferIndex += sizeof(int32_t);
+            if (BITS_PER_SAMPLE_SENT == 24)
+            {
+                // l = l << 1;  // These were to fix a bug in the Arduino-Pico framework
+                // r = r << 1;
+                l &= 0xFFFFFF;                       // Keep only the lower 24 bits
+                r &= 0xFFFFFF;                       // Keep only the lower 24 bits
+                memcpy(buffer + bufferIndex, &l, 3); // Copy only the lower 3 bytes
+                bufferIndex += 3;
+                memcpy(buffer + bufferIndex, &r, 3); // Copy only the lower 3 bytes
+                bufferIndex += 3;
+            }
+            else if(BITS_PER_SAMPLE_SENT == 32)
+            {
+                // l = l << 9;  // These were to fix a bug in the Arduino-Pico framework
+                // r = r << 9;
+                l = l << 8; // Keep only the lower 24 bits
+                r = r << 8; // Keep only the lower 24 bits
+                memcpy(buffer + bufferIndex, &l, sizeof(int32_t)); // Copy only the lower 3 bytes
+                bufferIndex += sizeof(int32_t);
+                memcpy(buffer + bufferIndex, &r, sizeof(int32_t)); // Copy only the lower 3 bytes
+                bufferIndex += sizeof(int32_t);
+            }
         }
         memcpy(buffer, &packet_number, sizeof(int32_t));  
         packet_number++;
