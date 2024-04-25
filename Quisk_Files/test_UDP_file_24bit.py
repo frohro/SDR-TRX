@@ -78,8 +78,8 @@ def main():
     # Separate the left and right channels
     left_channel = audio_data_sorted[::2][:NUM_PLOT_POINTS]
     right_channel = audio_data_sorted[1::2][:NUM_PLOT_POINTS]
-    print("Max of (Left + Right) is: ", max((left_channel + right_channel)))
-    print('Max of (Left - Right) is: ', max(left_channel - right_channel))
+    print("Max of (Left + Right) is: ", max((0.5*left_channel + 0.5*right_channel)))
+    print('Max of (Left - Right) is: ', max(0.5*left_channel - 0.5*right_channel))
 
     time_array = np.arange(len(left_channel))/SAMPLE_RATE
     plt.figure(figsize=(10, 6))
