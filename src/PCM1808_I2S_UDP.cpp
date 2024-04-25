@@ -49,7 +49,7 @@ void BufferEmptyer::emptyBuffer()
     if (buffer != nullptr)
     {
         // static uint32_t packet_number = 0;
-
+        delayMicroseconds(500);
         while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
         {
             delayMicroseconds(10);
