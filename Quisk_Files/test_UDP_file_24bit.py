@@ -49,10 +49,10 @@ def main():
             audio_data = ((audio_data[:, 2] << 16) | (audio_data[:, 1] << 8) | audio_data[:, 0])
 
             # Convert to signed 32-bit integers
-            audio_data = audio_data.view(np.int32)
+            # audio_data = audio_data.view(np.int32)
 
             # Correct the sign for negative numbers
-            audio_data = np.where(audio_data & (1 << 23), audio_data - (1 << 24), audio_data)
+            # audio_data = np.where(audio_data & (1 << 23), audio_data - (1 << 24), audio_data)
                             
             # Pair up the integers as left and right audio samples
             audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
