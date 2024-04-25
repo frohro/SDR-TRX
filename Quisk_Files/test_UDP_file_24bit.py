@@ -80,8 +80,8 @@ def main():
     right_channel = audio_data_sorted[1::2][:NUM_PLOT_POINTS]
     time_array = np.arange(len(left_channel))/SAMPLE_RATE
     plt.figure(figsize=(10, 6))
-    plt.plot(time_array, left_channel, label='Left Channel')
-    plt.plot(time_array, right_channel, label='Right Channel')
+    plt.plot(time_array, left_channel + right_channel, label='Left + Right')
+    plt.plot(time_array, right_channel, label='(Left - Right)*100')
     plt.legend()
     plt.xlabel('Time (s)')
     plt.title('Audio Data Received from Pico W')
