@@ -52,16 +52,18 @@ void BufferEmptyer::emptyBuffer()
 
         while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
         {
-            delayMicroseconds(100);
+            delayMicroseconds(10);
             Serial.println("udpDat.beginPacket failed");
         }
         memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
-        if (udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
+        while (!udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
         {
+            delayMicroseconds(10);
             Serial.println("udpData.write failed");
         }
-        if (udpData.endPacket())
+        while (!udpData.endPacket())
         {
+            delayMicroseconds(10);
             Serial.println("udpData.endPacket failed");
         }
         // if (*(uint32_t *)temp_buffer +1 != packet_number)
