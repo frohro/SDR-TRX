@@ -47,6 +47,7 @@ def main():
             time_per_statement = time.time() - start
 
     print(f"Time per statement: {time_per_statement} seconds")
+    print("audio_data: ", audio_data)
     # Sort packets by packet number
     packets.sort(key=lambda x: x[0])
 
