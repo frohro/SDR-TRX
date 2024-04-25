@@ -66,12 +66,6 @@ void BufferEmptyer::emptyBuffer()
             delayMicroseconds(10);
             Serial.println("udpData.endPacket failed");
         }
-        // if (*(uint32_t *)temp_buffer +1 != packet_number)
-        // {
-        //     Serial.printf("packet_number %d != %d\n", *(uint32_t *)temp_buffer, packet_number);
-        // }
-        // packet_number++;
-        // Serial.printf("Sent %d\n", *(int32_t *)buffer);
     }
 }
 
