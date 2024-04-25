@@ -86,6 +86,7 @@ def main():
     right_channel = audio_data_sorted[1::2][:NUM_PLOT_POINTS]
     print("Max of (Left + Right) is: ", max((0.5*left_channel + 0.5*right_channel)))
     print('Max of (Left - Right) is: ', max(0.5*left_channel - 0.5*right_channel))
+    print('The maximum image rejection is: ', 20*np.log10(max((0.5*left_channel + 0.5*right_channel))/max(0.5*left_channel - 0.5*right_channel)))
 
     time_array = np.arange(len(left_channel))/SAMPLE_RATE
     plt.figure(figsize=(10, 6))
