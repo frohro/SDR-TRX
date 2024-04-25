@@ -14,7 +14,7 @@ PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE =  48000 
 CHANNELS = 2 # Stereo
 NUM_PACKETS = 100
-NUM_PLOT_POINTS = 30
+NUM_PLOT_POINTS = 100
 
 lock = threading.Lock()
 
@@ -86,6 +86,9 @@ def main():
     plt.xlabel('Time (s)')
     plt.title('Audio Data Received from Pico W')
     plt.show()
+
+    print("Max of (Left + Right) is: ", max((left_channel + right_channel)))
+    print('Max of (Left - Right) is: ', max(left_channel - right_channel))
 
 #    # Convert 24-bit audio to 16-bit
 #     audio_data_16bit = (audio_data_sorted / np.power(2, 8)).astype(np.int16)
