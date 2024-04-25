@@ -39,9 +39,9 @@ def main():
             # Unpack the audio data into 24-bit signed integers
             audio_data = np.frombuffer(data[4:], dtype=np.int8).reshape(-1, 3)
             # audio_data = (audio_data[:, 0] << 16) | (audio_data[:, 1] << 8) | audio_data[:, 2]
-            audio_data = ((audio_data[:, 2].astype(np.int32) << 16) | 
-                        (audio_data[:, 1].astype(np.int32) << 8) | 
-                        audio_data[:, 0].astype(np.int32))
+            audio_data = ((audio_data[:, 2].astype(np.int32) << 16) ) #| 
+                        # (audio_data[:, 1].astype(np.int32) << 8) | 
+                        # audio_data[:, 0].astype(np.int32))
 
             # Pair up the integers as left and right audio samples
             audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
