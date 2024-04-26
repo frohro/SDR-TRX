@@ -91,7 +91,7 @@ BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
     }
     else if (RATE == 96000)
     {
-        DELAY_TIME = 1000; 
+        DELAY_TIME = 5000; 
     }
     else
     {
