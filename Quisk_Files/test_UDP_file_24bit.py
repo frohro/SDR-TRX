@@ -13,7 +13,7 @@ PORT = 12345
 PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE =  96000 
 CHANNELS = 2 # Stereo
-NUM_PACKETS = 1
+NUM_PACKETS = 2
 NUM_PLOT_POINTS = 4000
 
 lock = threading.Lock()
@@ -40,6 +40,7 @@ def main():
             # audio_data1 = (((audio_data[:, 2] << 24) | (audio_data[:, 1] << 16) | (audio_data[:, 0] << 8)) >> 8).astype(np.int32)
             # audio_data = (audio_data[:, 2] * 2**16 + audio_data[:, 1] * 2**8 + audio_data[:, 0])
             # audio_data = ((audio_data[:, 2].astype(np.int32) << 16)  + (audio_data[:, 1].astype(np.int32) << 8) +  audio_data[:, 0].astype(np.int32))
+            print("audio_data: ", audio_data)
             # Shift the bytes to their correct position
             audio_data2 = audio_data[:, 2] << 24
             audio_data1 = audio_data[:, 1] << 16
