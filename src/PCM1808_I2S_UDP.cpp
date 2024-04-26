@@ -38,12 +38,12 @@ BufferFiller::BufferFiller(CircularBufferQueue &q) : queue(q) {}
 
 void BufferFiller::fillBuffer()
 {
-    while (!mutex_try_enter(&my_mutex, &mutex_save))
-    {
-        // Mutex is locked, so wait here.
-    }
+    // while (!mutex_try_enter(&my_mutex, &mutex_save))
+    // {
+    //     // Mutex is locked, so wait here.
+    // }
     char *buffer = queue.getNextBufferAndUpdate(true);
-    mutex_exit(&my_mutex);
+    // mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
         static int32_t r, l, packet_number = 0;
@@ -102,12 +102,12 @@ BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
 
 void BufferEmptyer::emptyBuffer()
 {
-    while (!mutex_try_enter(&my_mutex, &mutex_save))
-    {
-        // Mutex is locked, so wait here.
-    }
+    // while (!mutex_try_enter(&my_mutex, &mutex_save))
+    // {
+    //     // Mutex is locked, so wait here.
+    // }
     char *buffer = queue.getNextBufferAndUpdate(false);
-    mutex_exit(&my_mutex);
+    // mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
         // static uint32_t packet_number = 0;
