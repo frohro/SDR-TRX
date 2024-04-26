@@ -13,7 +13,7 @@ PORT = 12345
 PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE =  96000 
 CHANNELS = 2 # Stereo
-NUM_PACKETS = 1000000
+NUM_PACKETS = 200
 NUM_PLOT_POINTS = 100
 
 lock = threading.Lock()
@@ -81,23 +81,23 @@ def main():
     # Since the audio data is now a list of tuples, we need to flatten it
     audio_data_sorted = np.array([sample for packet in packets for pair in packet[1] for sample in pair], dtype=np.int32)
 
-    # # Separate the left and right channels
-    # left_channel = audio_data_sorted[::2][:NUM_PLOT_POINTS]
-    # right_channel = audio_data_sorted[1::2][:NUM_PLOT_POINTS]
-    # print("Max of (Left + Right) is: ", max((0.5*left_channel + 0.5*right_channel)))
-    # print('Max of (Left - Right) is: ', max(0.5*left_channel - 0.5*right_channel))
-    # print('The maximum image rejection is: ', 20*np.log10(max((0.5*left_channel + 0.5*right_channel))/max(0.5*left_channel - 0.5*right_channel)))
+    # Separate the left and right channels
+    left_channel = audio_data_sorted[::2][:NUM_PLOT_POINTS]
+    right_channel = audio_data_sorted[1::2][:NUM_PLOT_POINTS]
+    print("Max of (Left + Right) is: ", max((0.5*left_channel + 0.5*right_channel)))
+    print('Max of (Left - Right) is: ', max(0.5*left_channel - 0.5*right_channel))
+    print('The maximum image rejection is: ', 20*np.log10(max((0.5*left_channel + 0.5*right_channel))/max(0.5*left_channel - 0.5*right_channel)))
 
-    # time_array = np.arange(len(left_channel))/SAMPLE_RATE
-    # plt.figure(figsize=(10, 6))
-    # plt.plot(time_array, left_channel, label='Left Channel')
-    # plt.plot(time_array, right_channel, label='Right Channel')
-    # # plt.plot(time_array, 0.5*left_channel + 0.5*right_channel, label='Average')
-    # # plt.plot(time_array, left_channel - right_channel, label='(Left - Right)*100')
-    # plt.legend()
-    # plt.xlabel('Time (s)')
-    # plt.title('Audio Data Received from Pico W')
-    # plt.show()
+    time_array = np.arange(len(left_channel))/SAMPLE_RATE
+    plt.figure(figsize=(10, 6))
+    plt.plot(time_array, left_channel, label='Left Channel')
+    plt.plot(time_array, right_channel, label='Right Channel')
+    # plt.plot(time_array, 0.5*left_channel + 0.5*right_channel, label='Average')
+    # plt.plot(time_array, left_channel - right_channel, label='(Left - Right)*100')
+    plt.legend()
+    plt.xlabel('Time (s)')
+    plt.title('Audio Data Received from Pico W')
+    plt.show()
 
 
 #    # Convert 24-bit audio to 16-bit
