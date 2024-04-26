@@ -18,6 +18,29 @@ NUM_PLOT_POINTS = 4000
 
 lock = threading.Lock()
 
+def convert_audio_bytes(data):
+    # Ensure the data length is exactly 1464 bytes
+    if len(data) != 1464:
+        raise ValueError("Data must be exactly 1464 bytes long")
+
+    # Initialize an empty list to store the converted samples
+    converted_samples = []
+
+    # Process each 6-byte segment (3 bytes for left, 3 bytes for right)
+    for i in range(0, len(data), 6):
+        # Extract left and right channel samples (3 bytes each)
+        left_sample = data[i:i+3]
+        right_sample = data[i+3:i+6]
+
+        # Convert from bytes to a 32-bit signed integer
+        left_int = int.from_bytes(left_sample, byteorder='little', signed=True)
+        right_int = int.from_bytes(right_sample, byteorder='little', signed=True)
+
+        # Append the converted samples to the list
+        converted_samples.append((left_int, right_int))
+
+    return converted_samples
+
 def main():
     # Create a UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -36,34 +59,36 @@ def main():
             # start = time.time()
             packet_number = struct.unpack('<I', data[:4])[0] # Little endian
             print('packet_number: ', packet_number)
+            data = data[4:]
+            audio_data_pairs = convert_audio_bytes(data)
 
             # Unpack the audio data into 24-bit signed integers
-            audio_data = np.frombuffer(data[4:], dtype=np.int8).reshape(-1, 3)
+            # audio_data = np.frombuffer(data[4:], dtype=np.int8).reshape(-1, 3)
             # audio_data1 = (((audio_data[:, 2] << 24) | (audio_data[:, 1] << 16) | (audio_data[:, 0] << 8)) >> 8).astype(np.int32)
             # audio_data = (audio_data[:, 2] * 2**16 + audio_data[:, 1] * 2**8 + audio_data[:, 0])
             # audio_data = ((audio_data[:, 2].astype(np.int32) << 16)  + (audio_data[:, 1].astype(np.int32) << 8) +  audio_data[:, 0].astype(np.int32))
-            print("audio_data: ", audio_data)
-            # Shift the bytes to their correct position
-            audio_data = audio_data.astype(np.int32)
-            audio_data2 = audio_data[:, 2] << 24
-            audio_data1 = audio_data[:, 1] << 16
-            audio_data0 = audio_data[:, 0] << 8
+            # print("audio_data: ", audio_data)
+            # # Shift the bytes to their correct position
+            # audio_data = audio_data.astype(np.int32)
+            # audio_data2 = audio_data[:, 2] << 24
+            # audio_data1 = audio_data[:, 1] << 16
+            # audio_data0 = audio_data[:, 0] << 8
 
-            print("audio_data2 shifted: ", audio_data2)
-            print("audio_data1 shifted: ", audio_data1)
-            print("audio_data0 shifted: ", audio_data0)
+            # print("audio_data2 shifted: ", audio_data2)
+            # print("audio_data1 shifted: ", audio_data1)
+            # print("audio_data0 shifted: ", audio_data0)
 
-            # Combine the bytes
-            combined = audio_data2 | audio_data1 | audio_data0
-            print("Combined: ", combined)
+            # # Combine the bytes
+            # combined = audio_data2 | audio_data1 | audio_data0
+            # print("Combined: ", combined)
 
-            # Shift the combined data to the right
-            shifted = combined >> 8
-            print("Shifted: ", shifted)
+            # # Shift the combined data to the right
+            # shifted = combined >> 8
+            # print("Shifted: ", shifted)
 
-            # Convert to int32
-            audio_data1 = shifted.astype(np.int32)
-            print("Final result: ", audio_data1)    
+            # # Convert to int32
+            # audio_data1 = shifted.astype(np.int32)
+            # print("Final result: ", audio_data1)    
 
 
             # Unpack the audio data into 24-bit signed integers
