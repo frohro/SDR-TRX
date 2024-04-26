@@ -80,6 +80,7 @@ def main():
     missed_packets = 0
     for packet in packets:
         packet_number = packet[0]
+        print('packet_number: ', packet_number)
         if previous_packet_number is not None:
             if packet_number < previous_packet_number:
                 print(f"Packets not sorted correctly. Previous packet number {previous_packet_number}, current packet number {packet_number}")
