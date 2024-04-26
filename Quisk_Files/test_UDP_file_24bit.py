@@ -61,9 +61,10 @@ def main():
             audio_data = convert_audio_bytes(data)
                             
             # Pair up the integers as left and right audio samples
-            audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
+            # audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
             # audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
-            packets.append((packet_number, audio_data_pairs))
+            # packets.append((packet_number, audio_data_pairs))
+            packets.append((packet_number, audio_data))
             # time_per_statement = time.time() - start
 
     # print(f"Time per statement: {time_per_statement} seconds")
