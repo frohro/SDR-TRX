@@ -42,6 +42,7 @@ def main():
             # audio_data = ((audio_data[:, 2].astype(np.int32) << 16)  + (audio_data[:, 1].astype(np.int32) << 8) +  audio_data[:, 0].astype(np.int32))
             print("audio_data: ", audio_data)
             # Shift the bytes to their correct position
+            audio_data = audio_data.astype(np.int32)
             audio_data2 = audio_data[:, 2] << 24
             audio_data1 = audio_data[:, 1] << 16
             audio_data0 = audio_data[:, 0] << 8
