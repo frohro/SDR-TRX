@@ -28,6 +28,7 @@ def main():
     packets = []
 
     print("Listening for packets on port 12345...")
+    print('len(packets): ', len(packets))
 
     while len(packets) < NUM_PACKETS:
         data, addr = sock.recvfrom(PACKET_SIZE)
