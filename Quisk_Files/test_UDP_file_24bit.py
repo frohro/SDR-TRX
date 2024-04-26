@@ -14,7 +14,7 @@ PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE =  96000 
 CHANNELS = 2 # Stereo
 NUM_PACKETS = 200
-NUM_PLOT_POINTS = 100
+NUM_PLOT_POINTS = 1000
 
 lock = threading.Lock()
 
@@ -92,8 +92,8 @@ def main():
     plt.figure(figsize=(10, 6))
     plt.plot(time_array, left_channel, label='Left Channel')
     plt.plot(time_array, right_channel, label='Right Channel')
-    # plt.plot(time_array, 0.5*left_channel + 0.5*right_channel, label='Average')
-    # plt.plot(time_array, left_channel - right_channel, label='(Left - Right)*100')
+    plt.plot(time_array, 0.5*left_channel + 0.5*right_channel, label='Average')
+    plt.plot(time_array, left_channel - right_channel, label='(Left - Right)*100')
     plt.legend()
     plt.xlabel('Time (s)')
     plt.title('Audio Data Received from Pico W')
