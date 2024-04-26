@@ -101,7 +101,6 @@ def main():
 
     # print(f"Time per statement: {time_per_statement} seconds")
     print("audio_data: ", audio_data)
-    print("audio_data1: ", audio_data1)
 
     # Sort packets by packet number
     packets.sort(key=lambda x: x[0])
