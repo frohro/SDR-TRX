@@ -13,7 +13,7 @@ PORT = 12345
 PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE =  96000 
 CHANNELS = 2 # Stereo
-NUM_PACKETS = 1000
+NUM_PACKETS = 1
 NUM_PLOT_POINTS = 4000
 
 lock = threading.Lock()
@@ -32,24 +32,45 @@ def main():
     while len(packets) < NUM_PACKETS:
         data, addr = sock.recvfrom(PACKET_SIZE)
         with lock:
-            start = time.time()
+            # start = time.time()
             packet_number = struct.unpack('<I', data[:4])[0] # Little endian
 
             # Unpack the audio data into 24-bit signed integers
             audio_data = np.frombuffer(data[4:], dtype=np.int8).reshape(-1, 3)
-            audio_data1 = (((audio_data[:, 2] << 24) | (audio_data[:, 1] << 16) | (audio_data[:, 0] << 8)) >> 8).astype(np.int32)
+            # audio_data1 = (((audio_data[:, 2] << 24) | (audio_data[:, 1] << 16) | (audio_data[:, 0] << 8)) >> 8).astype(np.int32)
             # audio_data = (audio_data[:, 2] * 2**16 + audio_data[:, 1] * 2**8 + audio_data[:, 0])
             # audio_data = ((audio_data[:, 2].astype(np.int32) << 16)  + (audio_data[:, 1].astype(np.int32) << 8) +  audio_data[:, 0].astype(np.int32))
-    
+            # Shift the bytes to their correct position
+            audio_data2 = audio_data[:, 2] << 24
+            audio_data1 = audio_data[:, 1] << 16
+            audio_data0 = audio_data[:, 0] << 8
+
+            print("audio_data2 shifted: ", audio_data2)
+            print("audio_data1 shifted: ", audio_data1)
+            print("audio_data0 shifted: ", audio_data0)
+
+            # Combine the bytes
+            combined = audio_data2 | audio_data1 | audio_data0
+            print("Combined: ", combined)
+
+            # Shift the combined data to the right
+            shifted = combined >> 8
+            print("Shifted: ", shifted)
+
+            # Convert to int32
+            audio_data1 = shifted.astype(np.int32)
+            print("Final result: ", audio_data1)    
+
+
             # Unpack the audio data into 24-bit signed integers
                             
             # Pair up the integers as left and right audio samples
             audio_data_pairs = list(zip(audio_data1[::2], audio_data1[1::2]))
             # audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
             packets.append((packet_number, audio_data_pairs))
-            time_per_statement = time.time() - start
+            # time_per_statement = time.time() - start
 
-    print(f"Time per statement: {time_per_statement} seconds")
+    # print(f"Time per statement: {time_per_statement} seconds")
     print("audio_data: ", audio_data)
     print("audio_data1: ", audio_data1)
 
