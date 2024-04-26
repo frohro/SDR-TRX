@@ -102,8 +102,10 @@ void BufferFiller::fillBuffer()
             {
                 // l = l << 1;  // These were to fix a bug in the Arduino-Pico framework
                 // r = r << 1;
-                l &= 0xFFFFFF;                       // Keep only the lower 24 bits
-                r &= 0xFFFFFF;                       // Keep only the lower 24 bits
+                l &= 0xFFFFFF00;                       // Keep only the lower 24 bits
+                r &= 0xFFFFFF00;
+                l = l >> 8;
+                r = r >> 8;                       // Keep only the lower 24 bits
                 memcpy(buffer + bufferIndex, &l, 3); // Copy only the lower 3 bytes
                 bufferIndex += 3;
                 memcpy(buffer + bufferIndex, &r, 3); // Copy only the lower 3 bytes
