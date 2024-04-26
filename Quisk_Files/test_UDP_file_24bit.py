@@ -34,6 +34,7 @@ def main():
         with lock:
             # start = time.time()
             packet_number = struct.unpack('<I', data[:4])[0] # Little endian
+            print(packet_number)
 
             # Unpack the audio data into 24-bit signed integers
             audio_data = np.frombuffer(data[4:], dtype=np.int8).reshape(-1, 3)
