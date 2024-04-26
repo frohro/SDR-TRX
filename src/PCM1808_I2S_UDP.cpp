@@ -33,53 +33,6 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
     }
 }
 
-BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
-{
-    if (RATE == 48000)
-    {
-        DELAY_TIME = 7500; 
-    }
-    else if (RATE == 96000)
-    {
-        DELAY_TIME = 3250; 
-    }
-    else
-    {
-        DELAY_TIME = 22500; // Hasn't been tested, but I think it should work for 16 ks/s.
-    }
-    memset(temp_buffer, 0xff, BUFFER_SIZE);
-}
-
-void BufferEmptyer::emptyBuffer()
-{
-    while (!mutex_try_enter(&my_mutex, &mutex_save))
-    {
-        // Mutex is locked, so wait here.
-    }
-    char *buffer = queue.getNextBufferAndUpdate(false);
-    mutex_exit(&my_mutex);
-    if (buffer != nullptr)
-    {
-        // static uint32_t packet_number = 0;
-        delayMicroseconds(DELAY_TIME);  // Tune this for minimmum number of missed packets.
-        while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
-        {
-            delayMicroseconds(10);
-            Serial.println("udpDat.beginPacket failed");
-        }
-        memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
-        while (!udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
-        {
-            delayMicroseconds(10);
-            Serial.println("udpData.write failed");
-        }
-        while (!udpData.endPacket())
-        {
-            delayMicroseconds(10);
-            Serial.println("udpData.endPacket failed");
-        }
-    }
-}
 
 BufferFiller::BufferFiller(CircularBufferQueue &q) : queue(q) {}
 
@@ -128,3 +81,53 @@ void BufferFiller::fillBuffer()
         // Serial.printf("Filled %d\n", packet_number);
     }
 }
+
+
+BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
+{
+    if (RATE == 48000)
+    {
+        DELAY_TIME = 7500; 
+    }
+    else if (RATE == 96000)
+    {
+        DELAY_TIME = 0; 
+    }
+    else
+    {
+        DELAY_TIME = 22500; // Hasn't been tested, but I think it should work for 16 ks/s.
+    }
+    memset(temp_buffer, 0xff, BUFFER_SIZE);
+}
+
+void BufferEmptyer::emptyBuffer()
+{
+    while (!mutex_try_enter(&my_mutex, &mutex_save))
+    {
+        // Mutex is locked, so wait here.
+    }
+    char *buffer = queue.getNextBufferAndUpdate(false);
+    mutex_exit(&my_mutex);
+    if (buffer != nullptr)
+    {
+        // static uint32_t packet_number = 0;
+        delayMicroseconds(DELAY_TIME);  // Tune this for minimmum number of missed packets.
+        while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
+        {
+            delayMicroseconds(10);
+            Serial.println("udpDat.beginPacket failed");
+        }
+        memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
+        while (!udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
+        {
+            delayMicroseconds(10);
+            Serial.println("udpData.write failed");
+        }
+        while (!udpData.endPacket())
+        {
+            delayMicroseconds(10);
+            Serial.println("udpData.endPacket failed");
+        }
+    }
+}
+
