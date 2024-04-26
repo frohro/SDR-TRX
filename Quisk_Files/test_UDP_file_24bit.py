@@ -60,7 +60,7 @@ def main():
             packet_number = struct.unpack('<I', data[:4])[0] # Little endian
             print('packet_number: ', packet_number)
             data = data[4:]
-            audio_data_pairs = convert_audio_bytes(data)
+            audio_data = convert_audio_bytes(data)
 
             # Unpack the audio data into 24-bit signed integers
             # audio_data = np.frombuffer(data[4:], dtype=np.int8).reshape(-1, 3)
@@ -94,7 +94,7 @@ def main():
             # Unpack the audio data into 24-bit signed integers
                             
             # Pair up the integers as left and right audio samples
-            audio_data_pairs = list(zip(audio_data1[::2], audio_data1[1::2]))
+            audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
             # audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
             packets.append((packet_number, audio_data_pairs))
             # time_per_statement = time.time() - start
