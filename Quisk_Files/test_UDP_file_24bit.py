@@ -13,8 +13,8 @@ PORT = 12345
 PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE =  96000 
 CHANNELS = 2 # Stereo
-NUM_PACKETS = 1000
-NUM_PLOT_POINTS = 2000
+NUM_PACKETS = 10000
+NUM_PLOT_POINTS = 4000
 
 lock = threading.Lock()
 
