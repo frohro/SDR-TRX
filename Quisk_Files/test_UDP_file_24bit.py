@@ -32,9 +32,9 @@ def convert_audio_bytes(data):
         left_sample = data[i:i+3]
         right_sample = data[i+3:i+6]
 
-        # Convert from bytes to a 32-bit signed integer
-        left_int = int.from_bytes(left_sample, byteorder='little', signed=True)
-        right_int = int.from_bytes(right_sample, byteorder='little', signed=True)
+        # # Convert from bytes to a 32-bit signed integer
+        # left_int = int.from_bytes(left_sample, byteorder='little', signed=True)
+        # right_int = int.from_bytes(right_sample, byteorder='little', signed=True)
 
         # Append the converted samples to the list
         converted_samples.append((left_int, right_int))
