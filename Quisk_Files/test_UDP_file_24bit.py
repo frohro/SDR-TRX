@@ -51,47 +51,14 @@ def main():
     packets = []
 
     print("Listening for packets on port 12345...")
-    print('len(packets): ', len(packets))
 
     while len(packets) < NUM_PACKETS:
         data, addr = sock.recvfrom(PACKET_SIZE)
         with lock:
             # start = time.time()
             packet_number = struct.unpack('<I', data[:4])[0] # Little endian
-            print('packet_number: ', packet_number)
             data = data[4:]
             audio_data = convert_audio_bytes(data)
-
-            # Unpack the audio data into 24-bit signed integers
-            # audio_data = np.frombuffer(data[4:], dtype=np.int8).reshape(-1, 3)
-            # audio_data1 = (((audio_data[:, 2] << 24) | (audio_data[:, 1] << 16) | (audio_data[:, 0] << 8)) >> 8).astype(np.int32)
-            # audio_data = (audio_data[:, 2] * 2**16 + audio_data[:, 1] * 2**8 + audio_data[:, 0])
-            # audio_data = ((audio_data[:, 2].astype(np.int32) << 16)  + (audio_data[:, 1].astype(np.int32) << 8) +  audio_data[:, 0].astype(np.int32))
-            # print("audio_data: ", audio_data)
-            # # Shift the bytes to their correct position
-            # audio_data = audio_data.astype(np.int32)
-            # audio_data2 = audio_data[:, 2] << 24
-            # audio_data1 = audio_data[:, 1] << 16
-            # audio_data0 = audio_data[:, 0] << 8
-
-            # print("audio_data2 shifted: ", audio_data2)
-            # print("audio_data1 shifted: ", audio_data1)
-            # print("audio_data0 shifted: ", audio_data0)
-
-            # # Combine the bytes
-            # combined = audio_data2 | audio_data1 | audio_data0
-            # print("Combined: ", combined)
-
-            # # Shift the combined data to the right
-            # shifted = combined >> 8
-            # print("Shifted: ", shifted)
-
-            # # Convert to int32
-            # audio_data1 = shifted.astype(np.int32)
-            # print("Final result: ", audio_data1)    
-
-
-            # Unpack the audio data into 24-bit signed integers
                             
             # Pair up the integers as left and right audio samples
             audio_data_pairs = list(zip(audio_data[::2], audio_data[1::2]))
@@ -135,7 +102,7 @@ def main():
     right_channel = audio_data_sorted[1::2][:NUM_PLOT_POINTS]
     # print("Max of (Left + Right) is: ", max((0.5*left_channel + 0.5*right_channel)))
     # print('Max of (Left - Right) is: ', max(0.5*left_channel - 0.5*right_channel))
-    print('The maximum image rejection is: ', 20*np.log10(max((0.5*left_channel + 0.5*right_channel))/max(0.5*left_channel - 0.5*right_channel)))
+    # print('The maximum image rejection is: ', 20*np.log10(max((0.5*left_channel + 0.5*right_channel))/max(0.5*left_channel - 0.5*right_channel)))
 
     time_array = np.arange(len(left_channel))/SAMPLE_RATE
     plt.figure(figsize=(10, 6))
