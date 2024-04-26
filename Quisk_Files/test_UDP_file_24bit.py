@@ -13,7 +13,7 @@ PORT = 12345
 PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE =  96000 
 CHANNELS = 2 # Stereo
-NUM_PACKETS = 10000
+NUM_PACKETS = 1000
 NUM_PLOT_POINTS = 4000
 
 lock = threading.Lock()
@@ -37,7 +37,7 @@ def main():
 
             # Unpack the audio data into 24-bit signed integers
             audio_data = np.frombuffer(data[4:], dtype=np.int8).reshape(-1, 3)
-            audio_data = (audio_data[:, 0] << 24) | (audio_data[:, 1] << 16) | audio_data[:, 2] << 8
+            audio_data = ((audio_data[:, 0] << 24) | (audio_data[:, 1] << 16) | audio_data[:, 2] << 8) >> 8
             # audio_data = (audio_data[:, 2] * 2**16 + audio_data[:, 1] * 2**8 + audio_data[:, 0])
             # audio_data = ((audio_data[:, 2].astype(np.int32) << 16)  + (audio_data[:, 1].astype(np.int32) << 8) +  audio_data[:, 0].astype(np.int32))
     
