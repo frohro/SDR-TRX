@@ -55,9 +55,13 @@ private:
     CircularBufferQueue &queue;
     char temp_buffer[BUFFER_SIZE];
     int DELAY_TIME;
+    char debugBuffer[1024]; // Buffer for debug messages
+    int debugBufferIndex = 0; // Index for the next debug message
     
 public:
     BufferEmptyer(CircularBufferQueue &q);
+    void addDebugMessage(const char* format, ...);
+    void printDebugMessages();
     void emptyBuffer();
 };
 

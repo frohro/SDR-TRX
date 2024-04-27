@@ -100,6 +100,21 @@ BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
     memset(temp_buffer, 0xff, BUFFER_SIZE);
 }
 
+void BufferEmptyer::addDebugMessage(const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    debugBufferIndex += vsnprintf(debugBuffer + debugBufferIndex, sizeof(debugBuffer) - debugBufferIndex, format, args);
+    va_end(args);
+}
+
+void BufferEmptyer::printDebugMessages()
+{
+    Serial.printf("%s", debugBuffer);
+    debugBufferIndex = 0; // Reset the buffer index
+}
+
+
 void BufferEmptyer::emptyBuffer()
 {
     // while (!mutex_try_enter(&my_mutex, &mutex_save))
