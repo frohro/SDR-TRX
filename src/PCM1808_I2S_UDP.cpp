@@ -38,7 +38,7 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
         }
         else
         {
-            BufferEmptyer::addDebugMessage("Emptyer buffer empty, currentIndex: %d, time: %d\n",currentIndex, millis());
+            // BufferEmptyer::addDebugMessage("Emptyer buffer empty, currentIndex: %d, time: %d\n",currentIndex, millis());
         }
         return nullptr; // Return null if the buffer is full/empty
     }
