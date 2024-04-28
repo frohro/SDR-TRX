@@ -29,6 +29,14 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
     }
     else
     {
+        if(isFiller)
+        {
+            BufferEmptyer::addDebugMessage("Filler buffer full, currentIndex: %d, time: %d\n",currentIndex, millis());
+        }
+        else
+        {
+            BufferEmptyer::addDebugMessage("Emptyer buffer empty, currentIndex: %d, time: %d\n",currentIndex, millis());
+        }
         return nullptr; // Return null if the buffer is full/empty
     }
 }
@@ -38,12 +46,12 @@ BufferFiller::BufferFiller(CircularBufferQueue &q) : queue(q) {}
 
 void BufferFiller::fillBuffer()
 {
-    // while (!mutex_try_enter(&my_mutex, &mutex_save))
-    // {
-    //     // Mutex is locked, so wait here.
-    // }
+    while (!mutex_try_enter(&my_mutex, &mutex_save))
+    {
+        // Mutex is locked, so wait here.
+    }
     char *buffer = queue.getNextBufferAndUpdate(true);
-    // mutex_exit(&my_mutex);
+    mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
         static int32_t r, l, packet_number = 0;
@@ -53,12 +61,6 @@ void BufferFiller::fillBuffer()
             i2s.read32(&l, &r);
             if (BITS_PER_SAMPLE_SENT == 24)
             {
-                // l = l << 1;  // These were to fix a bug in the Arduino-Pico framework
-                // r = r << 1;
-                // l &= 0xFFFFFF00;                       // Keep only the lower 24 bits
-                // r &= 0xFFFFFF00;
-                // l = l << 8;
-                // r = r << 8;                       // Keep only the lower 24 bits
                 memcpy(buffer + bufferIndex, &l, 3); // Copy only the lower 3 bytes
                 bufferIndex += 3;
                 memcpy(buffer + bufferIndex, &r, 3); // Copy only the lower 3 bytes
@@ -66,8 +68,6 @@ void BufferFiller::fillBuffer()
             }
             else if (BITS_PER_SAMPLE_SENT == 32)
             {
-                // l = l << 9;  // These were to fix a bug in the Arduino-Pico framework
-                // r = r << 9;
                 l = l << 8;                                        // Keep only the lower 24 bits
                 r = r << 8;                                        // Keep only the lower 24 bits
                 memcpy(buffer + bufferIndex, &l, sizeof(int32_t)); // Copy only the lower 3 bytes
@@ -77,8 +77,8 @@ void BufferFiller::fillBuffer()
             }
         }
         memcpy(buffer, &packet_number, sizeof(int32_t));
-        packet_number++;
         // Serial.printf("Filled %d\n", packet_number);
+        packet_number++;
     }
 }
 
@@ -89,7 +89,7 @@ BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
     {
         DELAY_TIME = 7500; 
     }
-    else if (RATE == 96000)
+    else if (RATE == 96000)  // These delays changed the problem from BufferEmptyer to BufferFiller
     {
         DELAY_TIME = 0; 
     }
@@ -117,12 +117,13 @@ void BufferEmptyer::printDebugMessages()
 
 void BufferEmptyer::emptyBuffer()
 {
-    // while (!mutex_try_enter(&my_mutex, &mutex_save))
-    // {
-    //     // Mutex is locked, so wait here.
-    // }
+    static uint32_t number_of_packets_sent = 0;
+    while (!mutex_try_enter(&my_mutex, &mutex_save))
+    {
+        // Mutex is locked, so wait here.
+    }
     char *buffer = queue.getNextBufferAndUpdate(false);
-    // mutex_exit(&my_mutex);
+    mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
         // static uint32_t packet_number = 0;
@@ -133,15 +134,23 @@ void BufferEmptyer::emptyBuffer()
             Serial.println("udpDat.beginPacket failed");
         }
         memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
+        uint32_t packet_number_in_packet = *(uint32_t*)temp_buffer;
         while (!udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
         {
             delayMicroseconds(10);
             Serial.println("udpData.write failed");
         }
-        while (!udpData.endPacket())
+        while (!udpData.endPacket())    
         {
             delayMicroseconds(10);
             Serial.println("udpData.endPacket failed");
+        }
+        BufferEmptyer::addDebugMessage("Number of packets sent %d at %d.  Packet_number sent %d\n", 
+                number_of_packets_sent, millis());
+        number_of_packets_sent++;
+        if (number_of_packets_sent > 1000)
+        {
+            BufferEmptyer::printDebugMessages();
         }
     }
 }
