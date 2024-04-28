@@ -105,6 +105,11 @@ BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
 
 void BufferEmptyer::addDebugMessage(const char* format, ...)
 {
+    if (debugBufferIndex >= sizeof(debugBuffer)) {
+        // Buffer is full, cannot add more messages
+        return;
+    }
+
     va_list args;
     va_start(args, format);
     debugBufferIndex += vsnprintf(debugBuffer + debugBufferIndex, sizeof(debugBuffer) - debugBufferIndex, format, args);
