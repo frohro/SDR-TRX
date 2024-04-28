@@ -27,8 +27,6 @@ extern const unsigned int DATA_UDPPORT; // UDP server port
 #define QUEUE_SIZE 5 // Must be odd.  Make it too big and it will stop sending UDP data.
 // With 9, the maximum latency is 8 packets, which is 15 ms.  Average is 2 packets, or 4 ms.
 
-int debugBufferIndex; // Index for the next debug message
-
 class CircularBufferQueue
 {
 private:
@@ -58,6 +56,7 @@ private:
     char temp_buffer[BUFFER_SIZE];
     int DELAY_TIME;
     static char debugBuffer[1024]; // Buffer for debug messages
+    static int debugBufferIndex;
     
 public:
     BufferEmptyer(CircularBufferQueue &q);
