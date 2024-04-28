@@ -1,6 +1,7 @@
 #include "PCM1808_I2S_UDP.h"
 uint32_t mutex_save;
 mutex_t my_mutex; // Mutex for thread safety
+int BufferEmptyer::debugBufferIndex = 0;
 
 CircularBufferQueue::CircularBufferQueue() : fillIndex(1), emptyIndex(0)
 {
