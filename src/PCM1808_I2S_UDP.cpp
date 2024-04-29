@@ -20,7 +20,7 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
     if (rp2040.fifo.available() == 0) // other_index is still the same.
     {
 
-        otherIndex = isFiller ? emptyIndex : fillIndex; // Return nullptr if the other op is not done.
+        otherIndex = isFiller ? emptyIndex : fillIndex; 
     }
     else
     {
