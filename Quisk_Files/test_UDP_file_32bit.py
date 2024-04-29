@@ -9,7 +9,7 @@ import time
 # Constants
 PORT = 12345
 PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
-SAMPLE_RATE = 48000 # 96 ks/s
+SAMPLE_RATE = 32000 # 96 ks/s
 CHANNELS = 2 # Stereo
 NUM_PACKETS = 10000
 NUM_PLOT_POINTS = 1000
@@ -39,7 +39,7 @@ def main():
         packets.append((packet_number, audio_data_pairs))
         time_per_statement = time.time() - start
         
-    print(f"Time per statement: {time_per_statement} seconds")
+    # print(f"Time per statement: {time_per_statement} seconds")
     # Sort packets by packet number
     packets.sort(key=lambda x: x[0])
 
