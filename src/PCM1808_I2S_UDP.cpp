@@ -61,12 +61,7 @@ BufferFiller::BufferFiller(CircularBufferQueue &q) : queue(q) {}
 
 void BufferFiller::fillBuffer()
 {
-    // while (!mutex_try_enter(&my_mutex, &mutex_save))
-    // {
-    //     // Mutex is locked, so wait here.
-    // }
     char *buffer = queue.getNextBufferAndUpdate(true);
-    // mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
         static int32_t r, l, packet_number = 0;
@@ -99,18 +94,6 @@ void BufferFiller::fillBuffer()
 
 BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
 {
-    // if (RATE == 48000)
-    // {
-    //     DELAY_TIME = 7500;
-    // }
-    // else if (RATE == 96000) // These delays changed the problem from BufferEmptyer to BufferFiller
-    // {
-    //     DELAY_TIME = 00;
-    // }
-    // else
-    // {
-    //     DELAY_TIME = 22500; // Hasn't been tested, but I think it should work for 16 ks/s.
-    // }
     memset(temp_buffer, 0xff, BUFFER_SIZE);
     // NVIC_DisableIRQ(USBCTRL_IRQ);
 }
@@ -138,13 +121,7 @@ void BufferEmptyer::printDebugMessages()
 void BufferEmptyer::emptyBuffer()
 {
     static uint32_t number_of_packets_sent = 0;
-    // while (!mutex_try_enter(&my_mutex, &mutex_save))
-    // {
-    //     // Mutex is locked, so wait here.
-    //     Serial.printf("Mutex is locked, so wait here at %d\n", millis());
-    // }
     char *buffer = queue.getNextBufferAndUpdate(false);
-    // mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
         delayMicroseconds(DELAY_TIME); // Tune this for minimmum number of missed packets.
