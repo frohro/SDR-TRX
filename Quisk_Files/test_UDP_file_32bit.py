@@ -68,16 +68,16 @@ def main():
     audio_data_sorted = np.array([item for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)
 
     # Separate the left and right channels
-    left_channel = np.array([item[0] for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)[:NUM_PLOT_POINTS]
-    right_channel = np.array([item[1] for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)[:NUM_PLOT_POINTS]
-    time_array = np.arange(len(left_channel))/SAMPLE_RATE
-    plt.figure(figsize=(10, 6))
-    plt.plot(time_array, left_channel, label='Left Channel')
-    plt.plot(time_array, right_channel, label='Right Channel')
-    plt.legend()
-    plt.xlabel('Time (s)')
-    plt.title('Audio Data Received from Pico W')
-    plt.show()
+    # left_channel = np.array([item[0] for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)[:NUM_PLOT_POINTS]
+    # right_channel = np.array([item[1] for sublist in [item[1] for item in packets] for item in sublist], dtype=np.int32)[:NUM_PLOT_POINTS]
+    # time_array = np.arange(len(left_channel))/SAMPLE_RATE
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(time_array, left_channel, label='Left Channel')
+    # plt.plot(time_array, right_channel, label='Right Channel')
+    # plt.legend()
+    # plt.xlabel('Time (s)')
+    # plt.title('Audio Data Received from Pico W')
+    # plt.show()
 
     # # Write to a .wav file
     # with wave.open('output.wav', 'wb') as wav_file:
