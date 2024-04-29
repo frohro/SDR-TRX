@@ -52,5 +52,5 @@ void loop() {
     packetNumber++;
 
     // Wait for a short period before sending the next packet
-    delay(1);
+    delay(2);
 }
