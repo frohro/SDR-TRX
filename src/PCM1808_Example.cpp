@@ -4,7 +4,7 @@
 IPAddress remoteIp(192, 168, 1, 101); // Put your laptop IP here.
 const unsigned int DATA_UDPPORT = 12345; // UDP server port
 const char* STASSID = "Frohne-2.4GHz"; // Put your access point SSID here. 
-const int RATE = 96000; // Works with 32 bits per sample at 96 ks/s.  This is 768 kBps.  We cound save by using 24 bits per sample.
+const int RATE = 48000; // Works with 32 bits per sample at 96 ks/s.  This is 768 kBps.  We cound save by using 24 bits per sample.
 const int MCLK_MULT = 256; // 384 for 48 BCK per frame,  256 for 64 BCK per frame
 const int BITS_PER_SAMPLE_SENT = 32;
 
@@ -19,7 +19,6 @@ void setup()
     if (mutex_try_enter(&my_mutex, &mutex_save))  // Synchronze cores so they start about the same time.
     {
         Serial.begin();
-        // delay(10);
         WiFi.begin(STASSID);
         while (WiFi.status() != WL_CONNECTED)
         {
