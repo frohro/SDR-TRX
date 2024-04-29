@@ -37,7 +37,7 @@ void loop() {
     uint8_t buffer[bufferSize];
 
     // Fill the buffer with zeros
-    // memset(buffer, 0x00, bufferSize);
+    memset(buffer, 0x00, bufferSize);
 
     // Set the packet number in the buffer
     memcpy(buffer, &packetNumber, packetNumberSize);
