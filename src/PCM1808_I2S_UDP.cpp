@@ -34,7 +34,8 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
     {
         if(isFiller)
         {
-            BufferEmptyer::addDebugMessage("Filler buffer full, currentIndex: %d, time: %d\n",currentIndex, millis());
+            // BufferEmptyer::addDebugMessage("Filler buffer full, currentIndex: %d, time: %d\n",currentIndex, millis());
+            Serial.printf("Filler buffer full, currentIndex: %d, time: %d\n",currentIndex, millis());
         }
         else
         {
