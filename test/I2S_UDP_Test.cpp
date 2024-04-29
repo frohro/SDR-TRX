@@ -77,8 +77,8 @@ void loop()
     while (bufferIndex < BUFFER_SIZE - 26)
     {                       // 13 is the max size of "%d\r\n" with 10 digits
         i2s.read32(&l, &r); // Read the next l and r values
-        l = l << 9;
-        r = r << 9;
+        l = l << 8;
+        r = r << 8;
         // This next line is for transferring data over the UART in case you don't have a Pico W,
         //    Serial.printf("%d,%d\r\n", l, r);  // This only works up 16 kHz.
         // With the extra four spaces it should wark at 96 kHz with 16 bit samples
