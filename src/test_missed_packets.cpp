@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
-#include <si5351.h>
 
 // WiFi settings
 const char* ssid = "Frohne-2.4GHz";
@@ -44,9 +43,25 @@ void loop() {
     memcpy(buffer, &packetNumber, packetNumberSize);
 
     // Send the packet
-    Udp.beginPacket(remoteIP, remotePort);
-    Udp.write(buffer, bufferSize);
-    Udp.endPacket();
+    if (! Udp.beginPacket(remoteIP, remotePort)) {
+        Serial.println("Failed to begin packet");
+        return;
+    }
+    if (!Udp.beginPacket(remoteIP, remotePort))
+    {
+        Serial.println("Failed to begin packet");
+        return;
+    }
+    if (!Udp.write(buffer, bufferSize))
+    {
+        Serial.println("Failed to write packet");
+        return;
+    }
+    if (!Udp.endPacket())
+    {
+        Serial.println("Failed to end packet");
+        return;
+    }
 
     // Increment the packet number
     packetNumber++;
