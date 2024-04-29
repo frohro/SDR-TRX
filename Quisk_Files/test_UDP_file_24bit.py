@@ -91,11 +91,8 @@ def main():
         expected_packet_number += 1
 
     print(f"Total missed packets: {missed_packets}")
-    unique_packets = NUM_PACKETS - missed_packets
-    print(f"This is {unique_packets/float(NUM_PACKETS)*100:.8f}% of the total packets received.")
-    if missed_packets != 0:
-        print(f"This is {NUM_PACKETS*(PACKET_SIZE-4)/6/SAMPLE_RATE/missed_packets:.2f} seconds of audio data per problem.")
-    
+    print(f"Packet loss rate: {missed_packets / NUM_PACKETS * 100:.2f}%")
+
     # Prepare the audio data for writing to a .wav file
     # Since the audio data is now a list of tuples, we need to flatten it
     audio_data_sorted = np.array([sample for packet in packets for pair in packet[1] for sample in pair], dtype=np.int32)
