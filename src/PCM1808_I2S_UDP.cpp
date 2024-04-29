@@ -130,12 +130,12 @@ void BufferEmptyer::emptyBuffer()
     while (!mutex_try_enter(&my_mutex, &mutex_save))
     {
         // Mutex is locked, so wait here.
+        Serial.printf("Mutex is locked, so wait here at %d\n", millis());
     }
     char *buffer = queue.getNextBufferAndUpdate(false);
     mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
-        // static uint32_t packet_number = 0;
         delayMicroseconds(DELAY_TIME);  // Tune this for minimmum number of missed packets.
         while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
         {
@@ -158,7 +158,7 @@ void BufferEmptyer::emptyBuffer()
         number_of_packets_sent++;
         BufferEmptyer::addDebugMessage("Number of packets sent %d at %d.  Packet_number sent %d\n", 
                 number_of_packets_sent, millis(), packet_number_in_packet);
-        if (number_of_packets_sent == 100)
+        if (number_of_packets_sent == 10)
         {
             BufferEmptyer::printDebugMessages();
         }
