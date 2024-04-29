@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <si5351.h>
 
 // WiFi settings
 const char* ssid = "Frohne-2.4GHz";
