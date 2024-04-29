@@ -148,7 +148,9 @@ void BufferEmptyer::emptyBuffer()
             delayMicroseconds(10);
             Serial.println("udpDat.beginPacket failed");
         }
+        mutex_enter_blocking(&my_mutex);
         memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
+        mutex_exit(&my_mutex);
         uint32_t packet_number_in_packet = *(uint32_t *)temp_buffer;
         while (!udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
         {
