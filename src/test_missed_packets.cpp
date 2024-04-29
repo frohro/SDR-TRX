@@ -68,5 +68,5 @@ void loop() {
 
     // Wait for a short period before sending the next packet
     // delay(0);
-    delayMicroseconds(1700);
+    delayMicroseconds(1900);
 }
