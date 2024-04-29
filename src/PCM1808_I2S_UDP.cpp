@@ -153,11 +153,12 @@ void BufferEmptyer::emptyBuffer()
         {
             delayMicroseconds(10);
             Serial.println("udpData.endPacket failed");
+    
         }
         number_of_packets_sent++;
         BufferEmptyer::addDebugMessage("Number of packets sent %d at %d.  Packet_number sent %d\n", 
                 number_of_packets_sent, millis(), packet_number_in_packet);
-        if (number_of_packets_sent == 10000)
+        if (number_of_packets_sent == 100)
         {
             BufferEmptyer::printDebugMessages();
         }
