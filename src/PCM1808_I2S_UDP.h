@@ -24,7 +24,7 @@ extern const int MCLK_MULT; // 384 32 bit for 48 BCK per frame,  256 for 64 BCK 
 extern const unsigned int DATA_UDPPORT; // UDP server port
 
 #define BUFFER_SIZE 1468 // 1468 => 183 samples of 8 bytes + 4 bytes for the packet number
-#define QUEUE_SIZE 65 // Must be odd.  
+#define QUEUE_SIZE 15 // Must be odd.  
 // With 9, the maximum latency is 8 packets, which is 15 ms.  Average is 2 packets, or 4 ms.
 
 class CircularBufferQueue

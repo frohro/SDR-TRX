@@ -13,8 +13,13 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
 {
     uint32_t &currentIndex = isFiller ? fillIndex : emptyIndex;
     uint32_t otherIndex, temp;
-    if (rp2040.fifo.available() == 0)
+    while (!mutex_try_enter(&my_mutex, &mutex_save))
     {
+        // Mutex is locked, so wait here.
+    }
+    if (rp2040.fifo.available() == 0) // other_index is still the same.
+    {
+
         otherIndex = isFiller ? emptyIndex : fillIndex; // Return nullptr if the other op is not done.
     }
     else
@@ -32,10 +37,10 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
     }
     else
     {
-        if(isFiller)
+        if (isFiller)
         {
             // BufferEmptyer::addDebugMessage("Filler buffer full, currentIndex: %d, time: %d\n",currentIndex, millis());
-            Serial.printf("Filler buffer full, currentIndex: %d, time: %d\n",currentIndex, millis());
+            Serial.printf("Filler buffer full, currentIndex: %d, time: %d\n", currentIndex, millis());
         }
         else
         {
@@ -43,19 +48,19 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
         }
         return nullptr; // Return null if the buffer is full/empty
     }
+    mutex_exit(&my_mutex);
 }
-
 
 BufferFiller::BufferFiller(CircularBufferQueue &q) : queue(q) {}
 
 void BufferFiller::fillBuffer()
 {
-    while (!mutex_try_enter(&my_mutex, &mutex_save))
-    {
-        // Mutex is locked, so wait here.
-    }
+    // while (!mutex_try_enter(&my_mutex, &mutex_save))
+    // {
+    //     // Mutex is locked, so wait here.
+    // }
     char *buffer = queue.getNextBufferAndUpdate(true);
-    mutex_exit(&my_mutex);
+    // mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
         static int32_t r, l, packet_number = 0;
@@ -86,16 +91,15 @@ void BufferFiller::fillBuffer()
     }
 }
 
-
 BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
 {
     if (RATE == 48000)
     {
-        DELAY_TIME = 7500; 
+        DELAY_TIME = 7500;
     }
-    else if (RATE == 96000)  // These delays changed the problem from BufferEmptyer to BufferFiller
+    else if (RATE == 96000) // These delays changed the problem from BufferEmptyer to BufferFiller
     {
-        DELAY_TIME = 00; 
+        DELAY_TIME = 00;
     }
     else
     {
@@ -104,9 +108,10 @@ BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
     memset(temp_buffer, 0xff, BUFFER_SIZE);
 }
 
-void BufferEmptyer::addDebugMessage(const char* format, ...)
+void BufferEmptyer::addDebugMessage(const char *format, ...)
 {
-    if (debugBufferIndex >= sizeof(debugBuffer)) {
+    if (debugBufferIndex >= sizeof(debugBuffer))
+    {
         // Buffer is full, cannot add more messages
         return;
     }
@@ -123,45 +128,42 @@ void BufferEmptyer::printDebugMessages()
     debugBufferIndex = 0; // Reset the buffer index
 }
 
-
 void BufferEmptyer::emptyBuffer()
 {
     static uint32_t number_of_packets_sent = 0;
-    while (!mutex_try_enter(&my_mutex, &mutex_save))
-    {
-        // Mutex is locked, so wait here.
-        Serial.printf("Mutex is locked, so wait here at %d\n", millis());
-    }
+    // while (!mutex_try_enter(&my_mutex, &mutex_save))
+    // {
+    //     // Mutex is locked, so wait here.
+    //     Serial.printf("Mutex is locked, so wait here at %d\n", millis());
+    // }
     char *buffer = queue.getNextBufferAndUpdate(false);
-    mutex_exit(&my_mutex);
+    // mutex_exit(&my_mutex);
     if (buffer != nullptr)
     {
-        delayMicroseconds(DELAY_TIME);  // Tune this for minimmum number of missed packets.
+        delayMicroseconds(DELAY_TIME); // Tune this for minimmum number of missed packets.
         while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
         {
             delayMicroseconds(10);
             Serial.println("udpDat.beginPacket failed");
         }
         memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
-        uint32_t packet_number_in_packet = *(uint32_t*)temp_buffer;
+        uint32_t packet_number_in_packet = *(uint32_t *)temp_buffer;
         while (!udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
         {
             delayMicroseconds(10);
             Serial.println("udpData.write failed");
         }
-        while (!udpData.endPacket())    
+        while (!udpData.endPacket())
         {
             delayMicroseconds(10);
             Serial.println("udpData.endPacket failed");
-    
         }
         number_of_packets_sent++;
-        BufferEmptyer::addDebugMessage("Number of packets sent %d at %d.  Packet_number sent %d\n", 
-                number_of_packets_sent, millis(), packet_number_in_packet);
+        BufferEmptyer::addDebugMessage("Number of packets sent %d at %d.  Packet_number sent %d\n",
+                                       number_of_packets_sent, millis(), packet_number_in_packet);
         if (number_of_packets_sent == 10)
         {
             BufferEmptyer::printDebugMessages();
         }
     }
 }
-
