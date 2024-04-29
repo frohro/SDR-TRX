@@ -60,8 +60,8 @@ def main():
     print(f"Total missed packets: {missed_packets}")
     unique_packets = NUM_PACKETS - missed_packets
     print(f"This is {unique_packets/float(NUM_PACKETS)*100:.8f}% of the total packets received.")
-    if missed_packets != 0:
-        print(f"This is {NUM_PACKETS*244/SAMPLE_RATE/missed_packets:.2f} seconds of audio data per problem.")
+    # if missed_packets != 0:
+    #     print(f"This is {NUM_PACKETS*244/SAMPLE_RATE/missed_packets:.2f} seconds of audio data per problem.")
 
     # # Prepare the audio data for writing to a .wav file
     # # Since the audio data is now a list of tuples, we need to flatten it
