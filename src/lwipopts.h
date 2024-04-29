@@ -6,5 +6,6 @@
 //
 // This example uses a common include to avoid repetition
 #include "lwipopts_examples_common.h"
+#define LWIP_LWIPERP 1
 
 #endif
