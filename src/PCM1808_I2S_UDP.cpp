@@ -95,7 +95,7 @@ BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
     }
     else if (RATE == 96000)  // These delays changed the problem from BufferEmptyer to BufferFiller
     {
-        DELAY_TIME = 300; 
+        DELAY_TIME = 00; 
     }
     else
     {
