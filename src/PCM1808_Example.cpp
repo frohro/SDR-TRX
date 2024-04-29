@@ -28,6 +28,7 @@ void setup()
         udpData.begin(DATA_UDPPORT);
         Serial.printf("Connected to %s\n", STASSID);
         mutex_exit(&my_mutex);
+        delay(2);
     }
 }
 
