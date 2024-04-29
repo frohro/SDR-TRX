@@ -33,6 +33,7 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
     {
         currentIndex = (currentIndex + 1) % QUEUE_SIZE;
         rp2040.fifo.push(currentIndex);
+        mutex_exit(&my_mutex);
         return buffers[currentIndex];
     }
     else
@@ -46,9 +47,9 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
         {
             // BufferEmptyer::addDebugMessage("Emptyer buffer empty, currentIndex: %d, time: %d\n",currentIndex, millis());
         }
+        mutex_exit(&my_mutex);
         return nullptr; // Return null if the buffer is full/empty
     }
-    mutex_exit(&my_mutex);
 }
 
 BufferFiller::BufferFiller(CircularBufferQueue &q) : queue(q) {}
