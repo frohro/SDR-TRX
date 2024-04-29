@@ -99,18 +99,18 @@ void BufferFiller::fillBuffer()
 
 BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
 {
-    if (RATE == 48000)
-    {
-        DELAY_TIME = 7500;
-    }
-    else if (RATE == 96000) // These delays changed the problem from BufferEmptyer to BufferFiller
-    {
-        DELAY_TIME = 00;
-    }
-    else
-    {
-        DELAY_TIME = 22500; // Hasn't been tested, but I think it should work for 16 ks/s.
-    }
+    // if (RATE == 48000)
+    // {
+    //     DELAY_TIME = 7500;
+    // }
+    // else if (RATE == 96000) // These delays changed the problem from BufferEmptyer to BufferFiller
+    // {
+    //     DELAY_TIME = 00;
+    // }
+    // else
+    // {
+    //     DELAY_TIME = 22500; // Hasn't been tested, but I think it should work for 16 ks/s.
+    // }
     memset(temp_buffer, 0xff, BUFFER_SIZE);
     // NVIC_DisableIRQ(USBCTRL_IRQ);
 }
