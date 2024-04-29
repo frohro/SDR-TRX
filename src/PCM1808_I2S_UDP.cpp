@@ -1,4 +1,8 @@
 #include "PCM1808_I2S_UDP.h"
+extern "C" {
+    #include "hardware/irq.h"
+}
+
 uint32_t mutex_save;
 mutex_t my_mutex; // Mutex for thread safety
 // Initialize the static members
@@ -42,7 +46,7 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
         if (isFiller)
         {
             // BufferEmptyer::addDebugMessage("Filler buffer full, currentIndex: %d, time: %d\n",currentIndex, millis());
-            Serial.printf("Filler buffer full, currentIndex: %d, time: %d\n", currentIndex, millis());
+            // Serial.printf("Filler buffer full, currentIndex: %d, time: %d\n", currentIndex, millis());
         }
         else
         {
@@ -108,6 +112,7 @@ BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
         DELAY_TIME = 22500; // Hasn't been tested, but I think it should work for 16 ks/s.
     }
     memset(temp_buffer, 0xff, BUFFER_SIZE);
+    // NVIC_DisableIRQ(USBCTRL_IRQ);
 }
 
 void BufferEmptyer::addDebugMessage(const char *format, ...)
@@ -120,13 +125,13 @@ void BufferEmptyer::addDebugMessage(const char *format, ...)
 
     va_list args;
     va_start(args, format);
-    debugBufferIndex += vsnprintf(debugBuffer + debugBufferIndex, sizeof(debugBuffer) - debugBufferIndex, format, args);
+    // debugBufferIndex += vsnprintf(debugBuffer + debugBufferIndex, sizeof(debugBuffer) - debugBufferIndex, format, args);
     va_end(args);
 }
 
 void BufferEmptyer::printDebugMessages()
 {
-    Serial.printf("%s", debugBuffer);
+    // Serial.printf("%s", debugBuffer);
     debugBufferIndex = 0; // Reset the buffer index
 }
 
@@ -146,19 +151,19 @@ void BufferEmptyer::emptyBuffer()
         while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
         {
             delayMicroseconds(10);
-            Serial.println("udpDat.beginPacket failed");
+            // Serial.println("udpDat.beginPacket failed");
         }
         memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
         uint32_t packet_number_in_packet = *(uint32_t *)temp_buffer;
         while (!udpData.write((const uint8_t *)&temp_buffer, BUFFER_SIZE))
         {
             delayMicroseconds(10);
-            Serial.println("udpData.write failed");
+            // Serial.println("udpData.write failed");
         }
         while (!udpData.endPacket())
         {
             delayMicroseconds(10);
-            Serial.println("udpData.endPacket failed");
+            // Serial.println("udpData.endPacket failed");
         }
         number_of_packets_sent++;
         BufferEmptyer::addDebugMessage("Number of packets sent %d at %d.  Packet_number sent %d\n",
