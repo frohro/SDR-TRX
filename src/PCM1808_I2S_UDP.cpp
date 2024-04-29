@@ -16,6 +16,7 @@ char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
     while (!mutex_try_enter(&my_mutex, &mutex_save))
     {
         // Mutex is locked, so wait here.
+        Serial.printf("Mutex lock, isFiller: %d, t = %d\n", isFiller, millis());
     }
     if (rp2040.fifo.available() == 0) // other_index is still the same.
     {
