@@ -97,8 +97,8 @@ public:
             while (bufferIndex < BUFFER_SIZE - 4) // Leave space for the packet number
             {
                 i2s.read32(&l, &r);
-                l = l << 9;
-                r = r << 9;
+                l = l << 8;
+                r = r << 8;
                 memcpy(buffer + bufferIndex, &l, sizeof(int32_t));  // We could speed this up for the network by sending 24 bits instead of 32.
                 bufferIndex += sizeof(int32_t);
                 memcpy(buffer + bufferIndex, &r, sizeof(int32_t));
@@ -106,7 +106,7 @@ public:
             }
             memcpy(buffer, &packet_number, sizeof(int32_t));
             packet_number++;
-            Serial.printf("Filled %d\n", packet_number);
+            // Serial.printf("Filled %d\n", packet_number);
         }
     }
 };
@@ -155,7 +155,7 @@ void setup()
             delay(1000);
         }
         udpData.begin(udpDataPort);
-        Serial.printf("Connected to %s\n", STASSID);
+        // Serial.printf("Connected to %s\n", STASSID);
         mutex_exit(&my_mutex);
     }
 }
