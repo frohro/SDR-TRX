@@ -1,4 +1,5 @@
 #include "PCM1808_I2S_UDP.h"
+#include "si5351.h"
 
 // Things you might want to change for your situation...
 IPAddress remoteIp(192, 168, 1, 101); // Put your laptop IP here.
