@@ -8,7 +8,7 @@ import time
 
 # Constants
 PORT = 12345
-PACKET_SIZE = 1436 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
+PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 SAMPLE_RATE = 96000 # 96 ks/s
 CHANNELS = 2 # Stereo
 NUM_PACKETS = 10000
@@ -31,7 +31,7 @@ def main():
 
         # Unpack the stereo audio data into a list of tuples (right, left)
 
-        audio_data = struct.unpack('<358i', data[4:]) # Little endian
+        audio_data = struct.unpack('<366i', data[4:]) # Little endian
 
 
         # Pair up the integers as left and right audio samples

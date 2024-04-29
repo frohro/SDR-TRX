@@ -12,7 +12,7 @@ unsigned int remotePort = 12345;
 WiFiUDP Udp;
 
 // Packet settings
-const int bufferSize = 1436;
+const int bufferSize = 1468;
 const int packetNumberSize = sizeof(uint32_t);
 
 // Packet number
