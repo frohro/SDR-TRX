@@ -20,8 +20,9 @@ const int packetNumberSize = sizeof(uint32_t);
 uint32_t packetNumber = 0;
 
 void setup() {
+    Serial.begin();
     // Initialize WiFi
-    WiFi.begin(ssid, password);
+    WiFi.begin(ssid);
     while (WiFi.status() != WL_CONNECTED) {
         delay(1000);
         Serial.println("Connecting to WiFi...");
@@ -51,5 +52,5 @@ void loop() {
     packetNumber++;
 
     // Wait for a short period before sending the next packet
-    delay(10);
+    delay(1);
 }
