@@ -17,10 +17,12 @@ from quisk_hardware_model import Hardware as BaseHardware
 # This is for control of the SDR-TRX with using the UDP port port 12346.  WSJT-X interfaces with this
 # locally using UDP on port 2237.  Capital letters begin commands to the SDR-TRX from Quisk, 
 # and lowercase letters are for commands coming from WSJT-X (through this Quisk interface).
-# This is for usinng the SDR-TRX with a 3.5 mm audio card to the soundcard of the computer,
-# and the WSJT-X software using the USB UART.
-# It requires the libldl/ directory from weakmon to be in the direectory you run this from.
-# It also requires the WSJTXClass.py file from wsjtx_transceiver_interface to be in the lib directory.
+# This is for usinng the SDR-TRX without a 3.5 mm audio card to the soundcard of the computer,
+# and the WSJT-X software using UDP, and the data coming over UDP part 12345 too.
+# It requires the libldl/ directory from weakmon to be in the directory you run this from.
+# It also requires the WSJTXClass.py file from wsjtx_transceiver_interface to be in the lib directory
+# and the version of that class. I have supplied a pruned down versions of ft8.py and ft4.45, because we don't need much
+# other than FT8Send and FT4Send from those files.  You need to edit transceiver_config.yml to have your callsign and grid, etc.
 
 import lib.WSJTXClass as WSJTXClass
 
@@ -34,18 +36,50 @@ sys.path.append(os.path.expandvars('$WEAKMON'))
 # name_of_sound_capt = "portaudio:(hw:2,0)"
 # name_of_sound_play = "portaudio:(hw:1,0)"
 
+DEBUG_ON = True
+# 
 # Uncomment these lines if you wish to use Pulseaudio
-name_of_sound_capt = "pulse"
+# name_of_sound_capt = "pulse"
 name_of_sound_play = "pulse"
 
-# Radio,s Frequency limits.
+# Radio's Frequency limits.
 radio_lower = 3500000
 radio_upper = 30000000
+PACKET_SIZE = 1468  # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
 
-# Set the number of Hz the signal is tuned to above the center frequency.
+# Set the number of Hz the signal is tuned to above the center frequency to avoid 1/f noise.
 vfo_Center_Offset = 10000
 
+import struct
+import collections
+import socket
 
+class Packet:
+    def __init__(self, data):
+        self.number = struct.unpack('<I', data[:4])[0]
+        self.pairs = [struct.unpack('<II', data[i:i+8]) for i in range(4, len(data), 8)]
+
+class PacketQueue:
+    def __init__(self):
+        self.queue = collections.deque()
+
+    def add_packet(self, packet):
+        self.queue.append(packet)
+        self.queue = collections.deque(sorted(self.queue, key=lambda p: p.number))
+
+    def check_missing_packets(self):
+        for i in range(1, len(self.queue)):
+            if self.queue[i].number != self.queue[i-1].number + 1:
+                avg_pairs = [((self.queue[i-1].pairs[j][0] + self.queue[i].pairs[j][0]) // 2,
+                              (self.queue[i-1].pairs[j][1] + self.queue[i].pairs[j][1]) // 2)
+                             for j in range(len(self.queue[i-1].pairs))]
+                self.queue.insert(i, Packet(struct.pack('<I', self.queue[i-1].number + 1) +
+                                             b''.join(struct.pack('<II', pair[0], pair[1]) for pair in avg_pairs)))
+
+    def get_packets(self):
+        packets = list(self.queue)
+        self.queue.clear()
+        return packets
 
 # SDR-TRX Hardware Control Class
 #
@@ -64,22 +98,22 @@ class Hardware(BaseHardware):
 
     def open(self):
 
-            # FT8 encoder
-        # UDP SETTINGS
-
         # Connection for WSJT-X
-        self.PICO_UDP_IP = "192.168.1.107"  # Put the Pico IP here.
+        self.PICO_UDP_IP = "192.168.1.110"  # Put the Pico IP here.
         self.COMMAND_UDP_PORT = 12346  # This is the port the Pico listens on for UDP comands coming from quisk.
-        self.DATA_UDP_PORT = 12345  # This is the port the Pico listens on for UDP IQ data coming from the Pico W.
+        self.DATA_UDP_PORT = 12345  # This is the port the quisk listens on for UDP IQ data coming from the Pico W.
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.command_sock.setblocking(False)
         self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.data_sock.bind((self.PICO_UDP_IP, self.DATA_UDP_PORT))
+        print(self.PICO_UDP_IP)
+        self.data_sock.bind(('', self.DATA_UDP_PORT))
         self.data_sock.setblocking(False)
+        self.InitSamples(3, 0)  # Three bytes per sample, little endian.
+        self.queue = PacketQueue()
         time.sleep(2)
         # Poll for version. Should probably confirm the response on this.
         version = str(self.get_parameter("VER"))  # The way the firmware is now, this sets it up to use the UART or UDP.
-        print("called version from line 78")
+        # UART is used if get_parameter uses the UART, and UDP is used if it uses the UDP.
         print(version)
         # Return an informative message for the config screen
         t = str(version) + ". Capture from sound card %s." % self.conf.name_of_sound_capt
@@ -95,17 +129,20 @@ class Hardware(BaseHardware):
         self.tx_freq = 1200
 
         # Connection for WSJT-X
-        WSJTX_UDP_IP = "127.0.0.1"
+        WSJTX_UDP_IP = "127.0.0.1"  # Assuming you are running WSJT-X on the same computer as Quisk...
         WSJTX_UDP_PORT = 2237
         self.wsjtx_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.wsjtx_sock.bind((WSJTX_UDP_IP, WSJTX_UDP_PORT))
         self.wsjtx_sock.setblocking(False)
+
+        self.StartSamples()
         return t
 
     def close(self):
         # Called once to close the Hardware
-        self.get_parameter("RX")
+        self.get_parameter("RX") # Make sure we are in RX mode.
         time.sleep(1)  # Wait for RX to be set.
+        self.StopSamples()
         self.command_sock.close()
         self.wsjtx_sock.close()
 
@@ -124,9 +161,7 @@ class Hardware(BaseHardware):
             vfo = radio_upper
             print("Outside range! Setting to %d" % radio_upper)
 
-
-
-        print("sample_rate =", sample_rate)
+        # print("sample_rate =", sample_rate)  # I believe sample_rate comes from quisk.
         # If the tune frequency is outside the RX bandwidth, set it to somewhere within that bandwidth.
         if tune > (vfo + sample_rate / 2) or tune < (vfo - sample_rate / 2):
             tune = vfo + vfo_Center_Offset
@@ -135,11 +170,6 @@ class Hardware(BaseHardware):
         # success = self.set_parameter("FREQ",str(vfo))
         self.set_parameter("FREQ", str(vfo))
         self.set_parameter("TX_FREQ", str(tune))
-
-        # if success:
-        #   print("Frequency change succeeded!")
-        # else:
-        #   print("Frequency change failed.")
 
         return tune, vfo
 
@@ -152,9 +182,66 @@ class Hardware(BaseHardware):
             self.get_parameter("RX")
             print("RX")
         return BaseHardware.OnButtonPTT(self, event)
+    
+    def GetRxSamples(self):
+                # Receive packets and add them to the queue
+        while True:
+            try:
+                data, addr = self.data_sock.recvfrom(PACKET_SIZE)
+            except socket.error:
+                break  # No more packets available
+            packet = Packet(data)
+            self.queue.add_packet(packet)
+
+        # Check for missing packets and fill them in
+        self.queue.check_missing_packets()
+
+        # Get the packets and pass them to the processing thread
+        packets = self.queue.get_packets()
+        for packet in packets:
+            data = b''.join(struct.pack('<II', pair[0], pair[1]) for pair in packet.pairs)
+            if len(data) % 8 != 0:  # Each I/Q pair is 8 bytes (2 * 4 bytes)
+                self.GotReadError(self, DEBUG_ON, "Error: Mismatched number of I and Q samples")
+                continue
+            self.AddRxSamples(data)
+            # self.GotReadError(self, DEBUG_ON, 'Sent ' + str(len(data)) + ' samples.')
+
+
+        ## First get the data.
+        # data, addr = self.data_sock.recvfrom(PACKET_SIZE)
+        # packet_number = struct.unpack('<I', data[:4])[0] # Get the packet number (little endian)
+
+        # Unpack the stereo audio data into a list of tuples (right, left)
+
+        # audio_data = struct.unpack('<366i', data[4:]) # Do we need to do this.  I don't think so.
+
+
+        # Pair up the integers as left and right audio samples
+        # audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
+        # packets.append((packet_number, audio_data_pairs))
+        # time_per_statement = time.time() - start
+        
+    # print(f"Time per statement: {time_per_statement} seconds")
+    # Sort packets by packet number
+    # packets.sort(key=lambda x: x[0])
+
+    # # Check for missing or out-of-order packets
+    # expected_packet_number = packet_number
+    # previous_packet_number = None
+    # missed_packets = 0
+    # for packet in packets:
+    #     packet_number = packet[0]
+    #     if previous_packet_number is not None:
+    #         if packet_number < previous_packet_number:
+    #             print(f"Packets not sorted correctly. Previous packet number {previous_packet_number}, current packet number {packet_number}")
+    #         elif packet_number != previous_packet_number + 1:
+    #             print(f"Packet missed. Expected packet number {previous_packet_number + 1}, but received packet number {packet_number}")
+    #             missed_packets += 1
+    #     previous_packet_number = packet_number
+    #     expected_packet_number += 1
 
     #
-    # Serial comms functions, to communicate with the Pi Pico board
+    # UDP comms functions, to communicate with the Raspberry Pi Pico W board used in the SDR-TRX.
     #
 
     def get_parameter(self, string):
@@ -206,7 +293,7 @@ class Hardware(BaseHardware):
         except BlockingIOError:
             return -1
 
-    # We need to integrate the UART reads below into the stuff above.
+    # We might want to integrate the UDP reads below into the stuff above.
 
     #  The code below is to interface WSJT-X with SDR-TRX.
 
