@@ -14,15 +14,14 @@ WiFiUDP Udp;
 
 // Packet settings
 const int bufferSize = 1458;
+int packetNumber = 100;
 const int packetNumberSize = sizeof(uint32_t);
-
-// Packet number
-uint32_t packetNumber = 0;
 
 void setup()
 {
     Serial.begin();
     // Initialize WiFi
+    delay(5000);  // Give time for serial monitor to show up.
     WiFi.begin(ssid);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -33,18 +32,18 @@ void setup()
 
     // Initialize UDP
     Udp.begin(12345);
-    delay(10000);  // Give time for serial monitor to show up.
+    
     // Create a buffer for the packet
     uint8_t buffer[bufferSize];
 
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < packetNumber; i++)
     {
 
         // Fill the buffer with zeros
         memset(buffer, 0x00, bufferSize);
 
         // Set the packet number in the buffer
-        memcpy(buffer, &packetNumber, packetNumberSize);
+        memcpy(buffer, &i, packetNumberSize);
 
         // Send the packet
         if (!Udp.beginPacket(remoteIP, remotePort))
@@ -68,13 +67,12 @@ void setup()
             return;
         }
 
-        // Increment the packet number
-        packetNumber++;
-
         // Wait for a short period before sending the next packet
-        delay(0);
+        delay(2);
     }
     Serial.println("Done sending packets");
+    delay(5000);
+    Serial.printf("packetNumber: %d\n", packetNumber);  // This should be 0
 }
 
 void loop()

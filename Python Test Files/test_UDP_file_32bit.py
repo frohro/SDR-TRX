@@ -8,11 +8,11 @@ import time
 
 # Constants
 PORT = 12345
-PACKET_SIZE = 1468 # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
-SAMPLE_RATE = 96000 # 96 ks/s
+PACKET_SIZE = 1444 # 4 bytes for packet number + 180 * 8 bytes for int32_t pairs
+SAMPLE_RATE = 48000 # 96 ks/s
 CHANNELS = 2 # Stereo
-NUM_PACKETS = 10000
-NUM_PLOT_POINTS = 2000
+NUM_PACKETS = 1000
+NUM_PLOT_POINTS = 1000
 
 def main():
     # Create a UDP socket
@@ -28,11 +28,11 @@ def main():
         data, addr = sock.recvfrom(PACKET_SIZE)
         # start = time.time()
         packet_number = struct.unpack('<I', data[:4])[0] # Little endian
+        # print("packet_number: ", packet_number)
 
         # Unpack the stereo audio data into a list of tuples (right, left)
 
-        audio_data = struct.unpack('<366i', data[4:]) # Little endian
-
+        audio_data = struct.unpack('<360i', data[4:]) # Little endian
 
         # Pair up the integers as left and right audio samples
         audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))

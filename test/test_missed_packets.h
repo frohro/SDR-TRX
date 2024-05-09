@@ -1,1 +1,1 @@
-extern uint32_t packetNumber;
+extern int packetNumber;

@@ -35,7 +35,7 @@
 
 // These are things you might want to change for your situation.
 const int RATE = 48000;    // Your network needs to handle this, but 96000 should also work, but misses some packets.
-const int BITS_PER_SAMPLE_SENT = 32;  // 24 or 32, 32 is less packet loss.
+const int BITS_PER_SAMPLE_SENT = 32;  // 24 or 32, 32 is less packet loss for some strange reason.
 const int MCLK_MULT = 256; //
 const char *STASSID = "Frohne-2.4GHz";
 // const char *STASSID = "rosbots";
@@ -317,10 +317,9 @@ I2S i2s(INPUT);
 void processCommandUDP()
 {
   bool no_error;
-  char received;
+  char received = 0;
   String command;
-  unsigned char rec_byte[2];
-  unsigned char msg_index;
+
   // Check if there's any serial data available.
   if (Serial.available())
   {
@@ -494,13 +493,13 @@ void processCommandUDP()
           set_rx_freq(freq);
           set_tx_freq(freq);
           udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-          udpCommand.printf("FREQ,%d\r\n", freq);
+          udpCommand.printf("FREQ,%ld\r\n", freq);
           udpCommand.endPacket();
         }
         else
         {
           udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-          udpCommand.printf("FREQ,%d\r\n", rx_freq);
+          udpCommand.printf("FREQ,%u\r\n", rx_freq);
           udpCommand.endPacket();
         }
       }
@@ -514,7 +513,7 @@ void processCommandUDP()
           uint32_t freq = freqStr.toInt();
           set_tx_freq(freq);
           udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
-          udpCommand.printf("TX_FREQ,%d\r\n", freq);
+          udpCommand.printf("TX_FREQ,%ld\r\n", freq);
           udpCommand.endPacket();
         }
         else
@@ -565,47 +564,12 @@ void processCommandUDP()
     }
   }
 }
-// void sendDataUDP()
-// { // This is too slow.  It only get 80 kB/s.
-//   static int32_t r, l;
-//   size_t bufferIndex = 0;
-//   // Fill the buffer with 108 lines of "%d\r\n"
-//   while (bufferIndex < BUFFER_SIZE - 26)
-//   {                     // Change to 23?  23 is the max size of "%d,%d\r\n" with 10 digits
-//     i2s.read32(&l, &r); // Read the next l and r values
-//     l = l << 9;
-//     r = r << 9;
-//     // This next line is for transferring data over the UART in case you don't have a Pico W,
-//     // Serial.printf("%d,%d\r\n", l, r); // This only works up 16 kHz.
-//     // With the extra four spaces it should wark at 96 kHz with 16 bit samples
-//     // and leaving about 90 frames for control packets if we can figure out how
-//     // to do that.
-//     // These next lines create the buffer of slightly less than the MTU (1500 bytes)
-//     int n = snprintf(buffer + bufferIndex, BUFFER_SIZE - bufferIndex, "%d,%d\r\n", l, r);
-//     if (n > 0)
-//     {
-//       bufferIndex += n;
-//     }
-//     else
-//     {
-//       Serial.println("Problem with buffer!");
-//       break;
-//     }
-//   }
-//   // Send the data buffer via UDP
-//   // udpData.beginPacket(udpCommand.remoteIP(), DATA_UDPPORT); // Same IP for both ports.
-//   udpData.beginPacket(remoteIp, DATA_UDPPORT);
-//   udpData.write((const uint8_t *)buffer, bufferIndex);
-//   udpData.endPacket();
-//   // Clear the buffer for the next round.  (Do we need this?)
-//   memset(buffer, 0, BUFFER_SIZE);
-// }
 
 void processCommandUART()
 {
   bool no_error;
   String command;
-  char received;
+  char received = 0;
   unsigned char rec_byte[2];
   unsigned char msg_index;
   // Check if there's any serial data available
@@ -733,11 +697,11 @@ void processCommandUART()
         String freqStr = command.substring(commaIndex + 1);
         uint32_t freq = freqStr.toInt();
         set_rx_freq(freq);
-        Serial.printf("FREQ,%d\r\n", freq);
+        Serial.printf("FREQ,%ld\r\n", freq);
       }
       else
       {
-        Serial.printf("FREQ,%d\r\n", rx_freq);
+        Serial.printf("FREQ,%u\r\n", rx_freq);
       }
     }
     else if (command.startsWith("TX_FREQ"))
@@ -748,11 +712,11 @@ void processCommandUART()
         String freqStr = command.substring(commaIndex + 1);
         uint32_t freq = freqStr.toInt();
         set_tx_freq(freq);
-        Serial.printf("TX_FREQ,%d\r\n", freq);
+        Serial.printf("TX_FREQ,%ld\r\n", freq);
       }
       else
       {
-        Serial.printf("TX_FREQ,%d\r\n", tx_freq);
+        Serial.printf("TX_FREQ,%u\r\n", tx_freq);
       }
     }
     else if (command.startsWith("USE_UDP"))

@@ -45,7 +45,7 @@ name_of_sound_play = "pulse"
 # Radio's Frequency limits.
 radio_lower = 3500000
 radio_upper = 30000000
-PACKET_SIZE = 1468  # 4 bytes for packet number + 183 * 8 bytes for int32_t pairs
+PACKET_SIZE = 1444  # 4 bytes for packet number + 180 * 8 bytes for int32_t pairs
 
 # Set the number of Hz the signal is tuned to above the center frequency to avoid 1/f noise.
 vfo_Center_Offset = 10000
@@ -57,7 +57,7 @@ import socket
 class Packet:
     def __init__(self, data):
         self.number = struct.unpack('<I', data[:4])[0]
-        self.pairs = [struct.unpack('<II', data[i:i+8]) for i in range(4, len(data), 8)]
+        self.pairs = [struct.unpack('<ii', data[i:i+8]) for i in range(4, len(data), 8)]
 
 class PacketQueue:
     def __init__(self):
@@ -74,7 +74,7 @@ class PacketQueue:
                               (self.queue[i-1].pairs[j][1] + self.queue[i].pairs[j][1]) // 2)
                              for j in range(len(self.queue[i-1].pairs))]
                 self.queue.insert(i, Packet(struct.pack('<I', self.queue[i-1].number + 1) +
-                                             b''.join(struct.pack('<II', pair[0], pair[1]) for pair in avg_pairs)))
+                                             b''.join(struct.pack('<ii', pair[0], pair[1]) for pair in avg_pairs)))
 
     def get_packets(self):
         packets = list(self.queue)
@@ -99,16 +99,16 @@ class Hardware(BaseHardware):
     def open(self):
 
         # Connection for WSJT-X
-        self.PICO_UDP_IP = "192.168.1.110"  # Put the Pico IP here.
+        self.PICO_UDP_IP = "192.168.1.108"  # Put the Pico IP here.
         self.COMMAND_UDP_PORT = 12346  # This is the port the Pico listens on for UDP comands coming from quisk.
         self.DATA_UDP_PORT = 12345  # This is the port the quisk listens on for UDP IQ data coming from the Pico W.
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.command_sock.setblocking(False)
         self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        print(self.PICO_UDP_IP)
         self.data_sock.bind(('', self.DATA_UDP_PORT))
+        print("Data socket bound to IP:", self.data_sock.getsockname()[0])
         self.data_sock.setblocking(False)
-        self.InitSamples(3, 0)  # Three bytes per sample, little endian.
+        self.InitSamples(4, 0)  # Four bytes per sample, little endian.
         self.queue = PacketQueue()
         time.sleep(2)
         # Poll for version. Should probably confirm the response on this.
@@ -183,62 +183,89 @@ class Hardware(BaseHardware):
             print("RX")
         return BaseHardware.OnButtonPTT(self, event)
     
+    import time
+
     def GetRxSamples(self):
-                # Receive packets and add them to the queue
+        # Initialize packet counter and time marker
+        # This routine is made for FT8 and FT4, where we need to send a packet every 15 seconds.
+        # The Pico W sending the data has a sample rate of 48046 samples per second > 48 ks/s.
+        # We made the packets so they carry 180 samples per packet.  That gives 4000 packets 
+        # per 15 seconds.  We discard any packets after that four times a minute at 59, 14, 29, 
+        # and 44 seconds.  This should make four ticks per minute, and we should be able to ignore
+        # # them if we are doing FT8 or FT4.  Something else might be more optimum for other modes.
+
+        packet_counter = 0
+        next_time_marker = 0
+        send_packets = False
+
         while True:
+            # Check if we've reached the next time marker
+            current_time = time.time()
+            current_seconds = current_time % 60
+
+            # Define the time markers
+            if 59 <= current_seconds < 60:
+                next_time_marker = current_time + 1 - current_seconds
+                send_packets = True
+            elif 14 <= current_seconds < 15:
+                next_time_marker = current_time + 1 - (current_seconds - 14)
+                send_packets = True
+            elif 29 <= current_seconds < 30:
+                next_time_marker = current_time + 1 - (current_seconds - 29)
+                send_packets = True
+            elif 44 <= current_seconds < 45:
+                next_time_marker = current_time + 1 - (current_seconds - 44)
+                send_packets = True
+
+            # If we've reached the next time marker, reset the packet counter
+            if current_time >= next_time_marker and send_packets:
+                packet_counter = 0
+                send_packets = False
+
+            # Define the minimum number of packets
+            MIN_PACKETS = 1  # adjust this number as needed
+
+            # Initialize a flag to indicate whether AddRxSamples has been called
+            first_call = True
+
             try:
                 data, addr = self.data_sock.recvfrom(PACKET_SIZE)
+                # Print the first 36 bytes of the original data
+                # print(" ".join(f"{b:02x}" for b in data[4:40]))
             except socket.error:
                 break  # No more packets available
+
             packet = Packet(data)
             self.queue.add_packet(packet)
 
-        # Check for missing packets and fill them in
-        self.queue.check_missing_packets()
+            # Check for missing packets and fill them in
+            self.queue.check_missing_packets()
 
-        # Get the packets and pass them to the processing thread
-        packets = self.queue.get_packets()
-        for packet in packets:
-            data = b''.join(struct.pack('<II', pair[0], pair[1]) for pair in packet.pairs)
-            if len(data) % 8 != 0:  # Each I/Q pair is 8 bytes (2 * 4 bytes)
-                self.GotReadError(self, DEBUG_ON, "Error: Mismatched number of I and Q samples")
-                continue
-            self.AddRxSamples(data)
-            # self.GotReadError(self, DEBUG_ON, 'Sent ' + str(len(data)) + ' samples.')
+            # Get the packets and pass them to the processing thread
+            packets = self.queue.get_packets()
 
+            for packet in packets:
+                data = b''.join(struct.pack('<ii', pair[0], pair[1]) for pair in packet.pairs)
+                # if len(data) % 8 != 0:  # Each I/Q pair is 8 bytes (2 * 4 bytes)
+                #     self.GotReadError(self, DEBUG_ON, "Error: Mismatched number of I and Q samples")
+                #     continue
 
-        ## First get the data.
-        # data, addr = self.data_sock.recvfrom(PACKET_SIZE)
-        # packet_number = struct.unpack('<I', data[:4])[0] # Get the packet number (little endian)
+                # If we've already sent 4000 packets since the last time marker, discard the rest
+                if packet_counter >= 4000:
+                    continue
 
-        # Unpack the stereo audio data into a list of tuples (right, left)
+                # If this is the first call to AddRxSamples and we don't have enough packets, skip this iteration
+                if first_call and len(packets) < MIN_PACKETS:
+                    continue
 
-        # audio_data = struct.unpack('<366i', data[4:]) # Do we need to do this.  I don't think so.
+                self.AddRxSamples(data)
+                # Print the first 32 bytes of the data sent to AddRxSamples
+                # print("The second data")
+                # print(" ".join(f"{b:02x}" for b in data[:32]))
+                packet_counter += 1
 
-
-        # Pair up the integers as left and right audio samples
-        # audio_data_pairs = list(zip(audio_data[1::2], audio_data[::2]))
-        # packets.append((packet_number, audio_data_pairs))
-        # time_per_statement = time.time() - start
-        
-    # print(f"Time per statement: {time_per_statement} seconds")
-    # Sort packets by packet number
-    # packets.sort(key=lambda x: x[0])
-
-    # # Check for missing or out-of-order packets
-    # expected_packet_number = packet_number
-    # previous_packet_number = None
-    # missed_packets = 0
-    # for packet in packets:
-    #     packet_number = packet[0]
-    #     if previous_packet_number is not None:
-    #         if packet_number < previous_packet_number:
-    #             print(f"Packets not sorted correctly. Previous packet number {previous_packet_number}, current packet number {packet_number}")
-    #         elif packet_number != previous_packet_number + 1:
-    #             print(f"Packet missed. Expected packet number {previous_packet_number + 1}, but received packet number {packet_number}")
-    #             missed_packets += 1
-    #     previous_packet_number = packet_number
-    #     expected_packet_number += 1
+                # After the first call to AddRxSamples, set the flag to False
+                first_call = False
 
     #
     # UDP comms functions, to communicate with the Raspberry Pi Pico W board used in the SDR-TRX.

@@ -6,7 +6,6 @@
 #include <I2S.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
-#include <pico/mutex.h>
 
 extern uint32_t mutex_save;
 extern mutex_t my_mutex; // Mutex for thread safety
@@ -22,8 +21,8 @@ extern const int MCLK_MULT; // 384 32 bit for 48 BCK per frame,  256 for 64 BCK 
 
 extern const unsigned int DATA_UDPPORT; // UDP server port
 
-#define BUFFER_SIZE 1468 // 1468 => 183 samples of 8 bytes + 4 bytes for the packet number
-#define QUEUE_SIZE 11 // Must be odd.  
+#define BUFFER_SIZE 1444 // 1444 => 180 samples of 8 bytes + 4 bytes for the packet number (4000 packet every 15 seconds)
+#define QUEUE_SIZE 19 // Must be odd.  
 // With 9, the maximum latency is 8 packets, which is 15 ms.  Average is 2 packets, or 4 ms.
 
 class CircularBufferQueue
