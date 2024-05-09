@@ -97,10 +97,9 @@ class Hardware(BaseHardware):
     ft4_encoder = FT4Send()
 
     def open(self):
-
-        # Connection for WSJT-X
-        self.PICO_UDP_IP = "192.168.1.108"  # Put the Pico IP here.
-        self.COMMAND_UDP_PORT = 12346  # This is the port the Pico listens on for UDP comands coming from quisk.
+        # Connection for WSJT-X and data
+        self.PICO_UDP_IP = None  # Will be set to the IP of the machine sending data
+        self.COMMAND_UDP_PORT = 12346  # This is the port the Pico listens on for UDP commands coming from quisk.
         self.DATA_UDP_PORT = 12345  # This is the port the quisk listens on for UDP IQ data coming from the Pico W.
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.command_sock.setblocking(False)
@@ -108,6 +107,16 @@ class Hardware(BaseHardware):
         self.data_sock.bind(('', self.DATA_UDP_PORT))
         print("Data socket bound to IP:", self.data_sock.getsockname()[0])
         self.data_sock.setblocking(False)
+
+        # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
+        while self.PICO_UDP_IP is None:
+            try:
+                data, addr = self.data_sock.recvfrom(1024)  # Adjust the buffer size as needed
+                self.PICO_UDP_IP = addr[0]
+                print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
+            except socket.error:
+                pass  # No data available yet
+            
         self.InitSamples(4, 0)  # Four bytes per sample, little endian.
         self.queue = PacketQueue()
         time.sleep(2)
@@ -222,16 +231,8 @@ class Hardware(BaseHardware):
                 packet_counter = 0
                 send_packets = False
 
-            # Define the minimum number of packets
-            MIN_PACKETS = 1  # adjust this number as needed
-
-            # Initialize a flag to indicate whether AddRxSamples has been called
-            first_call = True
-
             try:
                 data, addr = self.data_sock.recvfrom(PACKET_SIZE)
-                # Print the first 36 bytes of the original data
-                # print(" ".join(f"{b:02x}" for b in data[4:40]))
             except socket.error:
                 break  # No more packets available
 
@@ -254,18 +255,8 @@ class Hardware(BaseHardware):
                 if packet_counter >= 4000:
                     continue
 
-                # If this is the first call to AddRxSamples and we don't have enough packets, skip this iteration
-                if first_call and len(packets) < MIN_PACKETS:
-                    continue
-
                 self.AddRxSamples(data)
-                # Print the first 32 bytes of the data sent to AddRxSamples
-                # print("The second data")
-                # print(" ".join(f"{b:02x}" for b in data[:32]))
                 packet_counter += 1
-
-                # After the first call to AddRxSamples, set the flag to False
-                first_call = False
 
     #
     # UDP comms functions, to communicate with the Raspberry Pi Pico W board used in the SDR-TRX.
