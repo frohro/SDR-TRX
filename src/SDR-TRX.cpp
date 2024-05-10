@@ -749,7 +749,6 @@ void processCommandUART()
     }
   }
 }
-
 void find_quisk_IP()
 {
   // Set up UDP for receiving broadcast messages
@@ -763,8 +762,9 @@ void find_quisk_IP()
     if (packetSize)
     {
       // We've received a packet, read the data from it
-      char packetBuffer[5];
+      char packetBuffer[6];  // Make the buffer one character larger
       broadcast_udp.read(packetBuffer, 5);
+      packetBuffer[5] = '\0';  // Add a null terminator
       Serial.printf("Received broadcast message: %s\n", packetBuffer);
 
       // Check the identifier
