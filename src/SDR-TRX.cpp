@@ -757,7 +757,7 @@ void find_quisk_IP()
 
   // Wait for a broadcast message
   const char *message = "Quisk";
-  int messageSize = sizeof(message);
+  int messageSize = strlen(message) + 1;
 
   while (true)
   {
