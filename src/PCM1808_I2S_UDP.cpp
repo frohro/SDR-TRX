@@ -5,7 +5,7 @@ mutex_t my_mutex; // Mutex for thread safety
 
 CircularBufferQueue::CircularBufferQueue() : fillIndex(1), emptyIndex(0)
 {
-    rp2040.wdt_begin(7000);
+    rp2040.wdt_begin(8000);
 }
 
 char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
