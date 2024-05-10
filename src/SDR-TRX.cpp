@@ -37,11 +37,10 @@
 const int RATE = 48000;    // Your network needs to handle this, but 96000 should also work, but misses some packets.
 const int BITS_PER_SAMPLE_SENT = 32;  // 24 or 32, 32 is less packet loss for some strange reason.
 const int MCLK_MULT = 256; //
-const char *STASSID = "Frohne-2.4GHz";
 // const char *STASSID = "rosbots";
 // const char *PASSWORD = "ros2bots"; // In case you have a password,
 // you must add this to the WiFi.begin() call, or if you have no
-// passward, you need to take the PASSWORD arguement out.
+// password, you need to take the PASSWORD arguement out.
 const unsigned int DATA_UDPPORT = 12345;
 const unsigned int COMMAND_UDPPORT = 12346;
 const char *VERSION_NUMBER = "0.1.1";
@@ -750,11 +749,32 @@ void processCommandUART()
 void setup()
 {
   mutex_init(&my_mutex);
-  if (mutex_try_enter(&my_mutex, &mutex_save)) // Synchronze cores so they start about the same time.
+  if (mutex_try_enter(&my_mutex, &mutex_save)) // Synchronize cores so they start about the same time.
   {
     Serial.begin(); // Pico uses /dev/ttyACM0.  No baud rate needed.
-    // WiFi.begin(STASSID, PASSWORD); // Add , PASSWORD after STASSID if you have one.
-    WiFi.begin(STASSID); // Add , PASSWORD after STASSID if you have one.
+
+    // Scan for available networks
+    int n = WiFi.scanNetworks();
+    String bestSSID;
+    int32_t bestRSSI = -1000;
+
+    for (int i = 0; i < n; i++)
+    {
+      String ssid = WiFi.SSID(i);
+      int32_t rssi = WiFi.RSSI(i);
+
+      // Check if this is one of the SSIDs we're interested in and has a stronger signal
+      // if ((ssid == "Frohne-2.4GHz" || ssid == "Frohne-Shop-2.4GHz") && rssi > bestRSSI)
+      if ( rssi > bestRSSI)
+      {
+        bestSSID = ssid;
+        bestRSSI = rssi;
+      }
+    }
+
+    // Connect to the best SSID
+    WiFi.begin(bestSSID.c_str());
+
     for (int i = 0; i < 15 && WiFi.status() != WL_CONNECTED; i++)
     {
       delay(1000); // Delay for 1 second
@@ -767,7 +787,7 @@ void setup()
     }
     else
     {
-      Serial.printf("WiFi connected; IP address: %s\n", WiFi.localIP().toString().c_str());
+      Serial.printf("WiFi connected to %s; IP address: %s\n", bestSSID.c_str(), WiFi.localIP().toString().c_str());
       udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
       udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
       useUDP = true;
