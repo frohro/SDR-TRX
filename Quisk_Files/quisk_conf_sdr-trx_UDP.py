@@ -30,44 +30,7 @@ import lib.WSJTXClass as WSJTXClass  # To use encoders
 sys.path.append(os.path.expandvars('$WEAKMON'))
 
 DEBUG_ON = True
-# Move these into the Hardware class.
-# Uncomment these lines if you wish to use Pulseaudio
-name_of_sound_play = "pulse"
 
-# Radio's Frequency limits.
-radio_lower = 3500000
-radio_upper = 30000000
-PACKET_SIZE = 1444  # 4 bytes for packet number + 180 * 8 bytes for int32_t pairs
-
-# Set the number of Hz the signal is tuned to above the center frequency to avoid 1/f noise.
-vfo_Center_Offset = 10000
-
-class Packet:
-    def __init__(self, data):
-        self.number = struct.unpack('<I', data[:4])[0]
-        self.pairs = [struct.unpack('<ii', data[i:i+8]) for i in range(4, len(data), 8)]
-
-class PacketQueue:  
-    def __init__(self):
-        self.queue = collections.deque()
-
-    def add_packet(self, packet):
-        self.queue.append(packet)
-        self.queue = collections.deque(sorted(self.queue, key=lambda p: p.number))
-
-    def check_missing_packets(self):
-        for i in range(1, len(self.queue)):
-            if self.queue[i].number != self.queue[i-1].number + 1:
-                avg_pairs = [((self.queue[i-1].pairs[j][0] + self.queue[i].pairs[j][0]) // 2,
-                              (self.queue[i-1].pairs[j][1] + self.queue[i].pairs[j][1]) // 2)
-                             for j in range(len(self.queue[i-1].pairs))]
-                self.queue.insert(i, Packet(struct.pack('<I', self.queue[i-1].number + 1) +
-                                             b''.join(struct.pack('<ii', pair[0], pair[1]) for pair in avg_pairs)))
-
-    def get_packets(self):
-        packets = list(self.queue)
-        self.queue.clear()
-        return packets
 
 # SDR-TRX Hardware Control Class
 #
@@ -75,14 +38,52 @@ class PacketQueue:
 class Hardware(BaseHardware):
     # These are "static variable substitutes" since python doesn't have them.
     # They are shared by all instances of the class and don't get redefinede each time a method is called.
+    # Move these into the Hardware class.
+    # Uncomment these lines if you wish to use Pulseaudio
+    name_of_sound_play = "pulse"
 
-    tx_ready_wsjtx = False
-    tx_ready_wsjtx_sent = False
-    tx_now = False
+    # Radio's Frequency limits.
+    radio_lower = 3500000
+    radio_upper = 30000000
+    PACKET_SIZE = 1444  # 4 bytes for packet number + 180 * 8 bytes for int32_t pairs
 
-    # This is the open code for the WSJT server.
-    ft8_encoder = FT8Send()
-    ft4_encoder = FT4Send()
+    # Set the number of Hz the signal is tuned to above the center frequency to avoid 1/f noise.
+    vfo_Center_Offset = 10000
+
+    class Packet:
+        def __init__(self, data):
+            self.number = struct.unpack('<I', data[:4])[0]
+            self.pairs = [struct.unpack('<ii', data[i:i+8]) for i in range(4, len(data), 8)]
+
+    class PacketQueue:  
+        def __init__(self):
+            self.queue = collections.deque()
+
+        def add_packet(self, packet):
+            self.queue.append(packet)
+            self.queue = collections.deque(sorted(self.queue, key=lambda p: p.number))
+
+        def check_missing_packets(self):
+            for i in range(1, len(self.queue)):
+                if self.queue[i].number != self.queue[i-1].number + 1:
+                    avg_pairs = [((self.queue[i-1].pairs[j][0] + self.queue[i].pairs[j][0]) // 2,
+                                (self.queue[i-1].pairs[j][1] + self.queue[i].pairs[j][1]) // 2)
+                                for j in range(len(self.queue[i-1].pairs))]
+                    self.queue.insert(i, Packet(struct.pack('<I', self.queue[i-1].number + 1) +
+                                                b''.join(struct.pack('<ii', pair[0], pair[1]) for pair in avg_pairs)))
+
+        def get_packets(self):
+            packets = list(self.queue)
+            self.queue.clear()
+            return packets
+
+        tx_ready_wsjtx = False
+        tx_ready_wsjtx_sent = False
+        tx_now = False
+
+        # This is the open code for the WSJT server.
+        ft8_encoder = FT8Send()
+        ft4_encoder = FT4Send()
 
     def open(self):
         # Connection for WSJT-X and data
@@ -104,7 +105,7 @@ class Hardware(BaseHardware):
         self.establish_connection()
             
         self.InitSamples(4, 0)  # Four bytes per sample, little endian.
-        self.queue = PacketQueue()
+        self.queue = self.PacketQueue()
         time.sleep(2)
         # Poll for version. Should probably confirm the response on this.
         version = str(self.get_parameter("VER"))  # The way the firmware is now, this sets it up to use the UART or UDP.
@@ -149,18 +150,18 @@ class Hardware(BaseHardware):
         # which is to be demodulated) if it falls outside the passband (+/- sample_rate/2).
         print("Setting VFO to %d, with tune to %d." % (vfo, tune))
         print("Setting VFO to %d." % vfo)
-        if vfo < radio_lower:
-            vfo = radio_lower
-            print("Outside range! Setting to %d" % radio_lower)
+        if vfo < self.radio_lower:
+            vfo = self.radio_lower
+            print("Outside range! Setting to %d" % self.radio_lower)
 
-        if vfo > radio_upper:
-            vfo = radio_upper
-            print("Outside range! Setting to %d" % radio_upper)
+        if vfo > self.radio_upper:
+            vfo = self.radio_upper
+            print("Outside range! Setting to %d" % self.radio_upper)
 
         # print("sample_rate =", sample_rate)  # I believe sample_rate comes from quisk.
         # If the tune frequency is outside the RX bandwidth, set it to somewhere within that bandwidth.
         if tune > (vfo + sample_rate / 2) or tune < (vfo - sample_rate / 2):
-            tune = vfo + vfo_Center_Offset
+            tune = vfo + self.vfo_Center_Offset
             print("Bringing tune frequency back into the RX bandwidth.")
 
         # success = self.set_parameter("FREQ",str(vfo))
@@ -235,14 +236,14 @@ class Hardware(BaseHardware):
                 send_packets = False
 
             try:
-                data, addr = self.data_sock.recvfrom(PACKET_SIZE)
+                data, addr = self.data_sock.recvfrom(self.PACKET_SIZE)
                 self.no_data_repeat = 0
             except socket.error:
                 # Send a broadcast message to the Pico W to get the IP address in case it has reset.
                 self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
                 break  # No more packets available
 
-            packet = Packet(data)
+            packet = self.Packet(data)
             self.queue.add_packet(packet)
 
             # Check for missing packets and fill them in
