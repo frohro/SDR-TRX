@@ -43,8 +43,9 @@ const int MCLK_MULT = 256; //
 // password, you need to take the PASSWORD arguement out.
 const unsigned int DATA_UDPPORT = 12345;
 const unsigned int COMMAND_UDPPORT = 12346;
+const unsigned int BROADCAST_UDP_PORT = 12347;
 const char *VERSION_NUMBER = "0.1.1";
-IPAddress remoteIp(192, 168, 1, 101); // This is the IP address of the computer running Quisk.
+IPAddress quiskIP(192, 168, 1, 101); // This is the IP address of the computer running Quisk.
 // It will be replaced with the IP of the computer that sends the command.
 // Radio specific parameters go here.
 const int FREQ_LIMIT_LOWER = 3500000;
@@ -357,7 +358,7 @@ void processCommandUDP()
     Serial.print("Message: ");
     Serial.println(command);
     // Process the received command
-    remoteIp = udpCommand.remoteIP();
+    quiskIP = udpCommand.remoteIP();
     Serial.print("received is ");
     Serial.println(received);
     if ((received == 'm') || // This whole if statement is a way of combining my code with
@@ -461,7 +462,7 @@ void processCommandUDP()
     {
       if (command.startsWith("VER"))
       {
-        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+        udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
         Serial.println("VER received!");
         Serial.println("Began Packet.");
         Serial.printf("VER,%s\r\n", VERSION_NUMBER);
@@ -494,13 +495,13 @@ void processCommandUDP()
           uint32_t freq = freqStr.toInt();
           set_rx_freq(freq);
           set_tx_freq(freq);
-          udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+          udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
           udpCommand.printf("FREQ,%ld\r\n", freq);
           udpCommand.endPacket();
         }
         else
         {
-          udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+          udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
           udpCommand.printf("FREQ,%u\r\n", rx_freq);
           udpCommand.endPacket();
         }
@@ -514,13 +515,13 @@ void processCommandUDP()
           String freqStr = command.substring(commaIndex + 1);
           uint32_t freq = freqStr.toInt();
           set_tx_freq(freq);
-          udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+          udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
           udpCommand.printf("TX_FREQ,%ld\r\n", freq);
           udpCommand.endPacket();
         }
         else
         {
-          udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+          udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
           udpCommand.printf("TX_FREQ,%d\r\n", tx_freq);
           udpCommand.endPacket();
         }
@@ -528,7 +529,7 @@ void processCommandUDP()
       else if (command.startsWith("USE_UART"))
       {
         useUDP = false; // Set useUDP to false
-        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+        udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
         udpCommand.printf("USE_UART\r\n");
         udpCommand.endPacket();
       }
@@ -536,7 +537,7 @@ void processCommandUDP()
       {
         Serial.println("TX received!");
         tx();
-        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+        udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
         udpCommand.printf("TX\r\n");
         udpCommand.endPacket();
       }
@@ -544,7 +545,7 @@ void processCommandUDP()
       {
         Serial.println("RX received!");
         rx();
-        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+        udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
         udpCommand.printf("RX\r\n");
         udpCommand.endPacket();
       }
@@ -552,7 +553,7 @@ void processCommandUDP()
       {
 
         Serial.println("Unknown command received!");
-        udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+        udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
         udpCommand.write("ERROR\r\n");
         udpCommand.endPacket();
         no_error = false;
@@ -560,7 +561,7 @@ void processCommandUDP()
     }
     if (no_error)
     {
-      udpCommand.beginPacket(remoteIp, udpCommand.remotePort());
+      udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
       udpCommand.write("OK\r\n"); // Do we need an Ok after an error?
       udpCommand.endPacket();
     }
@@ -749,6 +750,35 @@ void processCommandUART()
   }
 }
 
+void find_quisk_IP()
+{
+  // Set up UDP for receiving broadcast messages
+  WiFiUDP broadcast_udp;
+  broadcast_udp.begin(BROADCAST_UDP_PORT);
+
+  // Wait for a broadcast message
+  while (true)
+  {
+    int packetSize = broadcast_udp.parsePacket();
+    if (packetSize)
+    {
+      // We've received a packet, read the data from it
+      char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
+      broadcast_udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+
+      // Check the identifier
+      if (String(packetBuffer) == "Quisk")
+      {
+        // Get the sender's IP address
+        quiskIP = broadcast_udp.remoteIP();
+        break;
+      }
+    }
+    // Delay between checks
+    delay(10);
+  }
+}
+
 void setup()
 {
   mutex_init(&my_mutex);
@@ -791,6 +821,7 @@ void setup()
     else
     {
       Serial.printf("WiFi connected to %s; IP address: %s\n", bestSSID.c_str(), WiFi.localIP().toString().c_str());
+      find_quisk_IP();
       udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
       udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
       useUDP = true;
