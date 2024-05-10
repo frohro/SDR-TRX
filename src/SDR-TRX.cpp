@@ -45,11 +45,12 @@ const unsigned int DATA_UDPPORT = 12345;
 const unsigned int COMMAND_UDPPORT = 12346;
 const char *VERSION_NUMBER = "0.1.1";
 IPAddress remoteIp(192, 168, 1, 101); // This is the IP address of the computer running Quisk.
-// It will be replaced with the IP of the competer that sends the command.
+// It will be replaced with the IP of the computer that sends the command.
 // Radio specific parameters go here.
 const int FREQ_LIMIT_LOWER = 3500000;
 const int FREQ_LIMIT_UPPER = 30000000;
 const int RX_SWITCH = 10;          // GPIO pin for RX/TX switch (High is RX)
+const int SMPS_ENABLE = 11;        // GPIO pin for SMPS enable
 const int CAL_FACTOR = 1.00007587; // Calibration factor for the Si5351 (multiply by this number to get the right frequency)
 uint_fast32_t rx_freq = 14074000;  // 20 meter FT8 frequency
 uint_fast32_t tx_freq = 14074000;  // 20 meter FT8 frequency
@@ -752,7 +753,8 @@ void setup()
   if (mutex_try_enter(&my_mutex, &mutex_save)) // Synchronize cores so they start about the same time.
   {
     Serial.begin(); // Pico uses /dev/ttyACM0.  No baud rate needed.
-
+    pinMode(SMPS_ENABLE, OUTPUT);
+    digitalWrite(SMPS_ENABLE, LOW);
     // Scan for available networks
     int n = WiFi.scanNetworks();
     String bestSSID;
