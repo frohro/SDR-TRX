@@ -763,8 +763,8 @@ void find_quisk_IP()
     if (packetSize)
     {
       // We've received a packet, read the data from it
-      char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
-      broadcast_udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+      char packetBuffer[5];
+      broadcast_udp.read(packetBuffer, 5);
       Serial.printf("Received broadcast message: %s\n", packetBuffer);
 
       // Check the identifier
