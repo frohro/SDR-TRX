@@ -11,6 +11,9 @@ import os
 from ft8 import FT8Send
 from ft4 import FT4Send
 from quisk_hardware_model import Hardware as BaseHardware
+import struct
+import collections
+import lib.WSJTXClass as WSJTXClass  # To use encoders
 
 # SDR-TRX Quisk Configuration File
 # This file is to integrate the function of control of the SDR-TRX wint Quisk and with WSJT-X.
@@ -24,22 +27,11 @@ from quisk_hardware_model import Hardware as BaseHardware
 # and the version of that class. I have supplied a pruned down versions of ft8.py and ft4.45, because we don't need much
 # other than FT8Send and FT4Send from those files.  You need to edit transceiver_config.yml to have your callsign and grid, etc.
 
-import lib.WSJTXClass as WSJTXClass
-
-# Import weakmon to use encoders
-
 sys.path.append(os.path.expandvars('$WEAKMON'))
 
-# SOUND CARD SETTINGS
-#
-# Uncomment these if you wish to use PortAudio directly
-# name_of_sound_capt = "portaudio:(hw:2,0)"
-# name_of_sound_play = "portaudio:(hw:1,0)"
-
 DEBUG_ON = True
-# 
+# Move these into the Hardware class.
 # Uncomment these lines if you wish to use Pulseaudio
-# name_of_sound_capt = "pulse"
 name_of_sound_play = "pulse"
 
 # Radio's Frequency limits.
@@ -50,16 +42,12 @@ PACKET_SIZE = 1444  # 4 bytes for packet number + 180 * 8 bytes for int32_t pair
 # Set the number of Hz the signal is tuned to above the center frequency to avoid 1/f noise.
 vfo_Center_Offset = 10000
 
-import struct
-import collections
-import socket
-
 class Packet:
     def __init__(self, data):
         self.number = struct.unpack('<I', data[:4])[0]
         self.pairs = [struct.unpack('<ii', data[i:i+8]) for i in range(4, len(data), 8)]
 
-class PacketQueue:
+class PacketQueue:  
     def __init__(self):
         self.queue = collections.deque()
 
@@ -101,21 +89,17 @@ class Hardware(BaseHardware):
         self.PICO_UDP_IP = None  # Will be set to the IP of the machine sending data
         self.COMMAND_UDP_PORT = 12346  # This is the port the Pico listens on for UDP commands coming from quisk.
         self.DATA_UDP_PORT = 12345  # This is the port the quisk listens on for UDP IQ data coming from the Pico W.
+        self.BROADCAST_PORT = 12347  # This is the port the Pico gets our IP address from.-
+        self.broadcast_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.broadcast_message = "Quisk"
+        self.isConnected = False
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.command_sock.setblocking(False)
         self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.data_sock.bind(('', self.DATA_UDP_PORT))
         print("Data socket bound to IP:", self.data_sock.getsockname()[0])
         self.data_sock.setblocking(False)
-
-        # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
-        while self.PICO_UDP_IP is None:
-            try:
-                data, addr = self.data_sock.recvfrom(1024)  # Adjust the buffer size as needed
-                self.PICO_UDP_IP = addr[0]
-                print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
-            except socket.error:
-                pass  # No data available yet
+        self.establish_connection()
             
         self.InitSamples(4, 0)  # Four bytes per sample, little endian.
         self.queue = PacketQueue()
@@ -191,8 +175,22 @@ class Hardware(BaseHardware):
             self.get_parameter("RX")
             print("RX")
         return BaseHardware.OnButtonPTT(self, event)
-    
-    import time
+
+    def establish_connection(self):
+        while not self.isConnected:
+            self.broadcast_sock.sendto(data.encode(), ('<broadcast>', self.BROADCAST_PORT))
+
+            # Check if a connection is established
+            # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
+            while self.PICO_UDP_IP is None:
+                try:
+                    data, addr = self.data_sock.recvfrom(PACKET_SIZE)  # Adjust the buffer size as needed
+                    self.PICO_UDP_IP = addr[0]
+                    print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
+                    if data == self.broadcast_message:
+                        self.isConnected = True
+                except socket.error:
+                    pass  # No data available yet
 
     def GetRxSamples(self):
         # Initialize packet counter and time marker
