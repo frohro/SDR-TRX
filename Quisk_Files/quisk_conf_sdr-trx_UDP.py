@@ -191,8 +191,8 @@ class Hardware(BaseHardware):
                     data, addr = self.data_sock.recvfrom(PACKET_SIZE)  # Adjust the buffer size as needed
                     self.PICO_UDP_IP = addr[0]
                     print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
-                    if data == self.broadcast_message:
-                        self.isConnected = True
+                    # if data == self.broadcast_message:
+                    self.isConnected = True
                 except socket.error:
                     pass  # No data available yet
 
