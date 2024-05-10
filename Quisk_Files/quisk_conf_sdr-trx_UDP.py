@@ -492,7 +492,7 @@ class Hardware(BaseHardware):
                             print(f"Exception occurred: {e}")
                         print ('It is now ', self.tx_freq)
 
-                    print('new_mode', new_mode, ' self.mode is: ', self.mode)
+                    # print('new_mode', new_mode, ' self.mode is: ', self.mode)
                     if new_mode != self.mode:  
                         print("Mode before: {0}".format(self.mode))
                         self.set_mode(new_mode)
@@ -518,7 +518,8 @@ class Hardware(BaseHardware):
                             self.transmit()
                         print("Time: {0}:{1}:{2}".format(utc_time.hour, utc_time.minute, utc_time.second))
                     else:
-                        print('Not Transmitting')
+                        pass
+                        #  print('Not Transmitting')
                     return BaseHardware.HeartBeat(self)
         
             except Exception as e:
