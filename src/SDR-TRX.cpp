@@ -811,7 +811,8 @@ void setup()
 
     for (int i = 0; i < 15 && WiFi.status() != WL_CONNECTED; i++)
     {
-      delay(100); // Delay for 1 second
+      delay(1000); // Delay for 1 second
+      rp2040.wdt_reset();
       Serial.println("Trying to connect to WiFi...");
     }
     if (WiFi.status() != WL_CONNECTED)
