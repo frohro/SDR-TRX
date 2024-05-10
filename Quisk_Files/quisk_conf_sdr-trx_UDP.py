@@ -91,6 +91,7 @@ class Hardware(BaseHardware):
         self.DATA_UDP_PORT = 12345  # This is the port the quisk listens on for UDP IQ data coming from the Pico W.
         self.BROADCAST_PORT = 12347  # This is the port the Pico gets our IP address from.-
         self.broadcast_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.broadcast_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.broadcast_message = "Quisk"
         self.isConnected = False
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -178,8 +179,7 @@ class Hardware(BaseHardware):
 
     def establish_connection(self):
         while not self.isConnected:
-            self.broadcast_sock.sendto(data.encode(), ('<broadcast>', self.BROADCAST_PORT))
-
+            self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
             # Check if a connection is established
             # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
             while self.PICO_UDP_IP is None:

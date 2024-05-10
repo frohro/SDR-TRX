@@ -98,7 +98,7 @@ void BufferEmptyer::emptyBuffer()
     {
         delayMicroseconds(1200); // For 48 ks/s, 32-bit and 1200 no packet loss.
         // delayMicroseconds(DELAY_TIME); // Tune this for minimmum number of missed packets.
-        while (!udpData.beginPacket(remoteIp, DATA_UDPPORT))
+        while (!udpData.beginPacket(quiskIP, DATA_UDPPORT))
         {
             delayMicroseconds(1100);
             Serial.println("udpDat.beginPacket failed");
