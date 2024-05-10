@@ -175,6 +175,7 @@ void tx()
   }
   digitalWrite(RX_SWITCH, LOW);    // Set TX mode on T/R switch
   digitalWrite(LED_BUILTIN, HIGH); // Turn on the LED
+  digitalWrite(SMPS_ENABLE, HIGH); // Turn on the SMPS for higher power
   delay(100);
   rx_relay_state = 0;
   si5351.output_enable(SI5351_CLK2, 1);
@@ -192,6 +193,7 @@ void rx()
   digitalWrite(RX_SWITCH, HIGH);
   digitalWrite(LED_BUILTIN, LOW); // Turn off the LED
   rx_relay_state = 1;
+  digitalWrite(SMPS_ENABLE, LOW); // Turn off the SMPS for lower noise (perhaps)
 }
 
 void set_tx_freq(uint32_t freq)
@@ -754,7 +756,6 @@ void setup()
   {
     Serial.begin(); // Pico uses /dev/ttyACM0.  No baud rate needed.
     pinMode(SMPS_ENABLE, OUTPUT);
-    digitalWrite(SMPS_ENABLE, LOW);
     // Scan for available networks
     int n = WiFi.scanNetworks();
     String bestSSID;
