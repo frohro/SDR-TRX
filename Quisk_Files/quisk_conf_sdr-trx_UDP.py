@@ -50,6 +50,14 @@ class Hardware(BaseHardware):
     # Set the number of Hz the signal is tuned to above the center frequency to avoid 1/f noise.
     vfo_Center_Offset = 10000
 
+    tx_ready_wsjtx = False
+    tx_ready_wsjtx_sent = False
+    tx_now = False
+
+    # This is the open code for the WSJT server.
+    ft8_encoder = FT8Send()
+    ft4_encoder = FT4Send()
+
     class Packet:
         def __init__(self, data):
             self.number = struct.unpack('<I', data[:4])[0]
@@ -76,14 +84,6 @@ class Hardware(BaseHardware):
             packets = list(self.queue)
             self.queue.clear()
             return packets
-
-    tx_ready_wsjtx = False
-    tx_ready_wsjtx_sent = False
-    tx_now = False
-
-    # This is the open code for the WSJT server.
-    ft8_encoder = FT8Send()
-    ft4_encoder = FT4Send()
 
     def open(self):
         # Connection for WSJT-X and data
