@@ -34,9 +34,9 @@
 // or transceiver.  Use OOP.  Make the code maintainable..
 
 // These are things you might want to change for your situation.
-const int RATE = 48000;    // Your network needs to handle this, but 96000 should also work, but misses some packets.
-const int BITS_PER_SAMPLE_SENT = 32;  // 24 or 32, 32 is less packet loss for some strange reason.
-const int MCLK_MULT = 256; //
+const int RATE = 48000;              // Your network needs to handle this, but 96000 should also work, but misses some packets.
+const int BITS_PER_SAMPLE_SENT = 32; // 24 or 32, 32 is less packet loss for some strange reason.
+const int MCLK_MULT = 256;           //
 // const char *STASSID = "rosbots";
 // const char *PASSWORD = "ros2bots"; // In case you have a password,
 // you must add this to the WiFi.begin() call, or if you have no
@@ -756,19 +756,22 @@ void find_quisk_IP()
   broadcast_udp.begin(BROADCAST_UDP_PORT);
 
   // Wait for a broadcast message
+  const char *message = "Quisk";
+  int messageSize = sizeof(message);
+
   while (true)
   {
     int packetSize = broadcast_udp.parsePacket();
     if (packetSize)
     {
       // We've received a packet, read the data from it
-      char packetBuffer[6];  // Make the buffer one character larger
-      broadcast_udp.read(packetBuffer, 5);
-      packetBuffer[5] = '\0';  // Add a null terminator
+      char packetBuffer[messageSize];
+      broadcast_udp.read(packetBuffer, messageSize - 1);
+      packetBuffer[messageSize - 1] = '\0'; // Add a null terminator
       Serial.printf("Received broadcast message: %s\n", packetBuffer);
 
       // Check the identifier
-      if (String(packetBuffer) == "Quisk")
+      if (String(packetBuffer) == message)
       {
         // Get the sender's IP address
         quiskIP = broadcast_udp.remoteIP();
@@ -801,7 +804,7 @@ void setup()
 
       // Check if this is one of the SSIDs we're interested in and has a stronger signal
       // if ((ssid == "Frohne-2.4GHz" || ssid == "Frohne-Shop-2.4GHz") && rssi > bestRSSI)
-      if ( rssi > bestRSSI)
+      if (rssi > bestRSSI)
       {
         bestSSID = ssid;
         bestRSSI = rssi;
