@@ -140,6 +140,7 @@ class Hardware(BaseHardware):
         self.StopSamples()
         self.command_sock.close()
         self.wsjtx_sock.close()
+        self.broadcast_sock.close()
 
     def ChangeFrequency(self, tune, vfo, source='', band='', event=None):
         # Called whenever quisk requests a frequency change.
@@ -237,12 +238,8 @@ class Hardware(BaseHardware):
                 data, addr = self.data_sock.recvfrom(PACKET_SIZE)
                 self.no_data_repeat = 0
             except socket.error:
-                if self.no_data_repeat > 10:
-                    print("Lost connection.  Getting it back.")
-                    self.isConnected = False
-                    self.no_data_repeat = -1
-                    self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
-                self.no_data_repeat += 1
+                # Send a broadcast message to the Pico W to get the IP address in case it has reset.
+                self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
                 break  # No more packets available
 
             packet = Packet(data)
