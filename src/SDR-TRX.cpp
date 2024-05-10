@@ -810,7 +810,7 @@ void setup()
 
     for (int i = 0; i < 15 && WiFi.status() != WL_CONNECTED; i++)
     {
-      delay(10); // Delay for 1 second
+      delay(100); // Delay for 1 second
       Serial.println("Trying to connect to WiFi...");
     }
     if (WiFi.status() != WL_CONNECTED)
