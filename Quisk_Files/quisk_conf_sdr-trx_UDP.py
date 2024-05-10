@@ -77,13 +77,13 @@ class Hardware(BaseHardware):
             self.queue.clear()
             return packets
 
-        tx_ready_wsjtx = False
-        tx_ready_wsjtx_sent = False
-        tx_now = False
+    tx_ready_wsjtx = False
+    tx_ready_wsjtx_sent = False
+    tx_now = False
 
-        # This is the open code for the WSJT server.
-        ft8_encoder = FT8Send()
-        ft4_encoder = FT4Send()
+    # This is the open code for the WSJT server.
+    ft8_encoder = FT8Send()
+    ft4_encoder = FT4Send()
 
     def open(self):
         # Connection for WSJT-X and data
