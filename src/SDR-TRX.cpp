@@ -771,6 +771,7 @@ void find_quisk_IP()
       {
         // Get the sender's IP address
         quiskIP = broadcast_udp.remoteIP();
+        Serial.printf("Quisk IP address: %s\n", quiskIP.toString().c_str());
         break;
       }
     }
