@@ -231,7 +231,11 @@ class Hardware(BaseHardware):
 
             try:
                 data, addr = self.data_sock.recvfrom(PACKET_SIZE)
+                self.no_data_repeat = 0
             except socket.error:
+                if self.no__data_repeat > 10:
+                    self.establish_connection()  # If the pico watchdog resets the Pico, it needs this.
+                self.no_data_repeat += 1
                 break  # No more packets available
 
             packet = Packet(data)
