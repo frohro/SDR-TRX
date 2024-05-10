@@ -5,7 +5,7 @@ mutex_t my_mutex; // Mutex for thread safety
 
 CircularBufferQueue::CircularBufferQueue() : fillIndex(1), emptyIndex(0)
 {
-    rp2040.wdt_begin(8000);
+    // rp2040.wdt_begin(8000);
 }
 
 char *CircularBufferQueue::getNextBufferAndUpdate(bool isFiller)
@@ -93,7 +93,7 @@ void BufferEmptyer::emptyBuffer()
 {
     char *buffer = queue.getNextBufferAndUpdate(false);
         // Feed the watchdog to reset the timer
-    rp2040.wdt_reset();
+    // rp2040.wdt_reset();
     if (buffer != nullptr)
     {
         delayMicroseconds(1200); // For 48 ks/s, 32-bit and 1200 no packet loss.
