@@ -190,7 +190,7 @@ class Hardware(BaseHardware):
                 self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
                 time.sleep(1)  # Wait for 1 second before sending the next broadcast message
                 try:
-                    data, addr = self.data_sock.recvfrom(PACKET_SIZE)  # Adjust the buffer size as needed
+                    data, addr = self.data_sock.recvfrom(self.PACKET_SIZE)  # Adjust the buffer size as needed
                     self.PICO_UDP_IP = addr[0]
                     print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
                     # if data == self.broadcast_message:
