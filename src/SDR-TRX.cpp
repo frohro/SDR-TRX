@@ -775,6 +775,7 @@ void find_quisk_IP()
       }
     }
     // Delay between checks
+    rp2040.wdt_reset();
     delay(10);
   }
 }
