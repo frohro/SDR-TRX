@@ -178,20 +178,23 @@ class Hardware(BaseHardware):
             print("RX")
         return BaseHardware.OnButtonPTT(self, event)
 
-    def establish_connection(self):
-        while not self.isConnected:
+import time
+
+def establish_connection(self):
+    while not self.isConnected:
+        # Check if a connection is established
+        # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
+        while self.PICO_UDP_IP is None:
             self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
-            # Check if a connection is established
-            # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
-            while self.PICO_UDP_IP is None:
-                try:
-                    data, addr = self.data_sock.recvfrom(PACKET_SIZE)  # Adjust the buffer size as needed
-                    self.PICO_UDP_IP = addr[0]
-                    print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
-                    if data == self.broadcast_message:
-                        self.isConnected = True
-                except socket.error:
-                    pass  # No data available yet
+            time.sleep(1)  # Wait for 1 second before sending the next broadcast message
+            try:
+                data, addr = self.data_sock.recvfrom(PACKET_SIZE)  # Adjust the buffer size as needed
+                self.PICO_UDP_IP = addr[0]
+                print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
+                if data == self.broadcast_message:
+                    self.isConnected = True
+            except socket.error:
+                pass  # No data available yet
 
     def GetRxSamples(self):
         # Initialize packet counter and time marker
