@@ -239,6 +239,7 @@ class Hardware(BaseHardware):
             except socket.error:
                 if self.no_data_repeat > 10:
                     print("Lost connection.  Getting it back.")
+                    self.isConnected = False
                     self.no_data_repeat = 0
                     self.establish_connection()  # If the pico watchdog resets the Pico, it needs this.
                 self.no_data_repeat += 1
