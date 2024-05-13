@@ -882,7 +882,7 @@ void loop()
   else
   {
     processCommandUART();
-    Serial.println("processCommandUART done.");
+    // Serial.println("processCommandUART done.");
   }
   if (data_sending)
   {
