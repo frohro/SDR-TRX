@@ -831,17 +831,18 @@ void setup()
       find_quisk_IP();
       udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
       udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
-      useUDP = false;  // False only for testing UART
+      useUDP = false;                    // False only for testing UART
     }
     si5351_init();
     pinMode(RX_SWITCH, OUTPUT);
     pinMode(LED_BUILTIN, OUTPUT); // Set the LED pin as output.  It is used for TX mode.
     cur_mode = MODE_FT8;
     setup_mode(cur_mode);
-    rx();          // Set RX mode
+    rx();           // Set RX mode
     useUDP = false; // Testing
     mutex_exit(&my_mutex);
   }
+  Serial.println("Setup done.");
 }
 
 void setup1()
