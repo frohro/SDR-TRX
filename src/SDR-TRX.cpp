@@ -839,8 +839,7 @@ void setup()
     cur_mode = MODE_FT8;
     setup_mode(cur_mode);
     rx();          // Set RX mode
-    useUDP = true; // False only for testing out FT8
-    mutex_exit(&my_mutex);
+    useUDP = false; // Testing
   }
 }
 
