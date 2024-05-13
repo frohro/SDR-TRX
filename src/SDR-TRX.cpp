@@ -883,6 +883,7 @@ void loop()
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
+  Serial.printf("In loop1.\n");
   if (data_sending)
   {
     static BufferFiller filler(bufferQueue);
