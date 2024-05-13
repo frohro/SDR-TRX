@@ -460,7 +460,7 @@ void processCommandUDP()
     }
     else
     {
-      if (command.startsWith("VER"))  // Whatever way we get VER, sets useUDP.
+      if (command.startsWith("VER")) // Whatever way we get VER, sets useUDP.
       {
         udpCommand.beginPacket(quiskIP, udpCommand.remotePort());
         Serial.println("VER received!");
@@ -836,8 +836,8 @@ void setup()
         find_quisk_IP();
         udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
         udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
-        useUDP = true;   
-        // Do we want data_sending to be true here?                 
+        useUDP = true;
+        // Do we want data_sending to be true here?
       }
     }
     si5351_init();
@@ -845,28 +845,31 @@ void setup()
     pinMode(LED_BUILTIN, OUTPUT); // Set the LED pin as output.  It is used for TX mode.
     cur_mode = MODE_FT8;
     setup_mode(cur_mode);
-    rx();           // Set RX mode
+    rx(); // Set RX mode
     mutex_exit(&my_mutex);
   }
   Serial.println("Setup done.");
 }
 
 void setup1()
-// We don't need core1 if using Audio and UART.  This needs fixing.
-{                 // This runs on Core1.  It is the I2S setup.
-  i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
-  i2s.setBCLK(0);
-  i2s.setMCLK(3);
-  // Note: LRCK pin is BCK pin plus 1 (1 in this case).
-  i2s.setSysClk(RATE);
-  i2s.setBitsPerSample(24);
-  i2s.setFrequency(RATE);
-  i2s.setMCLKmult(MCLK_MULT);
-  i2s.setBuffers(32, 0, 0);
-  i2s.begin();
-  mutex_enter_blocking(&my_mutex); // This should syschornize the cores, so one doesn't fill the buffer
-  // before the other is ready.
-  mutex_exit(&my_mutex);
+{
+  // We don't need core1 if using Audio and UART. \addindex.
+  if (useUDP)
+  {                 // This runs on Core1.  It is the I2S setup.
+    i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
+    i2s.setBCLK(0);
+    i2s.setMCLK(3);
+    // Note: LRCK pin is BCK pin plus 1 (1 in this case).
+    i2s.setSysClk(RATE);
+    i2s.setBitsPerSample(24);
+    i2s.setFrequency(RATE);
+    i2s.setMCLKmult(MCLK_MULT);
+    i2s.setBuffers(32, 0, 0);
+    i2s.begin();
+    mutex_enter_blocking(&my_mutex); // This should syschornize the cores, so one doesn't fill the buffer
+    // before the other is ready.
+    mutex_exit(&my_mutex);
+  }
 }
 
 void loop()
@@ -891,10 +894,13 @@ void loop()
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
-  Serial.printf("In loop1.\n");
-  if (data_sending)
-  {
-    static BufferFiller filler(bufferQueue);
-    filler.fillBuffer(); // Fill the buffer
-  }
+  if (useUDP)
+    {
+      Serial.printf("In loop1.\n");
+      if (data_sending)
+      {
+        static BufferFiller filler(bufferQueue);
+        filler.fillBuffer(); // Fill the buffer
+      }
+    }
 }
