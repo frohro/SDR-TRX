@@ -823,7 +823,7 @@ void setup()
     if (WiFi.status() != WL_CONNECTED)
     {
       Serial.println("Failed to connect to WiFi after 15 seconds");
-      // useUDP = false;
+      useUDP = false;
     }
     else
     {
@@ -831,7 +831,7 @@ void setup()
       find_quisk_IP();
       udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
       udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
-      useUDP = true;
+      useUDP = false;  // False only for testing UART
     }
     si5351_init();
     pinMode(RX_SWITCH, OUTPUT);
