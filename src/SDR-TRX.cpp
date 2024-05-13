@@ -874,7 +874,7 @@ void setup1()
 
 void loop()
 {
-  Serial.printf("In loop, useUDP is %d\n", useUDP);
+  // Serial.printf("In loop, useUDP is %d\n", useUDP);
   if (useUDP)
   {
     processCommandUDP();
@@ -896,7 +896,7 @@ void loop1()
 { // This should run on Core1.  It is the I2S loop.
   if (useUDP)
     {
-      Serial.printf("In loop1.\n");
+      // Serial.printf("In loop1.\n");
       if (data_sending)
       {
         static BufferFiller filler(bufferQueue);
