@@ -862,6 +862,7 @@ void setup1()
 
 void loop()
 {
+  Serial.printf("In loop, useUDP is %d\n", useUDP);
   if (useUDP)
   {
     processCommandUDP();
