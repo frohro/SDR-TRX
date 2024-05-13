@@ -578,7 +578,7 @@ void processCommandUART()
   // Check if there's any serial data available
   if (Serial.available() > 0)
     received = Serial.read();
-   Serial.printf("CammandUART received is: ", received);
+  //  Serial.printf("CammandUART received is: ", received);
   if ((received == 'm') || // This whole if statement is a way of combining my code with
       (received == 'o') || // wsjt-transceiver.ino.  I'm not sure if it is the best way.
       (received == 'e') ||
@@ -823,7 +823,7 @@ void setup()
     if (WiFi.status() != WL_CONNECTED)
     {
       Serial.println("Failed to connect to WiFi after 15 seconds");
-      useUDP = false;
+      // useUDP = false;
     }
     else
     {
