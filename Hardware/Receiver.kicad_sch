@@ -3017,7 +3017,7 @@
     (property "Footprint" "Package_SO:MSOP-10_3x3mm_P0.5mm" (at 97.79 130.81 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "https://datasheet.lcsc.com/lcsc/2012241239_Hangzhou-Ruimeng-Tech-MS5351M_C1509083.pdf" (at 88.9 113.03 0)
+    (property "Datasheet" "https://www.qrp-labs.com/images/synth/ms5351m.pdf" (at 88.9 113.03 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "LCSC" "C1509083" (at 97.79 110.49 0)
