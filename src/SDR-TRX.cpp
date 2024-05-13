@@ -840,6 +840,7 @@ void setup()
     setup_mode(cur_mode);
     rx();          // Set RX mode
     useUDP = false; // Testing
+    mutex_exit(&my_mutex);
   }
 }
 
