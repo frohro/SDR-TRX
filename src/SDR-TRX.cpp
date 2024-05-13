@@ -820,7 +820,7 @@ void setup()
       rp2040.wdt_reset();
       Serial.println("Trying to connect to WiFi...");
     }
-    if (WiFi.status() != WL_CONNECTED)
+    if ((WiFi.status() != WL_CONNECTED) && (useUDP))
     {
       Serial.println("Failed to connect to WiFi after 15 seconds");
       useUDP = false;
