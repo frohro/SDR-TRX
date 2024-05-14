@@ -677,23 +677,23 @@ void processCommandUART()
     if (command.startsWith("VER"))
     {
       Serial.printf("VER,%s\r\n", VERSION_NUMBER);
-      useUDP = false; // Set useUDP to false
+      // useUDP = false; // Set useUDP to false
       //  The first thing Quisk does is to check VER.
       //  So if it uses UART, we will use UART.
     }
-    else if (command.startsWith("START_I2S_UDP"))
-    {
-      Serial.println("START_I2S_UDP received!");
-      data_sending = true;
-      // Also need to connect to WiFi, setup ports for UDP Commands, etc  This needs fixing.
-      i2s.begin();
-    }
-    else if (command.startsWith("STOP_I2S_UDP"))
-    {
-      Serial.println("STOP_I2S_UDP received!");
-      data_sending = false;
-      i2s.end();
-    }
+    // else if (command.startsWith("START_I2S_UDP"))
+    // {
+    //   Serial.println("START_I2S_UDP received!");
+    //   data_sending = true;
+    //   // Also need to connect to WiFi, setup ports for UDP Commands, etc  This needs fixing.
+    //   i2s.begin();
+    // }
+    // else if (command.startsWith("STOP_I2S_UDP"))
+    // {
+    //   Serial.println("STOP_I2S_UDP received!");
+    //   data_sending = false;
+    //   i2s.end();
+    // }
     else if (command.startsWith("FREQ"))
     {
       int commaIndex = command.indexOf(',');
@@ -724,12 +724,12 @@ void processCommandUART()
         Serial.printf("TX_FREQ,%u\r\n", tx_freq);
       }
     }
-    else if (command.startsWith("USE_UDP"))
-    {
-      useUDP = true; // Set useUDP to true
-      // This needs fixed.  We need to connect to WIFI, etc. too.
-      Serial.printf("USE_UDP\r\n");
-    }
+    // else if (command.startsWith("USE_UDP"))
+    // {
+    //   useUDP = true; // Set useUDP to true
+    //   // This needs fixed.  We need to connect to WIFI, etc. too.
+    //   Serial.printf("USE_UDP\r\n");
+    // }
     else if (command.startsWith("TX"))
     {
       tx();
@@ -788,58 +788,65 @@ void find_quisk_IP()
   }
 }
 
+bool SetupWiFi(void)
+{
+  // Scan for available networks
+  int n = WiFi.scanNetworks();
+  String bestSSID;
+  int32_t bestRSSI = -1000;
+
+  for (int i = 0; i < n; i++)
+  {
+    String ssid = WiFi.SSID(i);
+    int32_t rssi = WiFi.RSSI(i);
+
+    // Check if this is one of the SSIDs we're interested in and has a stronger signal
+    // if ((ssid == "Frohne-2.4GHz" || ssid == "Frohne-Shop-2.4GHz") && rssi > bestRSSI)
+    if (rssi > bestRSSI)
+    {
+      bestSSID = ssid;
+      bestRSSI = rssi;
+    }
+  }
+
+  // Connect to the best SSID
+  WiFi.begin(bestSSID.c_str());
+
+  for (int i = 0; i < 15 && WiFi.status() != WL_CONNECTED; i++)
+  {
+    delay(1000); // Delay for 1 second
+    rp2040.wdt_reset();
+    Serial.println("Trying to connect to WiFi...");
+  }
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("Failed to connect to WiFi after 15 seconds");
+    useUDP = false;
+    return false;
+  }
+  else
+  {
+    Serial.printf("WiFi connected to %s; IP address: %s\n", bestSSID.c_str(), WiFi.localIP().toString().c_str());
+    find_quisk_IP();
+    udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
+    udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
+    useUDP = true;
+    data_sending = true;
+    return true;
+  }
+}
+
 void setup()
 {
   mutex_init(&my_mutex);
   if (mutex_try_enter(&my_mutex, &mutex_save)) // Synchronize cores so they start about the same time.
   {
-    Serial.begin(); // Pico uses /dev/ttyACM0.  No baud rate needed.
-    pinMode(SMPS_ENABLE, OUTPUT);
-    if (useUDP) // If we are using UDP, we need to connect to the best SSID.
+    if (useUDP)
     {
-      // Scan for available networks
-      int n = WiFi.scanNetworks();
-      String bestSSID;
-      int32_t bestRSSI = -1000;
-
-      for (int i = 0; i < n; i++)
-      {
-        String ssid = WiFi.SSID(i);
-        int32_t rssi = WiFi.RSSI(i);
-
-        // Check if this is one of the SSIDs we're interested in and has a stronger signal
-        // if ((ssid == "Frohne-2.4GHz" || ssid == "Frohne-Shop-2.4GHz") && rssi > bestRSSI)
-        if (rssi > bestRSSI)
-        {
-          bestSSID = ssid;
-          bestRSSI = rssi;
-        }
-      }
-
-      // Connect to the best SSID
-      WiFi.begin(bestSSID.c_str());
-
-      for (int i = 0; i < 15 && WiFi.status() != WL_CONNECTED; i++)
-      {
-        delay(1000); // Delay for 1 second
-        rp2040.wdt_reset();
-        Serial.println("Trying to connect to WiFi...");
-      }
-      if (WiFi.status() != WL_CONNECTED)
-      {
-        Serial.println("Failed to connect to WiFi after 15 seconds");
-        useUDP = false;
-      }
-      else
-      {
-        Serial.printf("WiFi connected to %s; IP address: %s\n", bestSSID.c_str(), WiFi.localIP().toString().c_str());
-        find_quisk_IP();
-        udpCommand.begin(COMMAND_UDPPORT); // Initialize UDP for command port
-        udpData.begin(DATA_UDPPORT);       // Initialize UDP for data port
-        useUDP = true;
-        // Do we want data_sending to be true here?
-      }
+      SetupWiFi();  // We could setup UDP here and use the return value of SetupWiFi.
     }
+    Serial.begin();
+    pinMode(SMPS_ENABLE, OUTPUT);
     si5351_init();
     pinMode(RX_SWITCH, OUTPUT);
     pinMode(LED_BUILTIN, OUTPUT); // Set the LED pin as output.  It is used for TX mode.
@@ -895,12 +902,12 @@ void loop()
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
   if (useUDP)
+  {
+    // Serial.printf("In loop1.\n");
+    if (data_sending)
     {
-      // Serial.printf("In loop1.\n");
-      if (data_sending)
-      {
-        static BufferFiller filler(bufferQueue);
-        filler.fillBuffer(); // Fill the buffer
-      }
+      static BufferFiller filler(bufferQueue);
+      filler.fillBuffer(); // Fill the buffer
     }
+  }
 }
