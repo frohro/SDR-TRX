@@ -96,7 +96,7 @@ void BufferEmptyer::emptyBuffer()
     rp2040.wdt_reset();
     if (buffer != nullptr)
     {
-        delayMicroseconds(1300); // For 48 ks/s, 32-bit and 1200 no packet loss.
+        delayMicroseconds(1400); // For 48 ks/s, 32-bit and 1200 no packet loss.
         // delayMicroseconds(DELAY_TIME); // Tune this for minimmum number of missed packets.
         while (!udpData.beginPacket(quiskIP, DATA_UDPPORT))
         {
