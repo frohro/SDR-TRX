@@ -58,7 +58,7 @@ uint_fast32_t tx_freq = 14074000;  // 20 meter FT8 frequency
 int rx_relay_state = 0;            // 0 is RX, 1 is TX
 int tx_state = 0;                  // 0 is off, 1 is on
 bool data_sending = false;         // Are we sending data over UDP?
-bool useUDP = false;               // If false, use UART instead of UDP.
+bool useUDP = true;               // If false, use UART instead of UDP.
 const int SERIAL_TIMEOUT = 20000;  // 20 seconds
 WiFiUDP udpData;                   // UDP object for data packets  (Is this a server or a client?)
 WiFiUDP udpCommand;                // UDP object for control packets
@@ -904,7 +904,7 @@ void loop()
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
-  // if (useUDP)
+  if (useUDP)
   {
     // Serial.printf("In loop1.\n");
     if (data_sending)
