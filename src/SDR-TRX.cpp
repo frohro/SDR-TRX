@@ -904,7 +904,7 @@ void loop()
 
 void loop1()
 { // This should run on Core1.  It is the I2S loop.
-  if (useUDP)
+  // if (useUDP)
   {
     // Serial.printf("In loop1.\n");
     if (data_sending)
