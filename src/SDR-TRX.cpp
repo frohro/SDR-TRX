@@ -595,15 +595,16 @@ void processCommandUART()
     {
       msg_index = 0;
       // timeout = 0;
-      while (msg_index < symbol_count) // && timeout < SERIAL_TIMEOUT)
-      {
-        if (Serial.available() > 0)
-        {
-          received = Serial.read();
-          tx_buffer[msg_index] = received;
-          msg_index++;
-        }
-      }
+      // Temporarilly commented out.
+      // while (msg_index < symbol_count) // && timeout < SERIAL_TIMEOUT)
+      // {
+      //   if (Serial.available() > 0)
+      //   {
+      //     received = Serial.read();
+      //     tx_buffer[msg_index] = received;
+      //     msg_index++;
+      //   }
+      // }
       message_available = true;
       Serial.print("m");
     }
@@ -613,14 +614,15 @@ void processCommandUART()
     {
       msg_index = 0;
       // Offset encoded in two bytes
-      while (msg_index < 2)
-      {
-        if (Serial.available() > 0)
-        {
-          rec_byte[msg_index] = Serial.read();
-          msg_index++;
-        }
-      }
+      // Temporarilly commented out.
+      // while (msg_index < 2)
+      // {
+      //   if (Serial.available() > 0)
+      //   {
+      //     rec_byte[msg_index] = Serial.read();
+      //     msg_index++;
+      //   }
+      // }
       offset = rec_byte[0] + (rec_byte[1] << 8);
       Serial.print("o");
     }
