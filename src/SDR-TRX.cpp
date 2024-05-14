@@ -577,6 +577,7 @@ void processCommandUART()
   unsigned char rec_byte[2];
   unsigned char msg_index;
   // Check if there's any serial data available
+  rp2040.wdt_reset();
   if (Serial.available() > 0)
     received = Serial.read();
   // Serial.printf("CammandUART received is: ", received);
@@ -595,16 +596,15 @@ void processCommandUART()
     {
       msg_index = 0;
       // timeout = 0;
-      // Temporarilly commented out.
-      // while (msg_index < symbol_count) // && timeout < SERIAL_TIMEOUT)
-      // {
-      //   if (Serial.available() > 0)
-      //   {
-      //     received = Serial.read();
-      //     tx_buffer[msg_index] = received;
-      //     msg_index++;
-      //   }
-      // }
+      while (msg_index < symbol_count) // && timeout < SERIAL_TIMEOUT)
+      {
+        if (Serial.available() > 0)
+        {
+          received = Serial.read();
+          tx_buffer[msg_index] = received;
+          msg_index++;
+        }
+      }
       message_available = true;
       Serial.print("m");
     }
@@ -614,15 +614,14 @@ void processCommandUART()
     {
       msg_index = 0;
       // Offset encoded in two bytes
-      // Temporarilly commented out.
-      // while (msg_index < 2)
-      // {
-      //   if (Serial.available() > 0)
-      //   {
-      //     rec_byte[msg_index] = Serial.read();
-      //     msg_index++;
-      //   }
-      // }
+      while (msg_index < 2)
+      {
+        if (Serial.available() > 0)
+        {
+          rec_byte[msg_index] = Serial.read();
+          msg_index++;
+        }
+      }
       offset = rec_byte[0] + (rec_byte[1] << 8);
       Serial.print("o");
     }
@@ -673,6 +672,7 @@ void processCommandUART()
   }
   else
   {
+    rp2040.wdt_reset();
     command = received + Serial.readStringUntil('\n');
     no_error = true;
     // Process the received command
@@ -753,6 +753,7 @@ void processCommandUART()
       Serial.write("OK\r\n"); // Do we need an Ok after an error?
     }
   }
+  rp2040.wdt_reset();
 }
 void find_quisk_IP()
 {
