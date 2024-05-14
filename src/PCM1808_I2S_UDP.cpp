@@ -96,11 +96,11 @@ void BufferEmptyer::emptyBuffer()
     rp2040.wdt_reset();
     if (buffer != nullptr)
     {
-        delayMicroseconds(1200); // For 48 ks/s, 32-bit and 1200 no packet loss.
+        // delayMicroseconds(1200); // For 48 ks/s, 32-bit and 1200 no packet loss.
         // delayMicroseconds(DELAY_TIME); // Tune this for minimmum number of missed packets.
         while (!udpData.beginPacket(quiskIP, DATA_UDPPORT))
         {
-            delayMicroseconds(1100);
+            // delayMicroseconds(1100);
             Serial.println("udpDat.beginPacket failed");
         }
         memcpy(temp_buffer, buffer, BUFFER_SIZE); // If we don't do this, it hangs in the udpData.write below.
