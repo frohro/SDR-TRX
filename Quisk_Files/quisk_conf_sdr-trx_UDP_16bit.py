@@ -188,8 +188,6 @@ class Hardware(BaseHardware):
             print("isConnected is: ", self.isConnected)
             # Check if a connection is established
             # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
-            self.data_sock.settimeout(1)  # Set a timeout of 1 second
-
             while self.PICO_UDP_IP is None:
                 try:
                     print("Sending broadcast message...")
@@ -204,7 +202,7 @@ class Hardware(BaseHardware):
                     print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
                     # if data == self.broadcast_message:
                     self.isConnected = True
-                except (socket.error, socket.timeout):
+                except socket.error:
                     if self.PICO_UDP_IP is not None:
                         break  # Exit the loop if self.PICO_UDP_IP is not None
                     pass  # No data available yet
