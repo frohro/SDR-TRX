@@ -188,7 +188,7 @@ class Hardware(BaseHardware):
             print("isConnected is: ", self.isConnected)
             # Check if a connection is established
             # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
-            while self.PICO_UDP_IP is None:
+            while self.PICO_UDP_IP is None:  #  This needs to be fixed.  It continues to send broadcast packets.
                 try:
                     print("Sending broadcast message...")
                     self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
