@@ -194,7 +194,7 @@ class Hardware(BaseHardware):
                     self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
                     time.sleep(1)  # Wait for 1 second before sending the next broadcast message
                 except Exception as e:
-                    print("Exception occurred: {0}".format(e))
+                    print("Broadcast message did not work: {0}".format(e))
                     break
                 try:
                     data, addr = self.data_sock.recvfrom(self.PACKET_SIZE)  # Adjust the buffer size as needed
@@ -202,6 +202,8 @@ class Hardware(BaseHardware):
                     print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
                     # if data == self.broadcast_message:
                     self.isConnected = True
+                    if self.PICO_UDP_IP is not None:
+                        break  # Exit the loop if self.PICO_UDP_IP is not None
                 except socket.error:
                     pass  # No data available yet
 
