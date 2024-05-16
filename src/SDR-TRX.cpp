@@ -35,7 +35,7 @@
 
 // These are things you might want to change for your situation.
 const int RATE = 48000;              // Your network needs to handle this, but 96000 should also work, but misses some packets.
-const int BITS_PER_SAMPLE_SENT = 32; // 24 or 32, 32 is less packet loss for some strange reason.
+const int BITS_PER_SAMPLE_SENT = 16; // 24 or 32, 32 is less packet loss for some strange reason.
 const int MCLK_MULT = 256;           //
 // const char *STASSID = "rosbots";
 // const char *PASSWORD = "ros2bots"; // In case you have a password,
