@@ -185,9 +185,11 @@ class Hardware(BaseHardware):
 
     def establish_connection(self):
         while not self.isConnected:
+            print("isConnected is: ", self.isConnected)
             # Check if a connection is established
             # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
             while self.PICO_UDP_IP is None:
+                print("Sending broadcast message...")
                 self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
                 time.sleep(1)  # Wait for 1 second before sending the next broadcast message
                 try:
