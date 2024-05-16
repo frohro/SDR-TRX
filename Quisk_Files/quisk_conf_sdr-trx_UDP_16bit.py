@@ -204,6 +204,7 @@ class Hardware(BaseHardware):
                     self.isConnected = True
                 except socket.error:
                     if self.PICO_UDP_IP is not None:
+                        print("Connection established with Pico W at IP:", self.PICO_UDP_IP, "but exception occurred.")
                         break  # Exit the loop if self.PICO_UDP_IP is not None
                     pass  # No data available yet
 
