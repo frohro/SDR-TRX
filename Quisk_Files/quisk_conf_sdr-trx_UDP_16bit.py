@@ -189,9 +189,13 @@ class Hardware(BaseHardware):
             # Check if a connection is established
             # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
             while self.PICO_UDP_IP is None:
-                print("Sending broadcast message...")
-                self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
-                time.sleep(1)  # Wait for 1 second before sending the next broadcast message
+                try:
+                    print("Sending broadcast message...")
+                    self.broadcast_sock.sendto(self.broadcast_message.encode(), ('<broadcast>', self.BROADCAST_PORT))
+                    time.sleep(1)  # Wait for 1 second before sending the next broadcast message
+                except Exception as e:
+                    print("Exception occurred: {0}".format(e))
+                    break
                 try:
                     data, addr = self.data_sock.recvfrom(self.PACKET_SIZE)  # Adjust the buffer size as needed
                     self.PICO_UDP_IP = addr[0]
