@@ -45,7 +45,7 @@ class Hardware(BaseHardware):
     # Radio's Frequency limits.
     radio_lower = 3500000
     radio_upper = 30000000
-    PACKET_SIZE = 2884  # 4 bytes for packet number + 360 * 4 bytes for int32_t pairs
+    PACKET_SIZE = 1444  # 4 bytes for packet number + 360 * 4 bytes for int32_t pairs
     # Using 16 bit samples, so 2 bytes per sample.
 
     # Set the number of Hz the signal is tuned to above the center frequency to avoid 1/f noise.
