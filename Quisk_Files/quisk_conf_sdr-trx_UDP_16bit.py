@@ -202,10 +202,10 @@ class Hardware(BaseHardware):
                     print("PICO_UDP_IP set to:", self.PICO_UDP_IP)
                     # if data == self.broadcast_message:
                     self.isConnected = True
-                    if self.PICO_UDP_IP is not None:
-                        break  # Exit the loop if self.PICO_UDP_IP is not None
                 except socket.error:
                     pass  # No data available yet
+                if self.PICO_UDP_IP is not None:
+                    break  # Exit the loop if self.PICO_UDP_IP is not None
 
     def GetRxSamples(self):
         # Initialize packet counter and time marker
