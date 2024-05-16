@@ -55,7 +55,7 @@ void BufferFiller::fillBuffer()
 
     if (buffer != nullptr)
     {
-        static int32_t packet_number = 0; //, skip_counter = SAMPLES_PER_SKIP_A_SAMPlE;
+        static int32_t packet_number = 0;
         uint32_t bufferIndex = 4;
         int32_t r, l;
         while (bufferIndex < BUFFER_SIZE) // Leave space for the packet number
@@ -77,13 +77,20 @@ void BufferFiller::fillBuffer()
                 memcpy(buffer + bufferIndex, &r, sizeof(int32_t)); // Copy only the lower 3 bytes
                 bufferIndex += sizeof(int32_t);
             }
+            else if (BITS_PER_SAMPLE_SENT == 16)
+            {
+                l = l >> 8;                                        // Keep only the lower 16 bits
+                r = r >> 8;                                        // Keep only the lower 16 bits
+                memcpy(buffer + bufferIndex, &l, 2); // Copy only the lower 2 bytes
+                bufferIndex += 2;
+                memcpy(buffer + bufferIndex, &r, 2); // Copy only the lower 2 bytes
+                bufferIndex += 2;
+            }
         }
         memcpy(buffer, &packet_number, sizeof(int32_t));
-        // Serial.printf("Filled %ld, t %ld\n", packet_number, micros());
         packet_number++;
     }
 }
-
 BufferEmptyer::BufferEmptyer(CircularBufferQueue &q) : queue(q)
 {
     memset(temp_buffer, 0xff, BUFFER_SIZE);
