@@ -52,7 +52,8 @@ const int FREQ_LIMIT_LOWER = 3500000;
 const int FREQ_LIMIT_UPPER = 30000000;
 const int RX_SWITCH = 10;          // GPIO pin for RX/TX switch (High is RX)
 const int SMPS_ENABLE = 11;        // GPIO pin for SMPS enable
-const int CAL_FACTOR = 1.00007587; // Calibration factor for the Si5351 (multiply by this number to get the right frequency)
+const int CAL_FACTOR = 1.000; // Calibration factor for the Si5351 (multiply by this number to get the right frequency)
+//  I need to put this into Quisk, using the option of my own widgets file.  Then let's remove it from here.
 uint_fast32_t rx_freq = 14074000;  // 20 meter FT8 frequency
 uint_fast32_t tx_freq = 14074000;  // 20 meter FT8 frequency
 int rx_relay_state = 0;            // 0 is RX, 1 is TX
