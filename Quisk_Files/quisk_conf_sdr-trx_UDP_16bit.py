@@ -96,7 +96,10 @@ class Hardware(BaseHardware):
         self.broadcast_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.broadcast_message = "Quisk"
         self.broadcast_sock.setblocking(False)
-        self.isConnected = False
+        if self.PICO_UDP_IP is None:
+            self.isConnected = False
+        else:
+            self.isConnected = True
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.command_sock.setblocking(False)
         self.data_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
