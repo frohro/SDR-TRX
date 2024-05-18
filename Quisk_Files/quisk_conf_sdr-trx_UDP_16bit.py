@@ -188,7 +188,7 @@ class Hardware(BaseHardware):
 
     def establish_connection(self):
         while not self.isConnected:
-            print("isConnected is: ", self.isConnected)
+            # print("isConnected is: ", self.isConnected)
             # Check if a connection is established
             # Wait for data to arrive and set PICO_UDP_IP to the sender's IP
             while self.PICO_UDP_IP is None:  #  This needs to be fixed.  It continues to send broadcast packets.
