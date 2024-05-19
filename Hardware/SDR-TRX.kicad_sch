@@ -1291,6 +1291,11 @@
     (effects (font (size 2.54 2.54) (thickness 0.508) bold) (justify left bottom))
     (uuid d93037e2-e1d2-4a3d-b94f-2c3b56eb2ac7)
   )
+  (text "For some reason we need a small load (33 pF works or a scope probe)\nbetween LRCK and GND."
+    (at 52.07 111.76 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid e890ee80-8010-436f-b75b-10a65dc841b8)
+  )
   (text "There is a Schottky diode\npreventing backfeeding the\ncomputer USB port."
     (at 151.13 123.19 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))

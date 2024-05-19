@@ -88,7 +88,7 @@ class Hardware(BaseHardware):
 
     def open(self):
         # Connection for WSJT-X and data
-        self.PICO_UDP_IP = "192.168.1.149"  # If not set, will be set to the IP of the machine sending data
+        self.PICO_UDP_IP = None #"192.168.1.149"  # If not set, will be set to the IP of the machine sending data
         self.COMMAND_UDP_PORT = 12346  # This is the port the Pico listens on for UDP commands coming from quisk.
         self.DATA_UDP_PORT = 12345  # This is the port the quisk listens on for UDP IQ data coming from the Pico W.
         self.BROADCAST_PORT = 12347  # This is the port the Pico gets our IP address from.-
