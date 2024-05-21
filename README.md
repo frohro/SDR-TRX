@@ -18,7 +18,7 @@ I am also using this as a platform to demonstrate to my students how to do an el
 * [Etherkit Si5351](https://github.com/etherkit/Si5351Arduino)
 
 ###
-The basic block diagram showing how this SDR interfaces with a PC is shown below.
+The basic block diagram showing how this SDR interfaces with a PC is shown below.  (Sorry the photos do not show up on GitHub's README here.  You can see them in the progress notes here: https://github.com/frohro/SDR-TRX/blob/main/SDR-TRX-Readme-Progress-Notes.html )
 
 ![image.png](66501d59-2362-4008-be4e-e607f1ae4f7b.png)
 
