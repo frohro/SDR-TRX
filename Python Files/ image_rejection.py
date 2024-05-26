@@ -9,7 +9,7 @@ def calculate_image_rejection(I, Q):
 # Generate example u and v signals
 # u is rotating clockwise, v is rotating counter-clockwise
 I = 1
-Q = 1.01j + 0.01
+Q = 1.01j + 0.01  # A 1% error in real and imaginary parts
 
 # Calculate the image rejection ratio
 image_rejection_ratio = calculate_image_rejection(I, Q)
