@@ -1,8 +1,9 @@
 import numpy as np
+import math
 
 def calculate_image_rejection(I, Q):
     # Calculate the image rejection ratio
-    image_rejection = 20*np.log10(np.abs(I_+ j1*Q)/np.abs(I - j1*Q))
+    image_rejection = 20*np.log10(np.abs(I+ j1*Q)/np.abs(I - j1*Q))
     return image_rejection
 
 # Generate example u and v signals
