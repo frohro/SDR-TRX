@@ -3,6 +3,8 @@ import math
 
 def calculate_image_rejection(I, Q):
     # Calculate the image rejection ratio
+    # To get the desired signal we take the + frequency phasor I and add it to -jQ.
+    # to get the image signal we take the - frequency phasor I and add it to +jQ.
     image_rejection = 20*np.log10(np.abs(I - 1j*Q)/np.abs(I + 1j*Q))
     return image_rejection
 
