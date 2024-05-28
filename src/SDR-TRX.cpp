@@ -45,7 +45,7 @@ const unsigned int DATA_UDPPORT = 12345;
 const unsigned int COMMAND_UDPPORT = 12346;
 const unsigned int BROADCAST_UDP_PORT = 12347;
 const char *VERSION_NUMBER = "0.1.1";
-IPAddress quiskIP(192, 168, 1, 101); // This is the IP address of the computer running Quisk.
+IPAddress quiskIP(192, 168, 1, 35); // This is the IP address of the computer running Quisk.
 // It will be replaced with the IP of the computer that sends the command.
 // Radio specific parameters go here.
 const int FREQ_LIMIT_LOWER = 3500000;
