@@ -36,7 +36,9 @@
 // These are things you might want to change for your situation.
 const int RATE = 48000;              // Your network needs to handle this, but 96000 should also work, but misses some packets.
 const int BITS_PER_SAMPLE_SENT = 16; // 24 or 32, 32 is less packet loss for some strange reason.
-const int MCLK_MULT = 256;           //
+const int MCLK_MULT = 256; 
+const int MD0 = 7;
+const int MD1 = 8;          //
 // const char *STASSID = "rosbots";
 // const char *PASSWORD = "ros2bots"; // In case you have a password,
 // you must add this to the WiFi.begin() call, or if you have no
@@ -867,6 +869,10 @@ void setup1()
   // We don't need core1 if using Audio and UART. \addindex.
   if (useUDP)
   {                 // This runs on Core1.  It is the I2S setup.
+    pinMode(MD0, OUTPUT); 
+    pinMode(MD1, OUTPUT);
+    digitalWrite(MD0, LOW); // Set PCM1808 to slave mode. 
+    digitalWrite(MD1, LOW);
     i2s.setDATA(2); // These are the pins for the data on the SDR-TRX
     i2s.setBCLK(0);
     i2s.setMCLK(3);

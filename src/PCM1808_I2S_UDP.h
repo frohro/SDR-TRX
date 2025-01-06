@@ -18,7 +18,8 @@ extern I2S i2s;
 
 extern const int RATE; // Works with 32 bits per sample at 96 ks/s.  This is 768 kBps.  We cound save by using 24 bits per sample.
 extern const int MCLK_MULT; // 384 32 bit for 48 BCK per frame,  256 for 64 BCK per frame
-
+extern const int MD0;
+extern const int MD1;
 extern const unsigned int DATA_UDPPORT; // UDP server port
 
 #define BUFFER_SIZE 1444 // 1444 => 180 samples of 8 bytes + 4 bytes for the packet number (4000 packet every 15 seconds)
