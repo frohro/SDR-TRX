@@ -1,0 +1,9 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "TLV759P")(type "KiCad")(uri "${KIPRJMOD}/TLV759P")(options "")(descr ""))
+  (lib (name "Transformer_THT")(type "KiCad")(uri "${KIPRJMOD}/Transformer_THT.pretty")(options "")(descr ""))
+  (lib (name "Raspberry_Pi_Pico_W_Kicad_Files")(type "KiCad")(uri "${KIPRJMOD}/SDR 2023 Docs/Raspberry_Pi_Pico_W_Kicad_Files")(options "")(descr "")(disabled))
+  (lib (name "MCU_RaspberryPi_and_Boards")(type "KiCad")(uri "${KIPRJMOD}/KiCad-RP-Pico/RP-Pico Libraries/MCU_RaspberryPi_and_Boards.pretty")(options "")(descr ""))
+  (lib (name "Shunt")(type "KiCad")(uri "${KIPRJMOD}/Shunt.pretty")(options "")(descr ""))
+  (lib (name "Diodes")(type "KiCad")(uri "${KIPRJMOD}/Diodes")(options "")(descr ""))
+)

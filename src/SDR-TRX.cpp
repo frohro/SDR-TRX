@@ -35,8 +35,8 @@
 
 // These are things you might want to change for your situation.
 const int RATE = 48000;              // Your network needs to handle this, but 96000 should also work, but misses some packets.
-const int BITS_PER_SAMPLE_SENT = 16; // 24 or 32, 32 is less packet loss for some strange reason.
-const int MCLK_MULT = 256; 
+const int BITS_PER_SAMPLE_SENT = 16; // (UDP bits) 24 or 32, 32 is less packet loss for some strange reason.
+const int MCLK_MULT = 256;           // 384 for 48 BCK per frame,  256 for 64 BCK per frame
 const int MD0 = 7;
 const int MD1 = 8;          //
 // const char *STASSID = "rosbots";
