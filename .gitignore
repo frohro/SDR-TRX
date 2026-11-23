@@ -24,3 +24,4 @@ jlcpcb
 *.wave
 SDR 2023 Docs
 *lck
+.history/
