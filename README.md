@@ -76,9 +76,9 @@ The PCB has test points and uses components I found still available on JLCPCB.  
 The cutout is for the WIFI antenna if a Pico W is used.
 
 ## Version 0.2 (v0.2) 
-I learned a lot since making v0.1 in 2023.  I am not working on v0.2.  The first version worked, but the image rejection was only about 20 dB, and a number of other things I did not think were up to snuff.  I have been teaching my Electronics II students about QSD SDR design and have learned a number of things.  I plan to share those in QEX, and use what I learned to make v0.2 a lot better.  A lot of the things I learned is aparent in ![the Intro-to-CAD-2026 Board](https://github.com/frohro/Intro-to-CAD-2026).  
+I learned a lot since making v0.1 in 2023.  I am now working on v0.2.  The first version worked, but the image rejection was only about 20 dB, and a number of other things I did not think were up to snuff.  I have been teaching my Electronics II students about QSD SDR design and have learned a number of things since 2023.  I plan to share those in QEX, and use what I learned to make v0.2 a lot better.  A lot of the things I learned are apparent in [the Intro-to-CAD-2026 Board](https://github.com/frohro/Intro-to-CAD-2026) if you are curious.  
 
-#### PCBWay
+#### [PCBWay](https://www.pcbway.com/)
 A ton of thanks goes out to PCBWay for sponsoring v0.2 of this project!  I want to try their services, and this will give me a chance to do that.
 
 
